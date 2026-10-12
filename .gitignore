@@ -426,3 +426,18 @@ FodyWeavers.xsd
 
 # Official VS Code C# Dev Kit Extension exclusion
 #*.lscache
+
+
+# SQLite Database files
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# Local application settings and secrets
+appsettings.Development.json
+appsettings.Local.json
+
+# macOS directory custom attributes
+.DS_Store

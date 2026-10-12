@@ -1,0 +1,6 @@
+@QuizLive.Server_HostAddress = http://localhost:5058
+
+GET {{QuizLive.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
