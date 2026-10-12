@@ -2,7 +2,7 @@
 
 namespace QuizLive.Server.Data.DTO
 {
-    public record QuestionDto(
+    public record ReadQuestionDto(
     int Id,
     string Text,
     string CorrectAnswer,
