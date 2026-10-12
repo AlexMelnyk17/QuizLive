@@ -1,25 +1,36 @@
+using Microsoft.EntityFrameworkCore;
+using QuizLive.Server.Commands;
+using QuizLive.Server.Data;
 
 namespace QuizLive.Server
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task<int> Main(string[] args)
         {
+            if (DbCommandHost.IsDbCommand(args))
+            {
+                return await DbCommandHost.RunAsync(args);
+            }
+
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
+            builder.Services.AddQuizLiveDbContext(builder.Configuration);
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                await db.Database.MigrateAsync();
+            }
+
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -30,12 +41,12 @@ namespace QuizLive.Server
 
             app.UseAuthorization();
 
-
             app.MapControllers();
 
             app.MapFallbackToFile("/index.html");
 
-            app.Run();
+            await app.RunAsync();
+            return 0;
         }
     }
 }
