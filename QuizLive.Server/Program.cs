@@ -1,3 +1,4 @@
+using QuizLive.Server.Services;
 using Microsoft.EntityFrameworkCore;
 using QuizLive.Server.Commands;
 using QuizLive.Server.Data;
@@ -19,6 +20,8 @@ namespace QuizLive.Server
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddScoped<IQuizService, QuizService>();
+            builder.Services.AddScoped<IQuizRepository, QuizRepository>();
 
             var app = builder.Build();
 
