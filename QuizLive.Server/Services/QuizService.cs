@@ -9,11 +9,10 @@ namespace QuizLive.Server.Services
         public async Task<IReadOnlyList<ReadQuizListItemDto>> GetAllAsync(CancellationToken ct = default) =>
             await repository.GetListAsync(ct);
 
-        public async Task<ReadQuizDetailsDto> GetByIdAsync(int id, CancellationToken ct = default)
+        public async Task<ReadQuizDetailsDto?> GetByIdAsync(int id, CancellationToken ct = default)
         {
-            var quiz = await repository.GetByIdAsync(id, ct)
-                ?? throw new NotFoundException($"Quiz {id} not found.");
-            return quiz.ToDetailsDto();
+            var quiz = await repository.GetByIdAsync(id, ct);
+            return quiz?.ToDetailsDto();
         }
 
         public async Task<ReadQuizDetailsDto> CreateAsync(CreateQuizDto dto, CancellationToken ct = default)
@@ -23,15 +22,14 @@ namespace QuizLive.Server.Services
             return quiz.ToDetailsDto();
         }
 
-        public async Task<ReadQuizDetailsDto> UpdateAsync(int id, CreateQuizDto dto, CancellationToken ct = default)
+        public async Task<ReadQuizDetailsDto?> UpdateAsync(int id, CreateQuizDto dto, CancellationToken ct = default)
         {
-            var quiz = await repository.GetByIdForUpdateAsync(id, ct)
-                ?? throw new NotFoundException($"Quiz {id} not found.");
+            var quiz = await repository.GetByIdForUpdateAsync(id, ct);
+            if (quiz is null) return null;
 
             quiz.Title = dto.Title;
             quiz.Description = dto.Description;
 
-            // PUT = повна заміна: старі питання видаляємо, нові додаємо з Order за позицією
             quiz.Questions.Clear();
             for (var i = 0; i < dto.Questions.Count; i++)
                 quiz.Questions.Add(dto.Questions[i].ToEntity(i + 1));
@@ -40,15 +38,18 @@ namespace QuizLive.Server.Services
             return quiz.ToDetailsDto();
         }
 
-        public async Task DeleteAsync(int id, CancellationToken ct = default)
+        public async Task<DeleteQuizResult> DeleteAsync(int id, CancellationToken ct = default)
         {
-            var quiz = await repository.GetByIdForUpdateAsync(id, ct)
-                ?? throw new NotFoundException($"Quiz {id} not found.");
+            var quiz = await repository.GetByIdForUpdateAsync(id, ct);
+            if (quiz is null) return DeleteQuizResult.NotFound;
 
             if (await repository.HasGameSessionsAsync(id, ct))
-                throw new ConflictException("Quiz has game history and cannot be deleted.");
+                return DeleteQuizResult.HasGameHistory;
 
             await repository.DeleteAsync(quiz, ct);
+            return DeleteQuizResult.Deleted;
         }
+
     }
+
 }
