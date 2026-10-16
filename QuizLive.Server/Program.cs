@@ -1,7 +1,9 @@
-using QuizLive.Server.Services;
 using Microsoft.EntityFrameworkCore;
-using QuizLive.Server.Commands;
-using QuizLive.Server.Data;
+using QuizLive.Server.Core.Interfaces;
+using QuizLive.Server.Application.Commands;
+using QuizLive.Server.Application.Services;
+using QuizLive.Server.Infrastructure.Data;
+using QuizLive.Server.Infrastructure.Repositories;
 
 namespace QuizLive.Server
 {
