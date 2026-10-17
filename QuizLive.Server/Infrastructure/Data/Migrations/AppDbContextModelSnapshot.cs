@@ -17,86 +17,71 @@ namespace QuizLive.Server.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
 
-            modelBuilder.Entity("QuizLive.Server.Data.Entities.AnswerOption", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsCorrect")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("Order")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("QuestionId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Text")
+                    b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(300)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("QuestionId", "Order")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
-                    b.ToTable("AnswerOptions", (string)null);
+                    b.ToTable("AspNetUserClaims", (string)null);
                 });
 
-            modelBuilder.Entity("QuizLive.Server.Data.Entities.AnswerRecord", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("AnsweredAtUtc")
+                    b.Property<string>("LoginProvider")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ElapsedMs")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("TEXT");
 
-                    b.Property<string>("GameCode")
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(6)
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsCorrect")
-                        .HasColumnType("INTEGER");
+                    b.HasKey("LoginProvider", "ProviderKey");
 
-                    b.Property<string>("Nickname")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("TEXT");
+                    b.HasIndex("UserId");
 
-                    b.Property<int?>("OptionId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("PlayerToken")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Points")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("QuestionIndex")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("SubmittedAnswer")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameCode");
-
-                    b.ToTable("AnswerRecords", (string)null);
+                    b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("QuizLive.Server.Data.Entities.GameSessionRecord", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.Games.GameSessionRecord", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -107,26 +92,44 @@ namespace QuizLive.Server.Data.Migrations
                         .HasMaxLength(6)
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("EndedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HostUserId")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("QuizId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("StartedAtUtc")
+                    b.Property<DateTime?>("StartedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Code")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("\"EndedAtUtc\" IS NULL");
+
+                    b.HasIndex("HostUserId");
 
                     b.HasIndex("QuizId");
 
-                    b.ToTable("GameSessionRecords", (string)null);
+                    b.ToTable("GameSessionRecords", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_GameSessionRecords_Status", "\"Status\" IN ('Lobby','Question','Results','Finished')");
+                        });
                 });
 
-            modelBuilder.Entity("QuizLive.Server.Data.Entities.PlayerResult", b =>
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.Games.Player", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -135,46 +138,136 @@ namespace QuizLive.Server.Data.Migrations
                     b.Property<int>("GameSessionRecordId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("JoinedAtUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Nickname")
                         .IsRequired()
                         .HasMaxLength(40)
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Rank")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GameSessionRecordId");
+                    b.HasIndex("Token")
+                        .IsUnique();
 
-                    b.ToTable("PlayerResults", (string)null);
+                    b.HasIndex("GameSessionRecordId", "Nickname")
+                        .IsUnique();
+
+                    b.ToTable("Players", (string)null);
                 });
 
-            modelBuilder.Entity("QuizLive.Server.Data.Entities.Question", b =>
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.Identity.AppUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.OpenText.OpenAnswer", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("AnsweredAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OpenQuestionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OpenQuestionId");
+
+                    b.HasIndex("PlayerId", "OpenQuestionId")
+                        .IsUnique();
+
+                    b.ToTable("OpenAnswers", (string)null);
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.OpenText.OpenQuestion", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("BasePoints")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("CorrectAnswer")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("Kind")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(0);
 
                     b.Property<int>("Order")
                         .HasColumnType("INTEGER");
@@ -187,7 +280,7 @@ namespace QuizLive.Server.Data.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("TimeLimitSeconds")
+                    b.Property<int?>("TimeLimitSeconds")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -195,10 +288,204 @@ namespace QuizLive.Server.Data.Migrations
                     b.HasIndex("QuizId", "Order")
                         .IsUnique();
 
-                    b.ToTable("Questions", (string)null);
+                    b.ToTable("OpenQuestions", (string)null);
                 });
 
-            modelBuilder.Entity("QuizLive.Server.Data.Entities.Quiz", b =>
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.PollChoice.PollAnswer", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("AnsweredAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PollOptionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PollQuestionId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PollOptionId");
+
+                    b.HasIndex("PollQuestionId");
+
+                    b.HasIndex("PlayerId", "PollQuestionId")
+                        .IsUnique();
+
+                    b.ToTable("PollAnswers", (string)null);
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.PollChoice.PollOption", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PollQuestionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PollQuestionId", "Order")
+                        .IsUnique();
+
+                    b.ToTable("PollOptions", (string)null);
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.PollChoice.PollQuestion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("QuizId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("TimeLimitSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuizId", "Order")
+                        .IsUnique();
+
+                    b.ToTable("PollQuestions", (string)null);
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.QuizChoice.QuizAnswer", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("AnsweredAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ElapsedMs")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Points")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("QuizOptionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("QuizQuestionId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuizOptionId");
+
+                    b.HasIndex("QuizQuestionId");
+
+                    b.HasIndex("PlayerId", "QuizQuestionId")
+                        .IsUnique();
+
+                    b.ToTable("QuizAnswers", (string)null);
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.QuizChoice.QuizOption", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("QuizQuestionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuizQuestionId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_QuizOptions_QuizQuestionId_Correct")
+                        .HasFilter("\"IsCorrect\" = 1");
+
+                    b.HasIndex("QuizQuestionId", "Order")
+                        .IsUnique();
+
+                    b.ToTable("QuizOptions", (string)null);
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.QuizChoice.QuizQuestion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("BasePoints")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("QuizId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("TimeLimitSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuizId", "Order")
+                        .IsUnique();
+
+                    b.ToTable("QuizQuestions", (string)null);
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.Quizzes.Quiz", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -211,6 +498,18 @@ namespace QuizLive.Server.Data.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -218,46 +517,192 @@ namespace QuizLive.Server.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Quizzes", (string)null);
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("Quizzes", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Quizzes_Kind", "\"Kind\" IN ('OpenText','PollChoice','QuizChoice')");
+                        });
                 });
 
-            modelBuilder.Entity("QuizLive.Server.Data.Entities.AnswerOption", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("QuizLive.Server.Data.Entities.Question", "Question")
+                    b.HasOne("QuizLive.Server.Core.Entities.Identity.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.HasOne("QuizLive.Server.Core.Entities.Identity.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.HasOne("QuizLive.Server.Core.Entities.Identity.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.Games.GameSessionRecord", b =>
+                {
+                    b.HasOne("QuizLive.Server.Core.Entities.Identity.AppUser", "HostUser")
+                        .WithMany("HostedGames")
+                        .HasForeignKey("HostUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("QuizLive.Server.Core.Entities.Quizzes.Quiz", "Quiz")
+                        .WithMany("Games")
+                        .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("HostUser");
+
+                    b.Navigation("Quiz");
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.Games.Player", b =>
+                {
+                    b.HasOne("QuizLive.Server.Core.Entities.Games.GameSessionRecord", "GameSession")
+                        .WithMany("Players")
+                        .HasForeignKey("GameSessionRecordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GameSession");
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.OpenText.OpenAnswer", b =>
+                {
+                    b.HasOne("QuizLive.Server.Core.Entities.OpenText.OpenQuestion", "Question")
+                        .WithMany("Answers")
+                        .HasForeignKey("OpenQuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("QuizLive.Server.Core.Entities.Games.Player", "Player")
+                        .WithMany("OpenAnswers")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Player");
+
+                    b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.OpenText.OpenQuestion", b =>
+                {
+                    b.HasOne("QuizLive.Server.Core.Entities.Quizzes.Quiz", "Quiz")
+                        .WithMany("OpenQuestions")
+                        .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quiz");
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.PollChoice.PollAnswer", b =>
+                {
+                    b.HasOne("QuizLive.Server.Core.Entities.Games.Player", "Player")
+                        .WithMany("PollAnswers")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QuizLive.Server.Core.Entities.PollChoice.PollOption", "Option")
+                        .WithMany("Answers")
+                        .HasForeignKey("PollOptionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("QuizLive.Server.Core.Entities.PollChoice.PollQuestion", "Question")
+                        .WithMany("Answers")
+                        .HasForeignKey("PollQuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Option");
+
+                    b.Navigation("Player");
+
+                    b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.PollChoice.PollOption", b =>
+                {
+                    b.HasOne("QuizLive.Server.Core.Entities.PollChoice.PollQuestion", "Question")
                         .WithMany("Options")
-                        .HasForeignKey("QuestionId")
+                        .HasForeignKey("PollQuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("QuizLive.Server.Data.Entities.GameSessionRecord", b =>
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.PollChoice.PollQuestion", b =>
                 {
-                    b.HasOne("QuizLive.Server.Data.Entities.Quiz", "Quiz")
-                        .WithMany("GameSessions")
+                    b.HasOne("QuizLive.Server.Core.Entities.Quizzes.Quiz", "Quiz")
+                        .WithMany("PollQuestions")
                         .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quiz");
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.QuizChoice.QuizAnswer", b =>
+                {
+                    b.HasOne("QuizLive.Server.Core.Entities.Games.Player", "Player")
+                        .WithMany("QuizAnswers")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QuizLive.Server.Core.Entities.QuizChoice.QuizOption", "Option")
+                        .WithMany("Answers")
+                        .HasForeignKey("QuizOptionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Quiz");
+                    b.HasOne("QuizLive.Server.Core.Entities.QuizChoice.QuizQuestion", "Question")
+                        .WithMany("Answers")
+                        .HasForeignKey("QuizQuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Option");
+
+                    b.Navigation("Player");
+
+                    b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("QuizLive.Server.Data.Entities.PlayerResult", b =>
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.QuizChoice.QuizOption", b =>
                 {
-                    b.HasOne("QuizLive.Server.Data.Entities.GameSessionRecord", "GameSessionRecord")
-                        .WithMany("PlayerResults")
-                        .HasForeignKey("GameSessionRecordId")
+                    b.HasOne("QuizLive.Server.Core.Entities.QuizChoice.QuizQuestion", "Question")
+                        .WithMany("Options")
+                        .HasForeignKey("QuizQuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("GameSessionRecord");
+                    b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("QuizLive.Server.Data.Entities.Question", b =>
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.QuizChoice.QuizQuestion", b =>
                 {
-                    b.HasOne("QuizLive.Server.Data.Entities.Quiz", "Quiz")
-                        .WithMany("Questions")
+                    b.HasOne("QuizLive.Server.Core.Entities.Quizzes.Quiz", "Quiz")
+                        .WithMany("QuizQuestions")
                         .HasForeignKey("QuizId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -265,21 +710,76 @@ namespace QuizLive.Server.Data.Migrations
                     b.Navigation("Quiz");
                 });
 
-            modelBuilder.Entity("QuizLive.Server.Data.Entities.GameSessionRecord", b =>
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.Quizzes.Quiz", b =>
                 {
-                    b.Navigation("PlayerResults");
+                    b.HasOne("QuizLive.Server.Core.Entities.Identity.AppUser", "Owner")
+                        .WithMany("OwnedQuizzes")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("QuizLive.Server.Data.Entities.Question", b =>
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.Games.GameSessionRecord", b =>
                 {
+                    b.Navigation("Players");
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.Games.Player", b =>
+                {
+                    b.Navigation("OpenAnswers");
+
+                    b.Navigation("PollAnswers");
+
+                    b.Navigation("QuizAnswers");
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.Identity.AppUser", b =>
+                {
+                    b.Navigation("HostedGames");
+
+                    b.Navigation("OwnedQuizzes");
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.OpenText.OpenQuestion", b =>
+                {
+                    b.Navigation("Answers");
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.PollChoice.PollOption", b =>
+                {
+                    b.Navigation("Answers");
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.PollChoice.PollQuestion", b =>
+                {
+                    b.Navigation("Answers");
+
                     b.Navigation("Options");
                 });
 
-            modelBuilder.Entity("QuizLive.Server.Data.Entities.Quiz", b =>
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.QuizChoice.QuizOption", b =>
                 {
-                    b.Navigation("GameSessions");
+                    b.Navigation("Answers");
+                });
 
-                    b.Navigation("Questions");
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.QuizChoice.QuizQuestion", b =>
+                {
+                    b.Navigation("Answers");
+
+                    b.Navigation("Options");
+                });
+
+            modelBuilder.Entity("QuizLive.Server.Core.Entities.Quizzes.Quiz", b =>
+                {
+                    b.Navigation("Games");
+
+                    b.Navigation("OpenQuestions");
+
+                    b.Navigation("PollQuestions");
+
+                    b.Navigation("QuizQuestions");
                 });
 #pragma warning restore 612, 618
         }

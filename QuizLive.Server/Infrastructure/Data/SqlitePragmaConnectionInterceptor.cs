@@ -28,6 +28,8 @@ public sealed class SqlitePragmaConnectionInterceptor : DbConnectionInterceptor
         command.ExecuteNonQuery();
         command.CommandText = "PRAGMA busy_timeout=5000;";
         command.ExecuteNonQuery();
+        command.CommandText = "PRAGMA foreign_keys=ON;";
+        command.ExecuteNonQuery();
     }
 
     private static async Task ExecutePragmasAsync(DbCommand command, CancellationToken cancellationToken)
@@ -35,6 +37,8 @@ public sealed class SqlitePragmaConnectionInterceptor : DbConnectionInterceptor
         command.CommandText = "PRAGMA journal_mode=WAL;";
         await command.ExecuteNonQueryAsync(cancellationToken);
         command.CommandText = "PRAGMA busy_timeout=5000;";
+        await command.ExecuteNonQueryAsync(cancellationToken);
+        command.CommandText = "PRAGMA foreign_keys=ON;";
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 }
