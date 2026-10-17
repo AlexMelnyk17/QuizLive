@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using QuizLive.Server.Core.Entities;
 using QuizLive.Server.Application.DTO;
 using QuizLive.Server.Application.Mappings;
 using QuizLive.Server.Infrastructure.Data;
+using QuizLive.Server.Core.Entities.Quizzes;
 
 namespace QuizLive.Server.Infrastructure.Repositories
 {

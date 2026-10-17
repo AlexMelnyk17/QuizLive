@@ -1,5 +1,5 @@
 ﻿using QuizLive.Server.Application.DTO;
-using QuizLive.Server.Core.Entities;
+using QuizLive.Server.Core.Entities.Quizzes;
 
 namespace QuizLive.Server.Infrastructure.Repositories
 {

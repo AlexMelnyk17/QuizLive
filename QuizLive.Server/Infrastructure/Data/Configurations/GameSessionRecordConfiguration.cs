@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using QuizLive.Server.Core.Entities;
+using QuizLive.Server.Core.Entities.Games;
 
 namespace QuizLive.Server.Infrastructure.Data.Configurations;
 

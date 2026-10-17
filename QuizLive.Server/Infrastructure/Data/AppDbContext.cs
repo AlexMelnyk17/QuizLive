@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using QuizLive.Server.Core.Entities;
+using QuizLive.Server.Core.Entities.Games;
+using QuizLive.Server.Core.Entities.Quizzes;
 
 namespace QuizLive.Server.Infrastructure.Data;
 

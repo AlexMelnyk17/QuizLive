@@ -441,3 +441,7 @@ appsettings.Local.json
 
 # macOS directory custom attributes
 .DS_Store
+# Claude Code
+CLAUDE.md
+CLAUDE.local.md
+.claude/

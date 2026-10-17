@@ -1,5 +1,6 @@
 ﻿using QuizLive.Server.Application.DTO;
 using QuizLive.Server.Core.Entities;
+using QuizLive.Server.Core.Entities.Quizzes;
 using System.Linq.Expressions;
 
 namespace QuizLive.Server.Application.Mappings
