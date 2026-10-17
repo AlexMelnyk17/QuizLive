@@ -1,8 +1,5 @@
 ﻿using QuizLive.Server.Core.Entities.Identity;
 using QuizLive.Server.Core.Entities.Quizzes;
-using QuizLive.Server.Core.Entities.OpenText;
-using QuizLive.Server.Core.Entities.PollChoice;
-using QuizLive.Server.Core.Entities.QuizChoice;
 using QuizLive.Server.Core.Enums;
 
 
@@ -23,7 +20,4 @@ public class GameSessionRecord
     public DateTime? EndedAtUtc { get; set; }
 
     public List<Player> Players { get; set; } = new();
-    public List<OpenAnswer> OpenAnswers { get; set; } = new();
-    public List<PollAnswer> PollAnswers { get; set; } = new();
-    public List<QuizAnswer> QuizAnswers { get; set; } = new();
 }
