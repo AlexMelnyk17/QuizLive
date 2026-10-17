@@ -1,27 +1,20 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using QuizLive.Server.Core.Entities;
+using QuizLive.Server.Core.Entities.QuizChoice;
 
 namespace QuizLive.Server.Infrastructure.Data.Configurations;
 
-public class QuestionConfiguration : IEntityTypeConfiguration<Question>
+public class QuizQuestionConfiguration : IEntityTypeConfiguration<QuizQuestion>
 {
-    public void Configure(EntityTypeBuilder<Question> builder)
+    public void Configure(EntityTypeBuilder<QuizQuestion> builder)
     {
-        builder.ToTable("Questions");
+        builder.ToTable("QuizQuestions");
 
         builder.HasKey(q => q.Id);
 
         builder.Property(q => q.Text)
             .IsRequired()
             .HasMaxLength(1000);
-
-        builder.Property(q => q.CorrectAnswer)
-            .IsRequired()
-            .HasMaxLength(200);
-
-        builder.Property(q => q.Kind)
-            .HasDefaultValue(QuestionKind.OpenText);
 
         builder.Property(q => q.ImageUrl)
             .HasMaxLength(500);
@@ -31,7 +24,12 @@ public class QuestionConfiguration : IEntityTypeConfiguration<Question>
 
         builder.HasMany(q => q.Options)
             .WithOne(o => o.Question)
-            .HasForeignKey(o => o.QuestionId)
+            .HasForeignKey(o => o.QuizQuestionId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(q => q.Answers)
+            .WithOne(a => a.Question)
+            .HasForeignKey(a => a.QuizQuestionId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

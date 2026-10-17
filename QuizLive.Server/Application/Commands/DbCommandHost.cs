@@ -11,7 +11,6 @@ public static class DbCommandHost
 
         return command switch
         {
-            "seed-demo" => await SeedDemoQuizHandler.RunAsync(cancellationToken),
             _ => UnknownCommand(command),
         };
     }
@@ -19,7 +18,7 @@ public static class DbCommandHost
     private static int UnknownCommand(string command)
     {
         Console.Error.WriteLine($"Unknown database command: {command}");
-        Console.Error.WriteLine("Usage: dotnet run --project QuizLive.Server -- db seed-demo");
+        Console.Error.WriteLine("No database commands are available yet.");
         return 1;
     }
 }
