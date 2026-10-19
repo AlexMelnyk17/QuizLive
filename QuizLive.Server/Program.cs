@@ -18,8 +18,11 @@ namespace QuizLive.Server
 
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddQuizLiveDbContext(builder.Configuration);
-            builder.Services.AddControllers();
+						builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+
+						builder.Services.AddQuizLiveDbContext(builder.Configuration);
+						builder.Services.AddQuizLiveAuth(builder.Configuration);
+						builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -48,7 +51,8 @@ namespace QuizLive.Server
 
             app.UseHttpsRedirection();
 
-            app.UseAuthorization();
+						app.UseAuthentication();
+						app.UseAuthorization();
 
             app.MapControllers();
 

@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Core.Entities.Identity;
 using QuizLive.Server.Infrastructure.Data;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 namespace QuizLive.Server.Infrastructure.Auth
 {
@@ -16,6 +16,7 @@ namespace QuizLive.Server.Infrastructure.Auth
         {
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
 
             services.AddOptions<JwtOptions>()
                 .Bind(configuration.GetSection(JwtOptions.SectionName))
@@ -30,33 +31,33 @@ namespace QuizLive.Server.Infrastructure.Auth
             })
             .AddEntityFrameworkStores<AppDbContext>();
 
-            var jwtKey = configuration["Jwt:Key"];
-
-            if (string.IsNullOrEmpty(jwtKey))
-            {
-                throw new InvalidOperationException("JWT key is not configured.");
-            }
-
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
+            .AddJwtBearer();
+
+            // Параметри валідації беремо з тих самих JwtOptions, що й для видачі токена.
+            services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+                .Configure<IOptions<JwtOptions>>((bearer, jwtOptions) =>
                 {
-                    ValidateIssuer = false, // За потреби увімкніть перевірку Issuer/Audience
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-                };
-            });
+                    var jwt = jwtOptions.Value;
+
+                    bearer.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = jwt.Issuer,
+                        ValidateAudience = true,
+                        ValidAudience = jwt.Audience,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),
+                        ClockSkew = TimeSpan.FromMinutes(1)
+                    };
+                });
 
             return services;
-
         }
     }
 }
-        
