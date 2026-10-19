@@ -15,6 +15,7 @@
 		"^@shared/(.*)$",
 		"^@modules/(.*)$",
 		"^@assets/(.*)$",
+		"^@config$",
 		"^@config/(.*)$",
 		"^@typings/(.*)$",
 		"^@utils/(.*)$",
