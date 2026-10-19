@@ -43,6 +43,8 @@ obj/x86/
 [Aa][Rr][Mm]64[Ee][Cc]/
 bld/
 [Oo]bj/
+**/obj/Debug/
+**/obj/Release/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
@@ -55,8 +57,8 @@ bld/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
-# Uncomment if you have tasks that create the project's static files in wwwroot
-#wwwroot/
+# SPA build output (vite build)
+QuizLive.Server/wwwroot/
 
 # Visual Studio 2017 auto generated files
 Generated\ Files/
