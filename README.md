@@ -1,34 +1,38 @@
-﻿🛠 Необхідні інструменти для запуску проєкту:
+﻿# QuizLive
 
-Visual Studio 2022 (з компонентом "ASP.NET and web development").[Встановити Visual Studio](https://visualstudio.microsoft.com/)
+## Prerequisites
 
-Node.js (бажано актуальної LTS версії: 20.x або 22.x).[Встановити Node.js](https://nodejs.org/en/download)
+- **Visual Studio 2022** with the “ASP.NET and web development” workload. [Install Visual Studio](https://visualstudio.microsoft.com/)
+- **Node.js** 20.19+ or 22.12+ (LTS recommended). [Install Node.js](https://nodejs.org/en/download)
 
-📥 Крок 1. Клонування репозиторію
+## 1. Clone the repository
 
-Відкрийте термінал та виконайте команду:
+```bash
+git clone <repository-url>
+cd QuizLive
+```
 
-git clone <сюди-вставити-посилання-на-github>
+## 2. Install dependencies
 
+At the repository root (Git hooks):
 
-📦 Крок 2. Встановлення залежностей фронтенду
-
-Для встановлення залежностей фронтенду перейдіть у папку клієнта:
-
-cd QuizLive/QuizLive.Client
-
-
-Потім запустіть встановлення пакетів:
-
+```bash
 npm install
+```
 
+For the frontend:
 
-💡 Примітка: Дочекайтеся завершення. Після цього має з'явитися папка node_modules всередині QuizLive.Client.
+```bash
+cd QuizLive.Client
+npm install
+```
 
-▶️ Крок 3. Запуск проєкту
+After `npm install` in `QuizLive.Client`, a `node_modules` folder should appear there.
 
-Відкрийте файл QuizLive.sln у Visual Studio 2022.
+## 3. Run the project
 
-Переконайтеся, що зверху на панелі обрано запуск бекенд-проєкту (зелена кнопка Play з написом QuizLive.Server).
+1. Open `QuizLive.sln` in Visual Studio 2022.
+2. Set **QuizLive.Server** as the startup project.
+3. Press **F5** or **Play**.
 
-Натисніть Play (або клавішу F5).
+In development, the ASP.NET SPA proxy can start the Vite dev server (`npm run dev` in `QuizLive.Client`). See [QuizLive.Client/README.md](QuizLive.Client/README.md) for frontend scripts and tooling.
