@@ -12,7 +12,7 @@ namespace QuizLive.Server.Infrastructure.Auth
     {
         private readonly JwtOptions _options = options.Value;
 
-        public string CreateToken(AppUser user)
+        public JwtToken CreateToken(AppUser user)
         {
             var claims = new List<Claim>
             {
@@ -33,14 +33,16 @@ namespace QuizLive.Server.Infrastructure.Auth
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+            var expiresAtUtc = DateTime.UtcNow.AddMinutes(_options.ExpiresMinutes);
+
             var token = new JwtSecurityToken(
                 issuer: _options.Issuer,
                 audience: _options.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_options.ExpiresMinutes),
+                expires: expiresAtUtc,
                 signingCredentials: credentials);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new JwtToken(new JwtSecurityTokenHandler().WriteToken(token), expiresAtUtc);
         }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using QuizLive.Server.Application.Abstractions;
+using QuizLive.Server.Application.Auth;
 using QuizLive.Server.Core.Entities.Identity;
 using QuizLive.Server.Infrastructure.Data;
 
@@ -17,6 +18,7 @@ namespace QuizLive.Server.Infrastructure.Auth
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUser, CurrentUser>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
+            services.AddScoped<IAuthService, AuthService>();
 
             services.AddOptions<JwtOptions>()
                 .Bind(configuration.GetSection(JwtOptions.SectionName))
@@ -28,6 +30,10 @@ namespace QuizLive.Server.Infrastructure.Auth
                 options.Password.RequiredLength = 6;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
+
+                options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
             })
             .AddEntityFrameworkStores<AppDbContext>();
 
