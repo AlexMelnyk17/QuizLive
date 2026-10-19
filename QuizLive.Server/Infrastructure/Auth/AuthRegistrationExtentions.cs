@@ -27,7 +27,6 @@ namespace QuizLive.Server.Infrastructure.Auth
                 options.Password.RequiredLength = 6;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
-                options.User.RequireUniqueEmail = false;
             })
             .AddEntityFrameworkStores<AppDbContext>();
 
