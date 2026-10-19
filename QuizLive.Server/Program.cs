@@ -22,10 +22,6 @@ namespace QuizLive.Server
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddHttpContextAccessor();
-            builder.Services.AddScoped<ICurrentUser, CurrentUser>();
-
-
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())
