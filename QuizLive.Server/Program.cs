@@ -3,6 +3,7 @@ using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Commands;
 using QuizLive.Server.Infrastructure.Auth;
 using QuizLive.Server.Infrastructure.Data;
+using QuizLive.Server.Infrastructure.ErrorHandling;
 
 namespace QuizLive.Server
 {
@@ -22,11 +23,13 @@ namespace QuizLive.Server
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddHttpContextAccessor();
-            builder.Services.AddScoped<ICurrentUser, CurrentUser>();
-
+            builder.Services.AddProblemDetails();
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
             var app = builder.Build();
+
+            app.UseExceptionHandler();
+            app.UseStatusCodePages();
 
             using (var scope = app.Services.CreateScope())
             {
