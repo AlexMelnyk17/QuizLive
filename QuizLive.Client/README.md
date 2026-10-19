@@ -49,4 +49,9 @@ Do not read `import.meta.env` elsewhere — use `src/config/env.ts` only: `impor
 
 ## Git hooks
 
-From the **repository root**, run `npm install` once so Husky runs `lint-staged --cwd QuizLive.Client` on commit (Prettier + ESLint for staged client files).
+From the **repository root**, run `npm install` once so Husky is installed.
+
+| Hook         | Command                                                                        |
+| ------------ | ------------------------------------------------------------------------------ |
+| `pre-commit` | `lint-staged --cwd QuizLive.Client` (Prettier + ESLint on staged client files) |
+| `pre-push`   | `npm run verify` in `QuizLive.Client` (ESLint, `tsc -b`, Vitest)               |
