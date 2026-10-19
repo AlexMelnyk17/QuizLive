@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Commands;
+using QuizLive.Server.Infrastructure.Auth;
 using QuizLive.Server.Infrastructure.Data;
 
 namespace QuizLive.Server
@@ -19,6 +21,10 @@ namespace QuizLive.Server
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+
 
             var app = builder.Build();
 
