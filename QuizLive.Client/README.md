@@ -1,16 +1,57 @@
-# React + Vite
+# QuizLive.Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript SPA built with [Vite](https://vite.dev/).
 
-Currently, two official plugins are available:
+## Requirements
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js **20.19+** or **22.12+** (required by Vite 8)
 
-## React Compiler
+## Scripts
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Command                           | Description                                                              |
+| --------------------------------- | ------------------------------------------------------------------------ |
+| `npm run dev`                     | Vite dev server                                                          |
+| `npm run build`                   | Typecheck (`tsc -b`) and production build into `QuizLive.Server/wwwroot` |
+| `npm run preview`                 | Preview production build locally                                         |
+| `npm run lint` / `lint:fix`       | ESLint (type-aware)                                                      |
+| `npm run format` / `format:check` | Prettier + import sorting                                                |
+| `npm run test` / `test:watch`     | Vitest + Testing Library                                                 |
 
-## Expanding the ESLint configuration
+## Architecture
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**Feature modules** live under `src/modules/<name>/` (api, components, hooks, store, `constants.ts`, `types.ts`, `index.ts`). **Shared** code uses top-level aliases. See [src/modules/README.md](src/modules/README.md).
+
+| Alias          | Purpose                                                           |
+| -------------- | ----------------------------------------------------------------- |
+| `@modules/*`   | Feature modules (import public API from each module’s `index.ts`) |
+| `@api/*`       | Shared HTTP client / base API utilities (not feature endpoints)   |
+| `@ui/*`        | Generic design-system components                                  |
+| `@layout/*`    | App shells and route layouts                                      |
+| `@providers/*` | Global React providers                                            |
+| `@shared/*`    | Cross-module constants/helpers (non-React)                        |
+| `@config`      | App configuration barrel (`ENV` from `config/env.ts`)             |
+| `@config/*`    | Other config modules under `src/config/`                          |
+| `@utils/*`     | Pure utilities                                                    |
+| `@typings/*`   | Shared FE types (not npm `@types`)                                |
+| `@assets/*`    | Imported static assets                                            |
+
+Vite resolves aliases via `resolve.tsconfigPaths` in [`vite.config.ts`](vite.config.ts); paths are defined in [`tsconfig.app.json`](tsconfig.app.json).
+
+## Environment variables
+
+Create **`.env`** in **`QuizLive.Client/`** (next to `vite.config.ts`). Vite does not read env from the repository root.
+
+| Variable            | Required | Example            | Purpose                           |
+| ------------------- | -------- | ------------------ | --------------------------------- |
+| `VITE_API_BASE_URL` | Yes      | `/api` or full URL | Base URL for API calls in the app |
+
+Do not read `import.meta.env` elsewhere — use `src/config/env.ts` only: `import { ENV } from '@config'` → `ENV.VITE_API_BASE_URL`.
+
+## Git hooks
+
+From the **repository root**, run `npm install` once so Husky is installed.
+
+| Hook         | Command                                                                        |
+| ------------ | ------------------------------------------------------------------------------ |
+| `pre-commit` | `lint-staged --cwd QuizLive.Client` (Prettier + ESLint on staged client files) |
+| `pre-push`   | `npm run verify` in `QuizLive.Client` (ESLint, `tsc -b`, Vitest)               |
