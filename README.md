@@ -1,4 +1,4 @@
-﻿# QuizLive
+# QuizLive
 
 ## Prerequisites
 
@@ -29,6 +29,18 @@ npm install
 
 After `npm install` in `QuizLive.Client`, a `node_modules` folder should appear there.
 
+Create file appsettings.Local.json in QuizLive.Server folder with the following content:
+
+```json
+{
+  "Jwt": {
+    "Key": "{private-key}"
+  }
+}
+```
+
+ptivate-key should be a random string of at least 32 characters. Not recommend to use special characters in the key.
+
 ## 3. Run the project
 
 1. Open `QuizLive.sln` in Visual Studio 2022.
@@ -36,3 +48,5 @@ After `npm install` in `QuizLive.Client`, a `node_modules` folder should appear 
 3. Press **F5** or **Play**.
 
 In development, the ASP.NET SPA proxy can start the Vite dev server (`npm run dev` in `QuizLive.Client`). See [QuizLive.Client/README.md](QuizLive.Client/README.md) for frontend scripts and tooling.
+
+
