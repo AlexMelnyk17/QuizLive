@@ -21,5 +21,19 @@ namespace QuizLive.Server.API.Controllers
         {
             return await quizService.GetByIdAsync(id);
         }
+
+        [HttpPost]
+        public async Task<ActionResult<QuizDto>> Create(CreateQuizRequest request)
+        {
+            var quiz = await quizService.CreateAsync(request);
+            return CreatedAtAction(nameof(GetById), new { id = quiz.Id }, quiz);
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await quizService.DeleteAsync(id);
+            return NoContent();
+        }
     }
 }
