@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using QuizLive.Server.Application.Abstractions;
-using QuizLive.Server.Application.Exeptions;
+using QuizLive.Server.Application.Exceptions;
 using QuizLive.Server.Core.Entities.Identity;
 
 namespace QuizLive.Server.Application.Auth

@@ -1,4 +1,4 @@
-﻿namespace QuizLive.Server.Application.Exeptions
+namespace QuizLive.Server.Application.Exceptions
 {
     public class NotFoundException(string message) : Exception(message);
 
