@@ -49,4 +49,26 @@ ptivate-key should be a random string of at least 32 characters. Not recommend t
 
 In development, the ASP.NET SPA proxy can start the Vite dev server (`npm run dev` in `QuizLive.Client`). See [QuizLive.Client/README.md](QuizLive.Client/README.md) for frontend scripts and tooling.
 
+<<<<<<< HEAD
 
+=======
+## 4. Seed demo data
+
+At the repository root:
+
+```bash
+dotnet run --project QuizLive.Server -- db seed
+```
+
+The command applies pending migrations, then creates the demo user and one demo quiz per quiz kind (open text, poll, scored quiz). It does not start the web server.
+
+Demo login: **quizzer** / **quiz123**.
+
+Seeding is safe to run again: the user and quizzes that already exist (matched by user name and by quiz title) are skipped, not updated.
+
+To seed a different database, pass a config override after `db seed`:
+
+```bash
+dotnet run --project QuizLive.Server -- db seed "--ConnectionStrings:Default=Data Source=other.db"
+```
+>>>>>>> ca869337fc6dd1d6a1df77c960b590809096ecce
