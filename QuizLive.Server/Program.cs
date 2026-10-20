@@ -1,9 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Commands;
 using QuizLive.Server.Infrastructure.Auth;
 using QuizLive.Server.Infrastructure.Data;
 using QuizLive.Server.Infrastructure.ErrorHandling;
+using System.Reflection;
 
 namespace QuizLive.Server
 {
@@ -29,7 +31,37 @@ namespace QuizLive.Server
             builder.Services.AddProblemDetails();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
-            var app = builder.Build();
+						builder.Services.AddSwaggerGen(options =>
+						{
+							var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+							options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFile));
+
+							options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+							{
+								Type = SecuritySchemeType.Http,
+								Scheme = "bearer",
+								BearerFormat = "JWT",
+								In = ParameterLocation.Header,
+								Description = "Paste the JWT token returned by /api/auth/login."
+							});
+
+							options.AddSecurityRequirement(new OpenApiSecurityRequirement
+							{
+									{
+											new OpenApiSecurityScheme
+											{
+													Reference = new OpenApiReference
+													{
+														Type = ReferenceType.SecurityScheme,
+														Id = "Bearer"
+													}
+											},
+											Array.Empty<string>()
+									}
+							});
+						});
+
+						var app = builder.Build();
 
             app.UseExceptionHandler();
             app.UseStatusCodePages();
