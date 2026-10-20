@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Commands;
+using QuizLive.Server.Application.Quizzes;
 using QuizLive.Server.Infrastructure.Auth;
 using QuizLive.Server.Infrastructure.Data;
 using QuizLive.Server.Infrastructure.ErrorHandling;
@@ -22,9 +24,31 @@ namespace QuizLive.Server
 
 						builder.Services.AddQuizLiveDbContext(builder.Configuration);
 						builder.Services.AddQuizLiveAuth(builder.Configuration);
+						builder.Services.AddScoped<IQuizService, QuizService>();
 						builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                // Кнопка Authorize: токен з POST /api/auth/login додається до кожного запиту.
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Description = "JWT token from POST /api/auth/login (without the \"Bearer\" prefix)."
+                });
+
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+            });
 
             builder.Services.AddProblemDetails();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
