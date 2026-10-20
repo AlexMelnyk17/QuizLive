@@ -8,13 +8,21 @@ namespace QuizLive.Server.Application.Quizzes
 {
     public class QuizService(AppDbContext db, ICurrentUser currentUser) : IQuizService
     {
-        public async Task<List<QuizDto>> GetMyQuizzesAsync()
+        public async Task<List<QuizDto>> GetMyQuizzesAsync(bool? archived = null)
         {
             var userId = currentUser.UserId;
 
-            return await db.Quizzes
+            var query = db.Quizzes
                 .AsNoTracking()
-                .Where(q => q.OwnerId == userId)
+                .Where(q => q.OwnerId == userId);
+
+            // Без параметра повертаються всі квізи, і архівні, і активні.
+            if (archived is not null)
+            {
+                query = query.Where(q => q.IsArchived == archived);
+            }
+
+            return await query
                 .OrderByDescending(q => q.CreatedAtUtc)
                 .Select(QuizMappings.ToDto)
                 .ToListAsync();
@@ -50,17 +58,42 @@ namespace QuizLive.Server.Application.Quizzes
             return await GetByIdAsync(quiz.Id);
         }
 
+        public async Task<QuizDto> UpdateAsync(int id, UpdateQuizRequest request)
+        {
+            var quiz = await FindOwnQuizAsync(id);
+
+            quiz.Title = request.Title.Trim();
+            quiz.Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim();
+
+            await db.SaveChangesAsync();
+
+            return await GetByIdAsync(id);
+        }
+
+        public async Task SetArchivedAsync(int id, bool isArchived)
+        {
+            var quiz = await FindOwnQuizAsync(id);
+
+            quiz.IsArchived = isArchived;
+            await db.SaveChangesAsync();
+        }
+
         public async Task DeleteAsync(int id)
         {
-            var userId = currentUser.UserId;
-
-            // Без AsNoTracking: Remove працює лише з об'єктом, який EF відстежує.
-            var quiz = await db.Quizzes.FirstOrDefaultAsync(q => q.Id == id && q.OwnerId == userId)
-                ?? throw new NotFoundException($"Quiz {id} was not found.");
+            var quiz = await FindOwnQuizAsync(id);
 
             // Питання та їхні варіанти видаляються каскадно.
             db.Quizzes.Remove(quiz);
             await db.SaveChangesAsync();
+        }
+
+        // Без AsNoTracking: EF відстежує знайдений квіз, тож SaveChanges збереже зміни або видалення.
+        private async Task<Quiz> FindOwnQuizAsync(int id)
+        {
+            var userId = currentUser.UserId;
+
+            return await db.Quizzes.FirstOrDefaultAsync(q => q.Id == id && q.OwnerId == userId)
+                ?? throw new NotFoundException($"Quiz {id} was not found.");
         }
     }
 }

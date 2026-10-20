@@ -8,6 +8,10 @@ namespace QuizLive.Server.Application.Quizzes
         [StringLength(2000)] string? Description,
         [EnumDataType(typeof(QuizKind))] QuizKind Kind);
 
+    public record UpdateQuizRequest(
+        [Required, StringLength(200)] string Title,
+        [StringLength(2000)] string? Description);
+
     public record QuizDto(
         int Id,
         string Title,
