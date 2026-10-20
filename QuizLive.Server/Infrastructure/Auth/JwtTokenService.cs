@@ -20,11 +20,6 @@ namespace QuizLive.Server.Infrastructure.Auth
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            if (!string.IsNullOrEmpty(user.Email))
-            {
-                claims.Add(new Claim(ClaimTypes.Email, user.Email));
-            }
-
             if (!string.IsNullOrEmpty(user.UserName))
             {
                 claims.Add(new Claim(ClaimTypes.Name, user.UserName));
