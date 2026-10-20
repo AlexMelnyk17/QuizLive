@@ -35,19 +35,43 @@ namespace QuizLive.Server.Application.Auth
 
             if (await userManager.IsLockedOutAsync(user))
             {
-                throw new UnauthorizedException("Account is temporarily locked. Try again later.");
+                throw await CreateLockedOutExceptionAstnc(user);
             }
 
             if (!await userManager.CheckPasswordAsync(user, request.Password))
             {
                 await userManager.AccessFailedAsync(user);
-                throw new UnauthorizedException(InvalidCredentialsMessage);
-            }
+
+								if (await userManager.IsLockedOutAsync(user))
+                {
+                    throw await CreateLockedOutExceptionAstnc(user);
+                }
+
+								var maxAttempts = userManager.Options.Lockout.MaxFailedAccessAttempts;
+								var failedAttempts = await userManager.GetAccessFailedCountAsync(user);
+
+								throw new UnauthorizedException(InvalidCredentialsMessage, new Dictionary<string, object?>
+								{
+									["remainingAttempts"] = Math.Max(0, maxAttempts - failedAttempts)
+								});
+						}
 
             await userManager.ResetAccessFailedCountAsync(user);
 
             return CreateResponse(user);
         }
+
+				private async Task<UnauthorizedException> CreateLockedOutExceptionAstnc(AppUser user)
+				{
+					var lockoutEnd = await userManager.GetLockoutEndDateAsync(user);
+
+					return new UnauthorizedException(
+							"Account is temporarily locked. Try again later.",
+							new Dictionary<string, object?>
+							{
+								["lockoutEndUtc"] = lockoutEnd?.UtcDateTime
+							});
+				}
 
         public async Task<UserDto> GetCurrentUserAsync()
         {

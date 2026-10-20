@@ -4,7 +4,12 @@ namespace QuizLive.Server.Application.Exceptions
 
     public class ConflictException(string message) : Exception(message);
 
-    public class UnauthorizedException(string message) : Exception(message);
+    public class UnauthorizedException(
+				string message,
+				IDictionary<string, object?>? extensions = null) : Exception(message)
+		{
+			public IDictionary<string, object?>? Extensions { get; } = extensions;
+		}
 
     public class DomainValidationException(
         string message,

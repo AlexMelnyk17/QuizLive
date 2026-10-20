@@ -42,6 +42,14 @@ namespace QuizLive.Server.Infrastructure.ErrorHandling
 
 			httpContext.Response.StatusCode = status;
 
+			if (exception is UnauthorizedException { Extensions: { } extensions })
+			{
+				foreach (var (key, value) in extensions)
+				{
+					problemDetails.Extensions[key] = value;
+				}
+			}
+
 			await httpContext.Response.WriteAsJsonAsync(
 								problemDetails,
 								problemDetails.GetType(),
