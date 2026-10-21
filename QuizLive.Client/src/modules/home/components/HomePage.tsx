@@ -1,4 +1,4 @@
-import { HOME_TITLE } from '../constants'
+import { HOME_TITLE } from '@modules/home/constants'
 
 export function HomePage() {
 	return (
