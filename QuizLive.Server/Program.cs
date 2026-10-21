@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Commands;
+using QuizLive.Server.Application.Quizzes;
 using QuizLive.Server.Infrastructure.Auth;
 using QuizLive.Server.Infrastructure.Data;
 using QuizLive.Server.Infrastructure.ErrorHandling;
