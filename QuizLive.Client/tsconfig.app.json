@@ -19,6 +19,7 @@
 		"noUncheckedSideEffectImports": true,
 		"baseUrl": ".",
 		"paths": {
+			"@src/*": ["src/*"],
 			"@api/*": ["src/api/*"],
 			"@assets/*": ["src/assets/*"],
 			"@config": ["src/config/index.ts"],
@@ -28,7 +29,10 @@
 			"@providers/*": ["src/providers/*"],
 			"@shared/*": ["src/shared/*"],
 			"@typings/*": ["src/typings/*"],
-			"@ui/*": ["src/ui/*"],
+			"@theme": ["src/theme/index.ts"],
+			"@theme/*": ["src/theme/*"],
+			"@components/ui": ["src/components/ui/index.ts"],
+			"@components/ui/*": ["src/components/ui/*"],
 			"@utils/*": ["src/utils/*"]
 		}
 	},
