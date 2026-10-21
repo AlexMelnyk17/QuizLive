@@ -23,6 +23,20 @@ export default defineConfig([
 				projectService: true,
 				tsconfigRootDir: import.meta.dirname
 			}
+		},
+		rules: {
+			'no-restricted-imports': [
+				'error',
+				{
+					patterns: [
+						{
+							group: ['../*', './*'],
+							message:
+								'Use path aliases (@theme, @components/ui, @modules, @src, etc.) instead of relative imports.'
+						}
+					]
+				}
+			]
 		}
 	},
 	eslintConfigPrettier

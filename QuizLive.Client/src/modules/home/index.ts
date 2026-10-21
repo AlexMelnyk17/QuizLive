@@ -1,3 +1,3 @@
-export { HOME_TITLE } from './constants'
-export type { HomeModuleId } from './types'
-export { HomePage } from './components/HomePage'
+export { HOME_TITLE } from '@modules/home/constants'
+export type { HomeModuleId } from '@modules/home/types'
+export { HomePage } from '@modules/home/components/HomePage'

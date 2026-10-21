@@ -10,7 +10,10 @@
 	"importOrder": [
 		"<THIRD_PARTY_MODULES>",
 		"^@layout/(.*)$",
-		"^@ui/(.*)$",
+		"^@theme$",
+		"^@theme/(.*)$",
+		"^@components/ui$",
+		"^@components/ui/(.*)$",
 		"^@providers/(.*)$",
 		"^@shared/(.*)$",
 		"^@modules/(.*)$",
@@ -20,8 +23,7 @@
 		"^@typings/(.*)$",
 		"^@utils/(.*)$",
 		"^@api/(.*)$",
-		"^../(.*)$",
-		"^./(.*)$"
+		"^@src/(.*)$"
 	],
 	"importOrderSeparation": true,
 	"importOrderSortSpecifiers": true
