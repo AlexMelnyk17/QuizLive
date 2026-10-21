@@ -19,23 +19,56 @@ React + TypeScript SPA built with [Vite](https://vite.dev/).
 
 ## Architecture
 
-**Feature modules** live under `src/modules/<name>/` (api, components, hooks, store, `constants.ts`, `types.ts`, `index.ts`). **Shared** code uses top-level aliases. See [src/modules/README.md](src/modules/README.md).
+Application code lives under `src/`. Use path aliases (no `./` or `../` imports).
 
-| Alias          | Purpose                                                           |
-| -------------- | ----------------------------------------------------------------- |
-| `@modules/*`   | Feature modules (import public API from each module’s `index.ts`) |
-| `@api/*`       | Shared HTTP client / base API utilities (not feature endpoints)   |
-| `@ui/*`        | Generic design-system components                                  |
-| `@layout/*`    | App shells and route layouts                                      |
-| `@providers/*` | Global React providers                                            |
-| `@shared/*`    | Cross-module constants/helpers (non-React)                        |
-| `@config`      | App configuration barrel (`ENV` from `config/env.ts`)             |
-| `@config/*`    | Other config modules under `src/config/`                          |
-| `@utils/*`     | Pure utilities                                                    |
-| `@typings/*`   | Shared FE types (not npm `@types`)                                |
-| `@assets/*`    | Imported static assets                                            |
+### Feature modules
 
-Vite resolves aliases via `resolve.tsconfigPaths` in [`vite.config.ts`](vite.config.ts); paths are defined in [`tsconfig.app.json`](tsconfig.app.json).
+Each folder under `src/modules/` is a **vertical slice** for one domain area (e.g. `home`, `lobby`, `game`). Keep feature code inside the module; use top-level `src/` folders only for **shared** concerns.
+
+```
+src/modules/<name>/
+  api/           # HTTP calls and DTO mapping for this module only
+  components/    # UI owned by this module
+  hooks/         # React hooks for this module
+  store/         # Client state for this module
+  constants.ts
+  types.ts
+  index.ts       # Public API — other code imports from here only
+```
+
+**Module rules**
+
+- Import other modules only via `@modules/<name>` (their `index.ts`), not deep paths into another module.
+- Do not import from another module’s `api/`, `store/`, or `components/` directly.
+- `modules/<name>/store/` — Zustand (or other) state scoped to that feature; one store per domain, no global reducer folder.
+- Add a module by copying `home/` and exporting the entry from `index.ts`.
+
+### Shared `src/` layout
+
+| Path | Purpose |
+| ---- | ------- |
+| `src/theme/` | Design tokens, light/dark themes, sprinkles (`@theme`) |
+| `src/components/ui/` | Reusable UI primitives (`@components/ui`) |
+| `src/api/`, `layout/`, `providers/`, `shared/`, `utils/`, `config/`, `assets/`, `typings/` | Cross-cutting concerns |
+
+### Path aliases
+
+| Alias | Purpose |
+| ----- | ------- |
+| `@modules/*` | Feature modules (public `index.ts` only) |
+| `@theme` / `@theme/*` | Theme contract, sprinkles, `ThemeProvider` |
+| `@components/ui` / `@components/ui/*` | Design-system components |
+| `@api/*` | Shared HTTP client / base API utilities |
+| `@layout/*` | App shells and route layouts |
+| `@providers/*` | Global React providers |
+| `@shared/*` | Cross-module constants/helpers (non-React) |
+| `@config` / `@config/*` | App configuration (`ENV` from `config/env.ts`) |
+| `@utils/*` | Pure utilities |
+| `@typings/*` | Shared FE types |
+| `@assets/*` | Static assets |
+| `@src/*` | App entry and other top-level `src` files |
+
+Paths are defined in [`tsconfig.app.json`](tsconfig.app.json); Vite resolves them via `tsconfigPaths` in [`vite.config.ts`](vite.config.ts).
 
 ## Environment variables
 
