@@ -6,6 +6,7 @@ using QuizLive.Server.Application.Quizzes;
 using QuizLive.Server.Infrastructure.Auth;
 using QuizLive.Server.Infrastructure.Data;
 using QuizLive.Server.Infrastructure.ErrorHandling;
+using System.Reflection;
 
 namespace QuizLive.Server
 {
@@ -20,40 +21,48 @@ namespace QuizLive.Server
 
             var builder = WebApplication.CreateBuilder(args);
 
-						builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+			builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
 
-						builder.Services.AddQuizLiveDbContext(builder.Configuration);
-						builder.Services.AddQuizLiveAuth(builder.Configuration);
-						builder.Services.AddScoped<IQuizService, QuizService>();
-						builder.Services.AddControllers();
+			builder.Services.AddQuizLiveDbContext(builder.Configuration);
+			builder.Services.AddQuizLiveAuth(builder.Configuration);
+			builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(options =>
-            {
-                // Кнопка Authorize: токен з POST /api/auth/login додається до кожного запиту.
-                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",
-                    BearerFormat = "JWT",
-                    Description = "JWT token from POST /api/auth/login (without the \"Bearer\" prefix)."
-                });
-
-                options.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-                        },
-                        Array.Empty<string>()
-                    }
-                });
-            });
+				
 
             builder.Services.AddProblemDetails();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
-            var app = builder.Build();
+						builder.Services.AddSwaggerGen(options =>
+						{
+							var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+							options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFile));
+
+							options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+							{
+								Type = SecuritySchemeType.Http,
+								Scheme = "bearer",
+								BearerFormat = "JWT",
+								In = ParameterLocation.Header,
+								Description = "Paste the JWT token returned by /api/auth/login."
+							});
+
+							options.AddSecurityRequirement(new OpenApiSecurityRequirement
+							{
+									{
+											new OpenApiSecurityScheme
+											{
+													Reference = new OpenApiReference
+													{
+														Type = ReferenceType.SecurityScheme,
+														Id = "Bearer"
+													}
+											},
+											Array.Empty<string>()
+									}
+							});
+						});
+
+						var app = builder.Build();
 
             app.UseExceptionHandler();
             app.UseStatusCodePages();

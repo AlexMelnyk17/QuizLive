@@ -1,4 +1,4 @@
-﻿# QuizLive
+# QuizLive
 
 ## Prerequisites
 
@@ -29,6 +29,18 @@ npm install
 
 After `npm install` in `QuizLive.Client`, a `node_modules` folder should appear there.
 
+Create file appsettings.Local.json in QuizLive.Server folder with the following content:
+
+```json
+{
+  "Jwt": {
+    "Key": "{private-key}"
+  }
+}
+```
+
+ptivate-key should be a random string of at least 32 characters. Not recommend to use special characters in the key.
+
 ## 3. Run the project
 
 1. Open `QuizLive.sln` in Visual Studio 2022.
@@ -37,6 +49,9 @@ After `npm install` in `QuizLive.Client`, a `node_modules` folder should appear 
 
 In development, the ASP.NET SPA proxy can start the Vite dev server (`npm run dev` in `QuizLive.Client`). See [QuizLive.Client/README.md](QuizLive.Client/README.md) for frontend scripts and tooling.
 
+<<<<<<< HEAD
+
+=======
 ## 4. Seed demo data
 
 At the repository root:
@@ -56,3 +71,4 @@ To seed a different database, pass a config override after `db seed`:
 ```bash
 dotnet run --project QuizLive.Server -- db seed "--ConnectionStrings:Default=Data Source=other.db"
 ```
+>>>>>>> ca869337fc6dd1d6a1df77c960b590809096ecce
