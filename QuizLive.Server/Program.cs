@@ -20,13 +20,13 @@ namespace QuizLive.Server
 
             var builder = WebApplication.CreateBuilder(args);
 
-						builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+			builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
 
-						builder.Services.AddQuizLiveDbContext(builder.Configuration);
-						builder.Services.AddQuizLiveAuth(builder.Configuration);
-						builder.Services.AddControllers();
+			builder.Services.AddQuizLiveDbContext(builder.Configuration);
+			builder.Services.AddQuizLiveAuth(builder.Configuration);
+			builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+				
 
             builder.Services.AddProblemDetails();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

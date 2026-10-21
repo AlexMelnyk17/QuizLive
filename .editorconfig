@@ -11,3 +11,7 @@ indent_size = 2
 [*.{json,yml,yaml,md}]
 indent_style = space
 indent_size = 2
+
+[*.cs]
+indent_style = space
+indent_size = 4
