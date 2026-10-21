@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Exeptions;
 using QuizLive.Server.Core.Entities.Quizzes;
@@ -32,7 +32,6 @@ namespace QuizLive.Server.Application.Quizzes
         {
             var userId = currentUser.UserId;
 
-            // Чужий квіз повертає таку саму 404, як і неіснуючий, щоб не розкривати, що він є.
             var quiz = await db.Quizzes
                 .AsNoTracking()
                 .Where(q => q.Id == id && q.OwnerId == userId)
@@ -87,7 +86,6 @@ namespace QuizLive.Server.Application.Quizzes
             await db.SaveChangesAsync();
         }
 
-        // Без AsNoTracking: EF відстежує знайдений квіз, тож SaveChanges збереже зміни або видалення.
         private async Task<Quiz> FindOwnQuizAsync(int id)
         {
             var userId = currentUser.UserId;
