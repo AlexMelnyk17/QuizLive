@@ -9,8 +9,8 @@ export const inputWrapper = recipe({
 		alignItems: 'center',
 		gap: vars.spacing[2],
 		borderRadius: vars.radii.md,
-		border: `1px solid ${vars.colors.border}`,
-		backgroundColor: vars.colors.surfaceRaised,
+		border: `1px solid ${vars.colors.borderStrong}`,
+		backgroundColor: vars.colors.surface,
 		color: vars.colors.textHeading,
 		transition: `border-color ${vars.durations.normal}, box-shadow ${vars.durations.normal}`,
 		':focus-within': {

@@ -1,19 +1,13 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { ThemeProvider } from '@theme/ThemeProvider'
-
-import App from '@src/App'
+import { renderApp } from '@src/test/renderApp'
 
 describe('App', () => {
-	it('renders the heading', () => {
-		render(
-			<ThemeProvider>
-				<App />
-			</ThemeProvider>
-		)
+	it('renders the home heading', async () => {
+		await renderApp()
 		expect(
-			screen.getByRole('heading', { name: /QuizLive Game Server/i })
+			await screen.findByRole('heading', { name: /QuizLive Game Server/i })
 		).toBeInTheDocument()
 	})
 })
