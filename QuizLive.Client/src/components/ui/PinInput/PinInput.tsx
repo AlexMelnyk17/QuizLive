@@ -13,6 +13,7 @@ export type PinInputProps = {
 	className?: string
 	name?: string
 	autoFocus?: boolean
+	'aria-labelledby'?: string
 }
 
 export function PinInput({
@@ -23,6 +24,7 @@ export function PinInput({
 	className,
 	name,
 	autoFocus,
+	'aria-labelledby': ariaLabelledBy,
 }: PinInputProps) {
 	const inputsRef = useRef<Array<HTMLInputElement | null>>([])
 	const chars = useMemo(() => {
@@ -73,7 +75,12 @@ export function PinInput({
 	}
 
 	return (
-		<div className={cn(pinRow, className)} role="group" aria-label={name ?? 'PIN input'}>
+		<div
+			className={cn(pinRow, className)}
+			role="group"
+			aria-labelledby={ariaLabelledBy}
+			aria-label={ariaLabelledBy ? undefined : (name ?? 'PIN input')}
+		>
 			{chars.map((char, index) => (
 				<input
 					key={index}

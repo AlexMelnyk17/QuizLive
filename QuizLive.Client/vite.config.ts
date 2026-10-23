@@ -18,5 +18,16 @@ export default defineConfig({
 		env: {
 			VITE_API_BASE_URL: '/api'
 		}
-	}
+	},
+	server: {
+    port: 53653,
+    strictPort: true,
+		proxy: {
+			'/api': {
+				target: 'https://localhost:7118',
+				changeOrigin: true,
+				secure: false,
+			},
+		}
+  },
 })

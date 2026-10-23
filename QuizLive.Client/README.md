@@ -49,7 +49,7 @@ src/modules/<name>/
 | ---- | ------- |
 | `src/theme/` | Design tokens, light/dark themes, sprinkles (`@theme`) |
 | `src/components/ui/` | Reusable UI primitives (`@components/ui`) |
-| `src/api/`, `layout/`, `providers/`, `shared/`, `utils/`, `config/`, `assets/`, `typings/` | Cross-cutting concerns |
+| `src/api/`, `layout/`, `providers/`, `shared/`, `utils/`, `config/`, `assets/` | Cross-cutting concerns |
 
 ### Path aliases
 
@@ -64,7 +64,6 @@ src/modules/<name>/
 | `@shared/*` | Cross-module constants/helpers (non-React) |
 | `@config` / `@config/*` | App configuration (`ENV` from `config/env.ts`) |
 | `@utils/*` | Pure utilities |
-| `@typings/*` | Shared FE types |
 | `@assets/*` | Static assets |
 | `@src/*` | App entry and other top-level `src` files |
 
