@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 
 import { ThemeProvider } from '@theme/ThemeProvider'
 
+import { AppProviders } from '@providers/AppProviders'
+
 import App from '@src/App'
 import '@theme/global.css'
 
@@ -14,7 +16,9 @@ if (!rootElement) {
 createRoot(rootElement).render(
 	<StrictMode>
 		<ThemeProvider>
-			<App />
+			<AppProviders>
+				<App />
+			</AppProviders>
 		</ThemeProvider>
 	</StrictMode>
 )
