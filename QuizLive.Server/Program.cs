@@ -31,8 +31,9 @@ namespace QuizLive.Server
 
             builder.Services.AddProblemDetails();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            builder.Services.AddScoped<IQuizService, QuizService>();
 
-						builder.Services.AddSwaggerGen(options =>
+            builder.Services.AddSwaggerGen(options =>
 						{
 							var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
 							options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFile));
@@ -84,8 +85,8 @@ namespace QuizLive.Server
 
             app.UseHttpsRedirection();
 
-						app.UseAuthentication();
-						app.UseAuthorization();
+			app.UseAuthentication();
+			app.UseAuthorization();
 
             app.MapControllers();
 

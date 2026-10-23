@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using QuizLive.Server.Application.Abstractions;
-using QuizLive.Server.Application.Exeptions;
+using QuizLive.Server.Application.Exceptions;
 using QuizLive.Server.Core.Entities.Quizzes;
 using QuizLive.Server.Infrastructure.Data;
 
