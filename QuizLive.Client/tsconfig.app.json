@@ -28,7 +28,6 @@
 			"@modules/*": ["src/modules/*"],
 			"@providers/*": ["src/providers/*"],
 			"@shared/*": ["src/shared/*"],
-			"@typings/*": ["src/typings/*"],
 			"@theme": ["src/theme/index.ts"],
 			"@theme/*": ["src/theme/*"],
 			"@components/ui": ["src/components/ui/index.ts"],
