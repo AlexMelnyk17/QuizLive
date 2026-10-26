@@ -15,7 +15,7 @@ namespace QuizLive.Server.Application.Questions
         [Required, StringLength(300)] string Text,
         bool? IsCorrect);
 
-    // Авторський DTO: містить IsCorrect, тому не віддається учасникам гри.
+    // Авторський DTO: містить IsCorrect.
     public record QuestionDto(
         int Id,
         int Order,
