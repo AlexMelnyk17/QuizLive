@@ -8,9 +8,22 @@ public class GameSessionRecordConfiguration : IEntityTypeConfiguration<GameSessi
 {
     public void Configure(EntityTypeBuilder<GameSessionRecord> builder)
     {
-        builder.ToTable("GameSessionRecords", t => t.HasCheckConstraint(
-            "CK_GameSessionRecords_Status",
-            "\"Status\" IN ('Lobby','Question','Results','Finished')"));
+        builder.ToTable("GameSessionRecords", t =>
+        {
+            t.HasCheckConstraint(
+                "CK_GameSessionRecords_Status",
+                "\"Status\" IN ('Lobby','Question','Results','Finished')");
+
+            // In Lobby nothing is current; while a question is shown its number and start time must be set.
+            // EndsAtUtc stays null for a question without a time limit.
+            t.HasCheckConstraint(
+                "CK_GameSessionRecords_CurrentQuestion",
+                "(\"Status\" = 'Lobby' AND \"CurrentQuestionOrder\" IS NULL " +
+                "AND \"CurrentQuestionStartedAtUtc\" IS NULL AND \"CurrentQuestionEndsAtUtc\" IS NULL) " +
+                "OR (\"Status\" = 'Question' AND \"CurrentQuestionOrder\" IS NOT NULL " +
+                "AND \"CurrentQuestionStartedAtUtc\" IS NOT NULL) " +
+                "OR \"Status\" IN ('Results','Finished')");
+        });
 
         builder.HasKey(g => g.Id);
 

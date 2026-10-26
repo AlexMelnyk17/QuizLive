@@ -95,6 +95,15 @@ namespace QuizLive.Server.Data.Migrations
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("CurrentQuestionEndsAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CurrentQuestionOrder")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("CurrentQuestionStartedAtUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("EndedAtUtc")
                         .HasColumnType("TEXT");
 
@@ -125,6 +134,8 @@ namespace QuizLive.Server.Data.Migrations
 
                     b.ToTable("GameSessionRecords", null, t =>
                         {
+                            t.HasCheckConstraint("CK_GameSessionRecords_CurrentQuestion", "(\"Status\" = 'Lobby' AND \"CurrentQuestionOrder\" IS NULL AND \"CurrentQuestionStartedAtUtc\" IS NULL AND \"CurrentQuestionEndsAtUtc\" IS NULL) OR (\"Status\" = 'Question' AND \"CurrentQuestionOrder\" IS NOT NULL AND \"CurrentQuestionStartedAtUtc\" IS NOT NULL) OR \"Status\" IN ('Results','Finished')");
+
                             t.HasCheckConstraint("CK_GameSessionRecords_Status", "\"Status\" IN ('Lobby','Question','Results','Finished')");
                         });
                 });
