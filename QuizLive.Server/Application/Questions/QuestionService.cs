@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using QuizLive.Server.Application.Abstractions;
-using QuizLive.Server.Application.Common;
 using QuizLive.Server.Application.Exceptions;
 using QuizLive.Server.Core.Entities.OpenText;
 using QuizLive.Server.Core.Entities.PollChoice;
@@ -15,11 +14,11 @@ namespace QuizLive.Server.Application.Questions
         // Максимум варіантів обмежує атрибут MaxLength у CreateQuestionRequest.
         private const int MinOptions = 2;
 
-        public async Task<PagedResult<QuestionDto>> GetPageAsync(int quizId, PageQuery page)
+        public async Task<List<QuestionDto>> GetAllAsync(int quizId)
         {
             var kind = await GetOwnQuizKindAsync(quizId);
 
-            return await QueryQuestions(quizId, kind).ToPagedResultAsync(page);
+            return await QueryQuestions(quizId, kind).ToListAsync();
         }
 
         public async Task<QuestionDto> GetByIdAsync(int quizId, int questionId)
