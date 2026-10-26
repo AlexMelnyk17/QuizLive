@@ -49,9 +49,7 @@ ptivate-key should be a random string of at least 32 characters. Not recommend t
 
 In development, the ASP.NET SPA proxy can start the Vite dev server (`npm run dev` in `QuizLive.Client`). See [QuizLive.Client/README.md](QuizLive.Client/README.md) for frontend scripts and tooling.
 
-<<<<<<< HEAD
 
-=======
 ## 4. Seed demo data
 
 At the repository root:
