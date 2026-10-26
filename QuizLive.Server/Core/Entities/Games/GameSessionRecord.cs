@@ -17,6 +17,9 @@ public class GameSessionRecord
     public GameStatus Status { get; set; } = GameStatus.Lobby;
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? StartedAtUtc { get; set; }
+    public int? CurrentQuestionOrder { get; set; }              // Order активного питання; null у Lobby
+    public DateTime? CurrentQuestionStartedAtUtc { get; set; }  // коли сервер показав питання
+    public DateTime? CurrentQuestionEndsAtUtc { get; set; }     // StartedAt + TimeLimitSeconds; null, якщо ліміту немає
     public DateTime? EndedAtUtc { get; set; }
 
     public List<Player> Players { get; set; } = new();
