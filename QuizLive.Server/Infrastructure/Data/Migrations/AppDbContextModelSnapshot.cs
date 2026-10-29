@@ -134,7 +134,7 @@ namespace QuizLive.Server.Data.Migrations
 
                     b.ToTable("GameSessionRecords", null, t =>
                         {
-                            t.HasCheckConstraint("CK_GameSessionRecords_CurrentQuestion", "(\"Status\" = 'Lobby' AND \"CurrentQuestionOrder\" IS NULL AND \"CurrentQuestionStartedAtUtc\" IS NULL AND \"CurrentQuestionEndsAtUtc\" IS NULL) OR (\"Status\" = 'Question' AND \"CurrentQuestionOrder\" IS NOT NULL AND \"CurrentQuestionStartedAtUtc\" IS NOT NULL) OR \"Status\" IN ('Results','Finished')");
+                            t.HasCheckConstraint("CK_GameSessionRecords_CurrentQuestion", "(\"Status\" = 'Lobby' AND \"CurrentQuestionOrder\" IS NULL AND \"CurrentQuestionStartedAtUtc\" IS NULL AND \"CurrentQuestionEndsAtUtc\" IS NULL) OR (\"Status\" IN ('Question','Results') AND \"CurrentQuestionOrder\" IS NOT NULL AND \"CurrentQuestionStartedAtUtc\" IS NOT NULL) OR \"Status\" = 'Finished'");
 
                             t.HasCheckConstraint("CK_GameSessionRecords_Status", "\"Status\" IN ('Lobby','Question','Results','Finished')");
                         });
