@@ -69,4 +69,4 @@ To seed a different database, pass a config override after `db seed`:
 ```bash
 dotnet run --project QuizLive.Server -- db seed "--ConnectionStrings:Default=Data Source=other.db"
 ```
->>>>>>> ca869337fc6dd1d6a1df77c960b590809096ecce
+
