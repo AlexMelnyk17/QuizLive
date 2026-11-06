@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Commands;
+using QuizLive.Server.Application.Questions;
 using QuizLive.Server.Application.Quizzes;
 using QuizLive.Server.Infrastructure.Auth;
 using QuizLive.Server.Infrastructure.Data;
@@ -32,6 +33,7 @@ namespace QuizLive.Server
             builder.Services.AddProblemDetails();
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddScoped<IQuizService, QuizService>();
+            builder.Services.AddScoped<IQuestionService, QuestionService>();
 
             builder.Services.AddSwaggerGen(options =>
 						{
