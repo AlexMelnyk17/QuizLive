@@ -386,9 +386,9 @@ namespace QuizLive.Server.Application.Questions
             {
                 await db.SaveChangesAsync();
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException ex) when (ex.IsUniqueViolation())
             {
-                // Два одночасні запити отримали однаковий Order і впали на унікальному індексі QuizId + Order.
+                // Concurrent requests collided on a unique Order index.
                 throw new ConflictException(QuizMessages.ChangedConcurrently);
             }
         }
