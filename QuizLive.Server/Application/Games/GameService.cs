@@ -8,7 +8,7 @@ using QuizLive.Server.Infrastructure.Data;
 
 namespace QuizLive.Server.Application.Games
 {
-    public class GameService(AppDbContext db, ICurrentUser currentUser) : IGameService
+    public class GameService(AppDbContext db, ICurrentUser currentUser, IGameNotifier notifier) : IGameService
     {
         private const int MaxCodeAttempts = 5;
 
@@ -98,6 +98,7 @@ namespace QuizLive.Server.Application.Games
             game.EndedAtUtc = DateTime.UtcNow;
 
             await db.SaveChangesAsync();
+            await notifier.GameEndedAsync(id);
         }
 
         public async Task<GameLookupDto> GetByCodeAsync(string code)
@@ -167,6 +168,8 @@ namespace QuizLive.Server.Application.Games
                 // Another player took the same nickname between the check and the insert.
                 throw new ConflictException($"The nickname \"{nickname}\" is already taken in this game.");
             }
+
+            await notifier.PlayerJoinedAsync(game.Id, new GamePlayerDto(player.Id, player.Nickname, player.JoinedAtUtc));
 
             return new JoinGameResponse(game.Id, player.Id, player.Nickname, player.Token);
         }

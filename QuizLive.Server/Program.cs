@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using QuizLive.Server.API.Hubs;
 using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Commands;
 using QuizLive.Server.Application.Games;
@@ -8,6 +9,7 @@ using QuizLive.Server.Application.Quizzes;
 using QuizLive.Server.Infrastructure.Auth;
 using QuizLive.Server.Infrastructure.Data;
 using QuizLive.Server.Infrastructure.ErrorHandling;
+using QuizLive.Server.Infrastructure.Realtime;
 using System.Reflection;
 
 namespace QuizLive.Server
@@ -36,6 +38,8 @@ namespace QuizLive.Server
             builder.Services.AddScoped<IQuizService, QuizService>();
             builder.Services.AddScoped<IQuestionService, QuestionService>();
             builder.Services.AddScoped<IGameService, GameService>();
+            builder.Services.AddSignalR();
+            builder.Services.AddSingleton<IGameNotifier, SignalRGameNotifier>();
 
             builder.Services.AddSwaggerGen(options =>
 						{
@@ -93,6 +97,7 @@ namespace QuizLive.Server
 			app.UseAuthorization();
 
             app.MapControllers();
+            app.MapHub<GameHub>("/api/hubs/game");
 
             app.MapFallbackToFile("/index.html");
 
