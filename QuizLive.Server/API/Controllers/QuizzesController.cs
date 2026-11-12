@@ -65,10 +65,12 @@ namespace QuizLive.Server.API.Controllers
         /// <response code="400">The request body failed validation.</response>
         /// <response code="401">The token is missing, invalid or expired.</response>
         /// <response code="404">The quiz does not exist or belongs to another user.</response>
+        /// <response code="409">The quiz is archived or has an active game.</response>
         [HttpPut("{id:int}")]
         [ProducesResponseType<QuizDto>(StatusCodes.Status200OK)]
         [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<QuizDto>> Update(int id, UpdateQuizRequest request)
         {
             return await quizService.UpdateAsync(id, request);

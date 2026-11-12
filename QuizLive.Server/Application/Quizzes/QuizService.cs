@@ -65,6 +65,7 @@ namespace QuizLive.Server.Application.Quizzes
         public async Task<QuizDto> UpdateAsync(int id, UpdateQuizRequest request)
         {
             var quiz = await FindOwnQuizAsync(id);
+            QuizGuards.EnsureNotArchived(quiz.IsArchived);
             await QuizGuards.EnsureNoActiveGameAsync(db, id);
 
             quiz.Title = request.Title.Trim();
