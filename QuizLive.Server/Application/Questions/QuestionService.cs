@@ -18,14 +18,14 @@ namespace QuizLive.Server.Application.Questions
         {
             var kind = await GetOwnQuizKindAsync(quizId);
 
-            return await QueryQuestions(quizId, kind).ToListAsync();
+            return await QuestionQueries.ForQuiz(db, quizId, kind).ToListAsync();
         }
 
         public async Task<QuestionDto> GetByIdAsync(int quizId, int questionId)
         {
             var kind = await GetOwnQuizKindAsync(quizId);
 
-            var question = await QueryQuestions(quizId, kind, questionId).FirstOrDefaultAsync();
+            var question = await QuestionQueries.ForQuiz(db, quizId, kind, questionId).FirstOrDefaultAsync();
 
             return question ?? throw new NotFoundException($"Question {questionId} was not found.");
         }
@@ -129,33 +129,6 @@ namespace QuizLive.Server.Application.Questions
                 .FirstOrDefaultAsync();
 
             return quiz?.Kind ?? throw new NotFoundException($"Quiz {quizId} was not found.");
-        }
-
-        // Фільтр по questionId стоїть до Select: після проєкції в record EF не перекладе q.Id у SQL.
-        private IQueryable<QuestionDto> QueryQuestions(int quizId, QuizKind kind, int? questionId = null)
-        {
-            return kind switch
-            {
-                QuizKind.OpenText => db.OpenQuestions
-                    .AsNoTracking()
-                    .Where(q => q.QuizId == quizId && (questionId == null || q.Id == questionId))
-                    .OrderBy(q => q.Order)
-                    .Select(QuestionMappings.OpenToDto),
-
-                QuizKind.PollChoice => db.PollQuestions
-                    .AsNoTracking()
-                    .Where(q => q.QuizId == quizId && (questionId == null || q.Id == questionId))
-                    .OrderBy(q => q.Order)
-                    .Select(QuestionMappings.PollToDto),
-
-                QuizKind.QuizChoice => db.QuizQuestions
-                    .AsNoTracking()
-                    .Where(q => q.QuizId == quizId && (questionId == null || q.Id == questionId))
-                    .OrderBy(q => q.Order)
-                    .Select(QuestionMappings.QuizToDto),
-
-                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
-            };
         }
 
         private async Task<int> GetNextOrderAsync(int quizId, QuizKind kind)

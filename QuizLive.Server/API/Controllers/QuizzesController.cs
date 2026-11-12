@@ -28,14 +28,21 @@ namespace QuizLive.Server.API.Controllers
             return await quizService.GetMyQuizzesAsync(archived);
         }
 
-        /// <summary>Returns a quiz of the current user by id.</summary>
-        /// <response code="200">The quiz.</response>
+        /// <summary>Returns a quiz of the current user by id together with its questions.</summary>
+        /// <remarks>
+        /// Questions are ordered by <c>order</c>, options inside a question too.
+        /// Which question fields are filled depends on the quiz kind:
+        /// - <b>OpenText</b> — <c>options</c> and <c>basePoints</c> are <c>null</c>.
+        /// - <b>PollChoice</b> — <c>options</c> without a correct one (<c>isCorrect</c> is <c>null</c>), <c>basePoints</c> is <c>null</c>.
+        /// - <b>QuizChoice</b> — <c>options</c> with <c>isCorrect</c>, <c>basePoints</c> may be set.
+        /// </remarks>
+        /// <response code="200">The quiz with its questions.</response>
         /// <response code="401">The token is missing, invalid or expired.</response>
         /// <response code="404">The quiz does not exist or belongs to another user.</response>
         [HttpGet("{id:int}")]
-        [ProducesResponseType<QuizDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType<QuizDetailsDto>(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<QuizDto>> GetById(int id)
+        public async Task<ActionResult<QuizDetailsDto>> GetById(int id)
         {
             return await quizService.GetByIdAsync(id);
         }
