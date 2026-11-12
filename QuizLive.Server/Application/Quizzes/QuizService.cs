@@ -65,7 +65,7 @@ namespace QuizLive.Server.Application.Quizzes
         public async Task<QuizDto> UpdateAsync(int id, UpdateQuizRequest request)
         {
             var quiz = await FindOwnQuizAsync(id);
-            await EnsureNoActiveGameAsync(id);
+            await QuizGuards.EnsureNoActiveGameAsync(db, id);
 
             quiz.Title = request.Title.Trim();
             quiz.Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim();
@@ -86,21 +86,11 @@ namespace QuizLive.Server.Application.Quizzes
         public async Task DeleteAsync(int id)
         {
             var quiz = await FindOwnQuizAsync(id);
-            await EnsureNoActiveGameAsync(id);
+            await QuizGuards.EnsureNoActiveGameAsync(db, id);
 
             // Питання та їхні варіанти видаляються каскадно.
             db.Quizzes.Remove(quiz);
             await db.SaveChangesAsync();
-        }
-
-        // Гра посилається на питання за Order, тому поки гра не завершена, вміст квізу змінювати не можна.
-        private async Task EnsureNoActiveGameAsync(int quizId)
-        {
-            var hasActiveGame = await db.GameSessionRecords.AnyAsync(g => g.QuizId == quizId && g.EndedAtUtc == null);
-            if (hasActiveGame)
-            {
-                throw new ConflictException(QuizMessages.HasActiveGame);
-            }
         }
 
         private async Task<QuizDto> GetDtoAsync(int id)

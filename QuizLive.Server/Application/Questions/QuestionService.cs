@@ -33,7 +33,7 @@ namespace QuizLive.Server.Application.Questions
 
         public async Task<QuestionDto> CreateAsync(int quizId, QuestionRequest request)
         {
-            var kind = await GetEditableQuizKindAsync(quizId);
+            var kind = await GetOwnQuizKindAsync(quizId, forEdit: true);
 
             Validate(kind, request);
 
@@ -103,7 +103,7 @@ namespace QuizLive.Server.Application.Questions
 
         public async Task<QuestionDto> UpdateAsync(int quizId, int questionId, QuestionRequest request)
         {
-            var kind = await GetEditableQuizKindAsync(quizId);
+            var kind = await GetOwnQuizKindAsync(quizId, forEdit: true);
 
             Validate(kind, request);
             await EnsureNoAnswersAsync(kind, questionId);
@@ -174,7 +174,7 @@ namespace QuizLive.Server.Application.Questions
 
         public async Task DeleteAsync(int quizId, int questionId)
         {
-            var kind = await GetEditableQuizKindAsync(quizId);
+            var kind = await GetOwnQuizKindAsync(quizId, forEdit: true);
 
             await EnsureNoAnswersAsync(kind, questionId);
 
@@ -233,7 +233,7 @@ namespace QuizLive.Server.Application.Questions
 
         public async Task<List<QuestionDto>> ReorderAsync(int quizId, ReorderQuestionsRequest request)
         {
-            var kind = await GetEditableQuizKindAsync(quizId);
+            var kind = await GetOwnQuizKindAsync(quizId, forEdit: true);
 
             await using var transaction = await db.Database.BeginTransactionAsync();
 
@@ -267,35 +267,6 @@ namespace QuizLive.Server.Application.Questions
             await transaction.CommitAsync();
 
             return await QuestionQueries.ForQuiz(db, quizId, kind).ToListAsync();
-        }
-
-        private async Task<QuizKind> GetEditableQuizKindAsync(int quizId)
-        {
-            var userId = currentUser.UserId;
-
-            var quiz = await db.Quizzes
-                .AsNoTracking()
-                .Where(q => q.Id == quizId && q.OwnerId == userId)
-                .Select(q => new
-                {
-                    q.Kind,
-                    q.IsArchived,
-                    HasActiveGame = q.Games.Any(g => g.EndedAtUtc == null)
-                })
-                .FirstOrDefaultAsync()
-                ?? throw new NotFoundException(QuizMessages.NotFound(quizId));
-
-            if (quiz.IsArchived)
-            {
-                throw new ConflictException(QuizMessages.IsArchived);
-            }
-
-            if (quiz.HasActiveGame)
-            {
-                throw new ConflictException(QuizMessages.HasActiveGame);
-            }
-
-            return quiz.Kind;
         }
 
         private async Task EnsureNoAnswersAsync(QuizKind kind, int questionId)
@@ -366,17 +337,24 @@ namespace QuizLive.Server.Application.Questions
         private static NotFoundException QuestionNotFound(int questionId) =>
             new(QuestionMessages.NotFound(questionId));
 
-        private async Task<QuizKind> GetOwnQuizKindAsync(int quizId)
+        private async Task<QuizKind> GetOwnQuizKindAsync(int quizId, bool forEdit = false)
         {
             var userId = currentUser.UserId;
 
             var quiz = await db.Quizzes
                 .AsNoTracking()
                 .Where(q => q.Id == quizId && q.OwnerId == userId)
-                .Select(q => new { q.Kind })
-                .FirstOrDefaultAsync();
+                .Select(q => new { q.Kind, q.IsArchived })
+                .FirstOrDefaultAsync()
+                ?? throw new NotFoundException(QuizMessages.NotFound(quizId));
 
-            return quiz?.Kind ?? throw new NotFoundException(QuizMessages.NotFound(quizId));
+            if (forEdit)
+            {
+                QuizGuards.EnsureNotArchived(quiz.IsArchived);
+                await QuizGuards.EnsureNoActiveGameAsync(db, quizId);
+            }
+
+            return quiz.Kind;
         }
 
         private async Task<int> GetNextOrderAsync(int quizId, QuizKind kind)
