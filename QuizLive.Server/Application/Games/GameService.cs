@@ -69,16 +69,54 @@ namespace QuizLive.Server.Application.Games
 
         public async Task<GameDto> GetByIdAsync(int id)
         {
-            var userId = currentUser.UserId;
-
-            var game = await db.GameSessionRecords
-                .AsNoTracking()
-                .Where(g => g.Id == id && g.HostUserId == userId)
+            var game = await HostGames(id, currentUser.UserId)
                 .Select(GameMappings.ToDto)
                 .FirstOrDefaultAsync();
 
             return game ?? throw new NotFoundException($"Game {id} was not found.");
         }
+
+        public async Task<GameDto> GetActiveHostGameAsync(int gameId, string hostUserId)
+        {
+            var game = await HostGames(gameId, hostUserId)
+                .Where(g => g.EndedAtUtc == null)
+                .Select(GameMappings.ToDto)
+                .FirstOrDefaultAsync();
+
+            return game ?? throw new NotFoundException($"Game {gameId} was not found.");
+        }
+
+        public async Task<PlayerGameStateDto> GetPlayerStateAsync(string playerToken)
+        {
+            if (string.IsNullOrWhiteSpace(playerToken))
+            {
+                throw new DomainValidationException("Player token is required.");
+            }
+
+            var state = await db.Players
+                .AsNoTracking()
+                .Where(p => p.Token == playerToken && p.GameSession.EndedAtUtc == null)
+                .Select(p => new PlayerGameStateDto(
+                    p.GameSessionRecordId,
+                    p.GameSession.Code,
+                    p.GameSession.Quiz.Title,
+                    p.GameSession.Status,
+                    p.Id,
+                    p.Nickname,
+                    p.GameSession.Players
+                        .OrderBy(x => x.JoinedAtUtc)
+                        .Select(x => new GamePlayerDto(x.Id, x.Nickname, x.JoinedAtUtc))
+                        .ToList()))
+                .FirstOrDefaultAsync();
+
+            return state ?? throw new NotFoundException("Player was not found.");
+        }
+
+        // The single ownership rule: a game is visible only to its host.
+        private IQueryable<GameSessionRecord> HostGames(int gameId, string hostUserId) =>
+            db.GameSessionRecords
+                .AsNoTracking()
+                .Where(g => g.Id == gameId && g.HostUserId == hostUserId);
 
         public async Task EndAsync(int id)
         {
