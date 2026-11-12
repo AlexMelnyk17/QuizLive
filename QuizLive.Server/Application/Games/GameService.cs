@@ -8,7 +8,7 @@ using QuizLive.Server.Infrastructure.Data;
 
 namespace QuizLive.Server.Application.Games
 {
-    public class GameService(AppDbContext db, ICurrentUser currentUser) : IGameService
+    public class GameService(AppDbContext db, ICurrentUser currentUser, IGameNotifier notifier) : IGameService
     {
         private const int MaxCodeAttempts = 5;
 
@@ -69,16 +69,54 @@ namespace QuizLive.Server.Application.Games
 
         public async Task<GameDto> GetByIdAsync(int id)
         {
-            var userId = currentUser.UserId;
-
-            var game = await db.GameSessionRecords
-                .AsNoTracking()
-                .Where(g => g.Id == id && g.HostUserId == userId)
+            var game = await HostGames(id, currentUser.UserId)
                 .Select(GameMappings.ToDto)
                 .FirstOrDefaultAsync();
 
             return game ?? throw new NotFoundException($"Game {id} was not found.");
         }
+
+        public async Task<GameDto> GetActiveHostGameAsync(int gameId, string hostUserId)
+        {
+            var game = await HostGames(gameId, hostUserId)
+                .Where(g => g.EndedAtUtc == null)
+                .Select(GameMappings.ToDto)
+                .FirstOrDefaultAsync();
+
+            return game ?? throw new NotFoundException($"Game {gameId} was not found.");
+        }
+
+        public async Task<PlayerGameStateDto> GetPlayerStateAsync(string playerToken)
+        {
+            if (string.IsNullOrWhiteSpace(playerToken))
+            {
+                throw new DomainValidationException("Player token is required.");
+            }
+
+            var state = await db.Players
+                .AsNoTracking()
+                .Where(p => p.Token == playerToken && p.GameSession.EndedAtUtc == null)
+                .Select(p => new PlayerGameStateDto(
+                    p.GameSessionRecordId,
+                    p.GameSession.Code,
+                    p.GameSession.Quiz.Title,
+                    p.GameSession.Status,
+                    p.Id,
+                    p.Nickname,
+                    p.GameSession.Players
+                        .OrderBy(x => x.JoinedAtUtc)
+                        .Select(x => new GamePlayerDto(x.Id, x.Nickname, x.JoinedAtUtc))
+                        .ToList()))
+                .FirstOrDefaultAsync();
+
+            return state ?? throw new NotFoundException("Player was not found.");
+        }
+
+        // The single ownership rule: a game is visible only to its host.
+        private IQueryable<GameSessionRecord> HostGames(int gameId, string hostUserId) =>
+            db.GameSessionRecords
+                .AsNoTracking()
+                .Where(g => g.Id == gameId && g.HostUserId == hostUserId);
 
         public async Task EndAsync(int id)
         {
@@ -98,6 +136,7 @@ namespace QuizLive.Server.Application.Games
             game.EndedAtUtc = DateTime.UtcNow;
 
             await db.SaveChangesAsync();
+            await notifier.GameEndedAsync(id);
         }
 
         public async Task<GameLookupDto> GetByCodeAsync(string code)
@@ -167,6 +206,8 @@ namespace QuizLive.Server.Application.Games
                 // Another player took the same nickname between the check and the insert.
                 throw new ConflictException($"The nickname \"{nickname}\" is already taken in this game.");
             }
+
+            await notifier.PlayerJoinedAsync(game.Id, new GamePlayerDto(player.Id, player.Nickname, player.JoinedAtUtc));
 
             return new JoinGameResponse(game.Id, player.Id, player.Nickname, player.Token);
         }
