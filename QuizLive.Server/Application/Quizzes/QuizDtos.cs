@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using QuizLive.Server.Application.Questions;
 using QuizLive.Server.Core.Enums;
 
 namespace QuizLive.Server.Application.Quizzes
@@ -20,4 +21,14 @@ namespace QuizLive.Server.Application.Quizzes
         bool IsArchived,
         DateTime CreatedAtUtc,
         int QuestionCount);
+
+    // A single quiz with its content (author view: options include IsCorrect).
+    public record QuizDetailsDto(
+        int Id,
+        string Title,
+        string? Description,
+        QuizKind Kind,
+        bool IsArchived,
+        DateTime CreatedAtUtc,
+        List<QuestionDto> Questions);
 }
