@@ -81,16 +81,70 @@ namespace QuizLive.Server.API.Controllers
         /// <response code="400">The request body failed validation.</response>
         /// <response code="401">The token is missing, invalid or expired.</response>
         /// <response code="404">The quiz does not exist or belongs to another user.</response>
-        /// <response code="409">The quiz has an active game, or it was changed by a concurrent request.</response>
+        /// <response code="409">The quiz is archived, has an active game, or was changed by a concurrent request.</response>
         [HttpPost]
         [ProducesResponseType<QuestionDto>(StatusCodes.Status201Created)]
         [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<QuestionDto>> Create(int quizId, CreateQuestionRequest request)
+        public async Task<ActionResult<QuestionDto>> Create(int quizId, QuestionRequest request)
         {
             var question = await questionService.CreateAsync(quizId, request);
             return CreatedAtAction(nameof(GetById), new { quizId, questionId = question.Id }, question);
+        }
+
+        /// <summary>Replaces the content of a question; its position is kept.</summary>
+        /// <remarks>Same body and rules as <c>POST</c>. Options are replaced as a whole.</remarks>
+        /// <response code="200">The updated question.</response>
+        /// <response code="400">The request body failed validation.</response>
+        /// <response code="401">The token is missing, invalid or expired.</response>
+        /// <response code="404">The quiz or the question does not exist, or the quiz belongs to another user.</response>
+        /// <response code="409">The quiz is archived or has an active game, or the question already has answers.</response>
+        [HttpPut("{questionId:int}")]
+        [ProducesResponseType<QuestionDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<QuestionDto>> Update(int quizId, int questionId, QuestionRequest request)
+        {
+            return await questionService.UpdateAsync(quizId, questionId, request);
+        }
+
+        /// <summary>Deletes a question; the following questions move up.</summary>
+        /// <response code="204">The question was deleted.</response>
+        /// <response code="401">The token is missing, invalid or expired.</response>
+        /// <response code="404">The quiz or the question does not exist, or the quiz belongs to another user.</response>
+        /// <response code="409">The quiz is archived or has an active game, or the question already has answers.</response>
+        [HttpDelete("{questionId:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> Delete(int quizId, int questionId)
+        {
+            await questionService.DeleteAsync(quizId, questionId);
+            return NoContent();
+        }
+
+        /// <summary>Sets a new order of the questions.</summary>
+        /// <remarks>
+        /// <c>questionIds</c> must list every question of the quiz exactly once, in the new order.
+        /// <code>
+        /// { "questionIds": [12, 10, 11] }
+        /// </code>
+        /// </remarks>
+        /// <response code="200">The questions in the new order.</response>
+        /// <response code="400">The list does not match the questions of the quiz.</response>
+        /// <response code="401">The token is missing, invalid or expired.</response>
+        /// <response code="404">The quiz does not exist or belongs to another user.</response>
+        /// <response code="409">The quiz is archived or has an active game.</response>
+        [HttpPut("order")]
+        [ProducesResponseType<List<QuestionDto>>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<List<QuestionDto>>> Reorder(int quizId, ReorderQuestionsRequest request)
+        {
+            return await questionService.ReorderAsync(quizId, request);
         }
     }
 }
