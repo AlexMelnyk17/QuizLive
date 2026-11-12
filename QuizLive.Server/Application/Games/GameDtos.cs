@@ -32,6 +32,16 @@ namespace QuizLive.Server.Application.Games
         string QuizTitle,
         GameStatus Status);
 
+    // What a player gets after connecting to the hub: the lobby as they see it.
+    public record PlayerGameStateDto(
+        int GameId,
+        string Code,
+        string QuizTitle,
+        GameStatus Status,
+        int PlayerId,
+        string Nickname,
+        List<GamePlayerDto> Players);
+
     // The token is returned only once, on join; the client keeps it to connect to the game later.
     public record JoinGameResponse(
         int GameId,
