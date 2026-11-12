@@ -2,6 +2,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Exceptions;
+using QuizLive.Server.Application.Quizzes;
 using QuizLive.Server.Core.Entities.Games;
 using QuizLive.Server.Core.Enums;
 using QuizLive.Server.Infrastructure.Data;
@@ -28,7 +29,7 @@ namespace QuizLive.Server.Application.Games
                     QuestionCount = q.OpenQuestions.Count + q.PollQuestions.Count + q.QuizQuestions.Count
                 })
                 .FirstOrDefaultAsync()
-                ?? throw new NotFoundException($"Quiz {request.QuizId} was not found.");
+                ?? throw new NotFoundException(QuizMessages.NotFound(request.QuizId));
 
             if (quiz.IsArchived)
             {

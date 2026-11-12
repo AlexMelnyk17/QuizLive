@@ -99,7 +99,7 @@ namespace QuizLive.Server.Application.Quizzes
             var hasActiveGame = await db.GameSessionRecords.AnyAsync(g => g.QuizId == quizId && g.EndedAtUtc == null);
             if (hasActiveGame)
             {
-                throw new ConflictException("The quiz has an active game and cannot be changed until the game ends.");
+                throw new ConflictException(QuizMessages.HasActiveGame);
             }
         }
 
@@ -113,7 +113,7 @@ namespace QuizLive.Server.Application.Quizzes
                 .Select(QuizMappings.ToDto)
                 .FirstOrDefaultAsync();
 
-            return quiz ?? throw new NotFoundException($"Quiz {id} was not found.");
+            return quiz ?? throw new NotFoundException(QuizMessages.NotFound(id));
         }
 
         private async Task<Quiz> FindOwnQuizAsync(int id)
@@ -121,7 +121,7 @@ namespace QuizLive.Server.Application.Quizzes
             var userId = currentUser.UserId;
 
             return await db.Quizzes.FirstOrDefaultAsync(q => q.Id == id && q.OwnerId == userId)
-                ?? throw new NotFoundException($"Quiz {id} was not found.");
+                ?? throw new NotFoundException(QuizMessages.NotFound(id));
         }
     }
 }

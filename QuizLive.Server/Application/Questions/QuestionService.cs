@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Exceptions;
+using QuizLive.Server.Application.Quizzes;
 using QuizLive.Server.Core.Entities.OpenText;
 using QuizLive.Server.Core.Entities.PollChoice;
 using QuizLive.Server.Core.Entities.QuizChoice;
@@ -282,16 +283,16 @@ namespace QuizLive.Server.Application.Questions
                     HasActiveGame = q.Games.Any(g => g.EndedAtUtc == null)
                 })
                 .FirstOrDefaultAsync()
-                ?? throw new NotFoundException($"Quiz {quizId} was not found.");
+                ?? throw new NotFoundException(QuizMessages.NotFound(quizId));
 
             if (quiz.IsArchived)
             {
-                throw new ConflictException("Questions of an archived quiz cannot be changed.");
+                throw new ConflictException(QuizMessages.IsArchived);
             }
 
             if (quiz.HasActiveGame)
             {
-                throw new ConflictException("Questions cannot be changed while the quiz has an active game.");
+                throw new ConflictException(QuizMessages.HasActiveGame);
             }
 
             return quiz.Kind;
@@ -309,7 +310,7 @@ namespace QuizLive.Server.Application.Questions
 
             if (hasAnswers)
             {
-                throw new ConflictException("The question already has answers from played games and cannot be changed.");
+                throw new ConflictException(QuestionMessages.HasAnswers);
             }
         }
 
@@ -342,10 +343,10 @@ namespace QuizLive.Server.Application.Questions
             if (!isComplete)
             {
                 throw new DomainValidationException(
-                    "Question order validation failed.",
+                    QuestionMessages.OrderValidationFailed,
                     new Dictionary<string, string[]>
                     {
-                        ["questionIds"] = ["Every question of the quiz must be listed exactly once."]
+                        ["questionIds"] = [QuestionMessages.OrderMustListAll]
                     });
             }
 
@@ -363,7 +364,7 @@ namespace QuizLive.Server.Application.Questions
                 .ToList();
 
         private static NotFoundException QuestionNotFound(int questionId) =>
-            new($"Question {questionId} was not found.");
+            new(QuestionMessages.NotFound(questionId));
 
         private async Task<QuizKind> GetOwnQuizKindAsync(int quizId)
         {
@@ -375,7 +376,7 @@ namespace QuizLive.Server.Application.Questions
                 .Select(q => new { q.Kind })
                 .FirstOrDefaultAsync();
 
-            return quiz?.Kind ?? throw new NotFoundException($"Quiz {quizId} was not found.");
+            return quiz?.Kind ?? throw new NotFoundException(QuizMessages.NotFound(quizId));
         }
 
         private async Task<int> GetNextOrderAsync(int quizId, QuizKind kind)
@@ -410,7 +411,7 @@ namespace QuizLive.Server.Application.Questions
             catch (DbUpdateException)
             {
                 // Два одночасні запити отримали однаковий Order і впали на унікальному індексі QuizId + Order.
-                throw new ConflictException("The quiz was changed by another request. Please try again.");
+                throw new ConflictException(QuizMessages.ChangedConcurrently);
             }
         }
 
@@ -431,7 +432,7 @@ namespace QuizLive.Server.Application.Questions
 
             if (kind != QuizKind.QuizChoice && request.BasePoints is not null)
             {
-                AddError("basePoints", "Points are only used in quiz choice questions.");
+                AddError("basePoints", QuestionMessages.PointsOnlyInQuizChoice);
             }
 
             switch (kind)
@@ -439,21 +440,21 @@ namespace QuizLive.Server.Application.Questions
                 case QuizKind.OpenText:
                     if (options.Count > 0)
                     {
-                        AddError("options", "Open text questions have no options.");
+                        AddError("options", QuestionMessages.OpenTextHasNoOptions);
                     }
                     break;
 
                 case QuizKind.PollChoice:
                     if (options.Count < MinOptions)
                     {
-                        AddError("options", $"At least {MinOptions} options are required.");
+                        AddError("options", QuestionMessages.MinOptions(MinOptions));
                     }
 
                     for (var i = 0; i < options.Count; i++)
                     {
                         if (options[i].IsCorrect is not null)
                         {
-                            AddError($"options[{i}].isCorrect", "Poll options have no correct answer.");
+                            AddError($"options[{i}].isCorrect", QuestionMessages.PollHasNoCorrectOption);
                         }
                     }
                     break;
@@ -461,20 +462,20 @@ namespace QuizLive.Server.Application.Questions
                 case QuizKind.QuizChoice:
                     if (options.Count < MinOptions)
                     {
-                        AddError("options", $"At least {MinOptions} options are required.");
+                        AddError("options", QuestionMessages.MinOptions(MinOptions));
                     }
 
                     for (var i = 0; i < options.Count; i++)
                     {
                         if (options[i].IsCorrect is null)
                         {
-                            AddError($"options[{i}].isCorrect", "Specify whether the option is correct.");
+                            AddError($"options[{i}].isCorrect", QuestionMessages.IsCorrectRequired);
                         }
                     }
 
                     if (options.Count(o => o.IsCorrect == true) != 1)
                     {
-                        AddError("options", "Exactly one option must be correct.");
+                        AddError("options", QuestionMessages.ExactlyOneCorrect);
                     }
                     break;
             }
@@ -482,7 +483,7 @@ namespace QuizLive.Server.Application.Questions
             if (errors.Count > 0)
             {
                 throw new DomainValidationException(
-                    "Question validation failed.",
+                    QuestionMessages.ValidationFailed,
                     errors.ToDictionary(e => e.Key, e => e.Value.ToArray()));
             }
         }
