@@ -89,6 +89,12 @@ namespace QuizLive.Server.Application.Quizzes
             var quiz = await FindOwnQuizAsync(id);
             await QuizGuards.EnsureNoActiveGameAsync(db, id);
 
+            // Games keep their results and reference the quiz with Restrict, so a played quiz can only be archived.
+            if (await db.GameSessionRecords.AnyAsync(g => g.QuizId == id))
+            {
+                throw new ConflictException(QuizMessages.HasGames);
+            }
+
             // Питання та їхні варіанти видаляються каскадно.
             db.Quizzes.Remove(quiz);
             await db.SaveChangesAsync();

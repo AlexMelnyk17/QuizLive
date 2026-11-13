@@ -106,9 +106,11 @@ namespace QuizLive.Server.API.Controllers
         /// <response code="204">The quiz was deleted.</response>
         /// <response code="401">The token is missing, invalid or expired.</response>
         /// <response code="404">The quiz does not exist or belongs to another user.</response>
+        /// <response code="409">The quiz has an active game, or has played games and should be archived instead.</response>
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Delete(int id)
         {
             await quizService.DeleteAsync(id);
