@@ -4,6 +4,7 @@ using QuizLive.Server.Application.Exceptions;
 using QuizLive.Server.Application.Quizzes;
 using QuizLive.Server.Core.Entities.OpenText;
 using QuizLive.Server.Core.Entities.PollChoice;
+using QuizLive.Server.Core.Entities.Questions;
 using QuizLive.Server.Core.Entities.QuizChoice;
 using QuizLive.Server.Core.Enums;
 using QuizLive.Server.Infrastructure.Data;
@@ -37,66 +38,24 @@ namespace QuizLive.Server.Application.Questions
 
             Validate(kind, request);
 
-            var order = await GetNextOrderAsync(quizId, kind);
-            var text = request.Text.Trim();
-            var imageUrl = string.IsNullOrWhiteSpace(request.ImageUrl) ? null : request.ImageUrl.Trim();
             var options = request.Options ?? [];
 
-            int questionId;
-
-            switch (kind)
+            var questionId = kind switch
             {
-                case QuizKind.OpenText:
-                    var openQuestion = new OpenQuestion
-                    {
-                        QuizId = quizId,
-                        Text = text,
-                        Order = order,
-                        TimeLimitSeconds = request.TimeLimitSeconds,
-                        ImageUrl = imageUrl
-                    };
+                QuizKind.OpenText => await AddQuestionAsync(
+                    new OpenQuestion { QuizId = quizId },
+                    request),
 
-                    db.OpenQuestions.Add(openQuestion);
-                    await SaveQuestionAsync();
-                    questionId = openQuestion.Id;
-                    break;
+                QuizKind.PollChoice => await AddQuestionAsync(
+                    new PollQuestion { QuizId = quizId, Options = ToPollOptions(options) },
+                    request),
 
-                case QuizKind.PollChoice:
-                    var pollQuestion = new PollQuestion
-                    {
-                        QuizId = quizId,
-                        Text = text,
-                        Order = order,
-                        TimeLimitSeconds = request.TimeLimitSeconds,
-                        ImageUrl = imageUrl,
-                        Options = ToPollOptions(options)
-                    };
+                QuizKind.QuizChoice => await AddQuestionAsync(
+                    new QuizQuestion { QuizId = quizId, BasePoints = request.BasePoints, Options = ToQuizOptions(options) },
+                    request),
 
-                    db.PollQuestions.Add(pollQuestion);
-                    await SaveQuestionAsync();
-                    questionId = pollQuestion.Id;
-                    break;
-
-                case QuizKind.QuizChoice:
-                    var quizQuestion = new QuizQuestion
-                    {
-                        QuizId = quizId,
-                        Text = text,
-                        Order = order,
-                        TimeLimitSeconds = request.TimeLimitSeconds,
-                        BasePoints = request.BasePoints,
-                        ImageUrl = imageUrl,
-                        Options = ToQuizOptions(options)
-                    };
-
-                    db.QuizQuestions.Add(quizQuestion);
-                    await SaveQuestionAsync();
-                    questionId = quizQuestion.Id;
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
-            }
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+            };
 
             return await GetByIdAsync(quizId, questionId);
         }
@@ -108,8 +67,6 @@ namespace QuizLive.Server.Application.Questions
             Validate(kind, request);
             await EnsureNoAnswersAsync(kind, questionId);
 
-            var text = request.Text.Trim();
-            var imageUrl = string.IsNullOrWhiteSpace(request.ImageUrl) ? null : request.ImageUrl.Trim();
             var options = request.Options ?? [];
 
             await using var transaction = await db.Database.BeginTransactionAsync();
@@ -117,50 +74,25 @@ namespace QuizLive.Server.Application.Questions
             switch (kind)
             {
                 case QuizKind.OpenText:
-                    var openQuestion = await db.OpenQuestions
-                        .FirstOrDefaultAsync(q => q.Id == questionId && q.QuizId == quizId)
-                        ?? throw QuestionNotFound(questionId);
+                    var openQuestion = await FindQuestionAsync(db.OpenQuestions, quizId, questionId);
 
-                    openQuestion.Text = text;
-                    openQuestion.TimeLimitSeconds = request.TimeLimitSeconds;
-                    openQuestion.ImageUrl = imageUrl;
+                    ApplyCommonFields(openQuestion, request);
                     await SaveQuestionAsync();
                     break;
 
                 case QuizKind.PollChoice:
-                    var pollQuestion = await db.PollQuestions
-                        .Include(q => q.Options)
-                        .FirstOrDefaultAsync(q => q.Id == questionId && q.QuizId == quizId)
-                        ?? throw QuestionNotFound(questionId);
+                    var pollQuestion = await FindQuestionAsync(db.PollQuestions.Include(q => q.Options), quizId, questionId);
 
-                    pollQuestion.Text = text;
-                    pollQuestion.TimeLimitSeconds = request.TimeLimitSeconds;
-                    pollQuestion.ImageUrl = imageUrl;
-
-                    // Old options are removed in a separate save so new ones don't hit the (QuestionId, Order) index.
-                    pollQuestion.Options.Clear();
-                    await SaveQuestionAsync();
-
-                    pollQuestion.Options.AddRange(ToPollOptions(options));
-                    await SaveQuestionAsync();
+                    ApplyCommonFields(pollQuestion, request);
+                    await ReplaceOptionsAsync(pollQuestion.Options, ToPollOptions(options));
                     break;
 
                 case QuizKind.QuizChoice:
-                    var quizQuestion = await db.QuizQuestions
-                        .Include(q => q.Options)
-                        .FirstOrDefaultAsync(q => q.Id == questionId && q.QuizId == quizId)
-                        ?? throw QuestionNotFound(questionId);
+                    var quizQuestion = await FindQuestionAsync(db.QuizQuestions.Include(q => q.Options), quizId, questionId);
 
-                    quizQuestion.Text = text;
-                    quizQuestion.TimeLimitSeconds = request.TimeLimitSeconds;
+                    ApplyCommonFields(quizQuestion, request);
                     quizQuestion.BasePoints = request.BasePoints;
-                    quizQuestion.ImageUrl = imageUrl;
-
-                    quizQuestion.Options.Clear();
-                    await SaveQuestionAsync();
-
-                    quizQuestion.Options.AddRange(ToQuizOptions(options));
-                    await SaveQuestionAsync();
+                    await ReplaceOptionsAsync(quizQuestion.Options, ToQuizOptions(options));
                     break;
 
                 default:
@@ -180,53 +112,13 @@ namespace QuizLive.Server.Application.Questions
 
             await using var transaction = await db.Database.BeginTransactionAsync();
 
-            switch (kind)
+            await (kind switch
             {
-                case QuizKind.OpenText:
-                    var openQuestions = await db.OpenQuestions
-                        .Where(q => q.QuizId == quizId)
-                        .OrderBy(q => q.Order)
-                        .ToListAsync();
-
-                    var openQuestion = openQuestions.FirstOrDefault(q => q.Id == questionId)
-                        ?? throw QuestionNotFound(questionId);
-
-                    db.OpenQuestions.Remove(openQuestion);
-                    openQuestions.Remove(openQuestion);
-                    await ApplyOrderAsync(openQuestions, (q, order) => q.Order = order);
-                    break;
-
-                case QuizKind.PollChoice:
-                    var pollQuestions = await db.PollQuestions
-                        .Where(q => q.QuizId == quizId)
-                        .OrderBy(q => q.Order)
-                        .ToListAsync();
-
-                    var pollQuestion = pollQuestions.FirstOrDefault(q => q.Id == questionId)
-                        ?? throw QuestionNotFound(questionId);
-
-                    db.PollQuestions.Remove(pollQuestion);
-                    pollQuestions.Remove(pollQuestion);
-                    await ApplyOrderAsync(pollQuestions, (q, order) => q.Order = order);
-                    break;
-
-                case QuizKind.QuizChoice:
-                    var quizQuestions = await db.QuizQuestions
-                        .Where(q => q.QuizId == quizId)
-                        .OrderBy(q => q.Order)
-                        .ToListAsync();
-
-                    var quizQuestion = quizQuestions.FirstOrDefault(q => q.Id == questionId)
-                        ?? throw QuestionNotFound(questionId);
-
-                    db.QuizQuestions.Remove(quizQuestion);
-                    quizQuestions.Remove(quizQuestion);
-                    await ApplyOrderAsync(quizQuestions, (q, order) => q.Order = order);
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
-            }
+                QuizKind.OpenText => DeleteQuestionAsync<OpenQuestion>(quizId, questionId),
+                QuizKind.PollChoice => DeleteQuestionAsync<PollQuestion>(quizId, questionId),
+                QuizKind.QuizChoice => DeleteQuestionAsync<QuizQuestion>(quizId, questionId),
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+            });
 
             await transaction.CommitAsync();
         }
@@ -237,32 +129,13 @@ namespace QuizLive.Server.Application.Questions
 
             await using var transaction = await db.Database.BeginTransactionAsync();
 
-            switch (kind)
+            await (kind switch
             {
-                case QuizKind.OpenText:
-                    var openQuestions = await db.OpenQuestions.Where(q => q.QuizId == quizId).ToListAsync();
-                    await ApplyOrderAsync(
-                        SortByIds(openQuestions, q => q.Id, request.QuestionIds),
-                        (q, order) => q.Order = order);
-                    break;
-
-                case QuizKind.PollChoice:
-                    var pollQuestions = await db.PollQuestions.Where(q => q.QuizId == quizId).ToListAsync();
-                    await ApplyOrderAsync(
-                        SortByIds(pollQuestions, q => q.Id, request.QuestionIds),
-                        (q, order) => q.Order = order);
-                    break;
-
-                case QuizKind.QuizChoice:
-                    var quizQuestions = await db.QuizQuestions.Where(q => q.QuizId == quizId).ToListAsync();
-                    await ApplyOrderAsync(
-                        SortByIds(quizQuestions, q => q.Id, request.QuestionIds),
-                        (q, order) => q.Order = order);
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
-            }
+                QuizKind.OpenText => ReorderQuestionsAsync<OpenQuestion>(quizId, request.QuestionIds),
+                QuizKind.PollChoice => ReorderQuestionsAsync<PollQuestion>(quizId, request.QuestionIds),
+                QuizKind.QuizChoice => ReorderQuestionsAsync<QuizQuestion>(quizId, request.QuestionIds),
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+            });
 
             await transaction.CommitAsync();
 
@@ -285,27 +158,84 @@ namespace QuizLive.Server.Application.Questions
             }
         }
 
+        private async Task<int> AddQuestionAsync<T>(T question, QuestionRequest request) where T : Question
+        {
+            ApplyCommonFields(question, request);
+            question.Order = await GetNextOrderAsync<T>(question.QuizId);
+
+            db.Set<T>().Add(question);
+            await SaveQuestionAsync();
+
+            return question.Id;
+        }
+
+        private static async Task<T> FindQuestionAsync<T>(IQueryable<T> questions, int quizId, int questionId)
+            where T : Question
+        {
+            return await questions.FirstOrDefaultAsync(q => q.Id == questionId && q.QuizId == quizId)
+                ?? throw QuestionNotFound(questionId);
+        }
+
+        private static void ApplyCommonFields(Question question, QuestionRequest request)
+        {
+            question.Text = request.Text.Trim();
+            question.TimeLimitSeconds = request.TimeLimitSeconds;
+            question.ImageUrl = string.IsNullOrWhiteSpace(request.ImageUrl) ? null : request.ImageUrl.Trim();
+        }
+
+        // Old options are removed in a separate save so new ones don't hit the (QuestionId, Order) index.
+        private async Task ReplaceOptionsAsync<T>(List<T> options, List<T> newOptions)
+        {
+            options.Clear();
+            await SaveQuestionAsync();
+
+            options.AddRange(newOptions);
+            await SaveQuestionAsync();
+        }
+
+        private async Task DeleteQuestionAsync<T>(int quizId, int questionId) where T : Question
+        {
+            var questions = await db.Set<T>()
+                .Where(q => q.QuizId == quizId)
+                .OrderBy(q => q.Order)
+                .ToListAsync();
+
+            var question = questions.FirstOrDefault(q => q.Id == questionId)
+                ?? throw QuestionNotFound(questionId);
+
+            db.Set<T>().Remove(question);
+            questions.Remove(question);
+            await ApplyOrderAsync(questions);
+        }
+
+        private async Task ReorderQuestionsAsync<T>(int quizId, List<int> questionIds) where T : Question
+        {
+            var questions = await db.Set<T>().Where(q => q.QuizId == quizId).ToListAsync();
+
+            await ApplyOrderAsync(SortByIds(questions, questionIds));
+        }
+
         // SQLite checks the unique (QuizId, Order) index per row, so orders go through temporary negative values first.
-        private async Task ApplyOrderAsync<T>(List<T> questions, Action<T, int> setOrder)
+        private async Task ApplyOrderAsync<T>(List<T> questions) where T : Question
         {
             for (var i = 0; i < questions.Count; i++)
             {
-                setOrder(questions[i], -(i + 1));
+                questions[i].Order = -(i + 1);
             }
 
             await SaveQuestionAsync();
 
             for (var i = 0; i < questions.Count; i++)
             {
-                setOrder(questions[i], i + 1);
+                questions[i].Order = i + 1;
             }
 
             await SaveQuestionAsync();
         }
 
-        private static List<T> SortByIds<T>(List<T> questions, Func<T, int> getId, List<int> questionIds)
+        private static List<T> SortByIds<T>(List<T> questions, List<int> questionIds) where T : Question
         {
-            var byId = questions.ToDictionary(getId);
+            var byId = questions.ToDictionary(q => q.Id);
 
             var isComplete = questionIds.Count == byId.Count
                 && questionIds.Distinct().Count() == questionIds.Count
@@ -357,25 +287,12 @@ namespace QuizLive.Server.Application.Questions
             return quiz.Kind;
         }
 
-        private async Task<int> GetNextOrderAsync(int quizId, QuizKind kind)
+        private async Task<int> GetNextOrderAsync<T>(int quizId) where T : Question
         {
             // int? — щоб MaxAsync повернув null для квізу без питань, а не кинув виняток.
-            var maxOrder = kind switch
-            {
-                QuizKind.OpenText => await db.OpenQuestions
-                    .Where(q => q.QuizId == quizId)
-                    .MaxAsync(q => (int?)q.Order),
-
-                QuizKind.PollChoice => await db.PollQuestions
-                    .Where(q => q.QuizId == quizId)
-                    .MaxAsync(q => (int?)q.Order),
-
-                QuizKind.QuizChoice => await db.QuizQuestions
-                    .Where(q => q.QuizId == quizId)
-                    .MaxAsync(q => (int?)q.Order),
-
-                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
-            };
+            var maxOrder = await db.Set<T>()
+                .Where(q => q.QuizId == quizId)
+                .MaxAsync(q => (int?)q.Order);
 
             return (maxOrder ?? 0) + 1;
         }
