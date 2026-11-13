@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Games;
+using QuizLive.Server.Core.Enums;
 
 namespace QuizLive.Server.API.Controllers
 {
@@ -30,6 +31,21 @@ namespace QuizLive.Server.API.Controllers
         {
             var game = await gameService.CreateAsync(request);
             return CreatedAtAction(nameof(GetById), new { id = game.Id }, game);
+        }
+
+        /// <summary>Returns all games hosted by the current user, newest first.</summary>
+        /// <param name="quizId">Only games of this quiz. A quiz of another user gives an empty list.</param>
+        /// <param name="status">Only games in this status. Without filters, all games are returned.</param>
+        /// <response code="200">The list of games.</response>
+        /// <response code="400">The status is not a known game status.</response>
+        /// <response code="401">The token is missing, invalid or expired.</response>
+        [HttpGet]
+        [ProducesResponseType<List<GameSummaryDto>>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<List<GameSummaryDto>>> GetAll([FromQuery] int? quizId, [FromQuery] GameStatus? status)
+        {
+            return await gameService.GetMyGamesAsync(quizId, status);
         }
 
         /// <summary>Returns a game hosted by the current user, with the players who joined it.</summary>
