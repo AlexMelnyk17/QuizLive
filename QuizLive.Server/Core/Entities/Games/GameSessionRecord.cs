@@ -8,8 +8,8 @@ namespace QuizLive.Server.Core.Entities.Games;
 public class GameSessionRecord
 {
     public int Id { get; set; }
-    public string Code { get; set; } = "";              // 6, унікальний серед активних ігор
-                                                        // (індекс із фільтром EndedAtUtc IS NULL)
+    public string Code { get; set; } = "";              // 6, unique among active games
+                                                        // (index filtered by EndedAtUtc IS NULL)
     public int QuizId { get; set; }
     public Quiz Quiz { get; set; } = null!;             // Restrict
     public string HostUserId { get; set; } = "";        // FK → AspNetUsers, Restrict
@@ -17,9 +17,9 @@ public class GameSessionRecord
     public GameStatus Status { get; set; } = GameStatus.Lobby;
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? StartedAtUtc { get; set; }
-    public int? CurrentQuestionOrder { get; set; }              // Order активного питання; null у Lobby
-    public DateTime? CurrentQuestionStartedAtUtc { get; set; }  // коли сервер показав питання
-    public DateTime? CurrentQuestionEndsAtUtc { get; set; }     // StartedAt + TimeLimitSeconds; null, якщо ліміту немає
+    public int? CurrentQuestionOrder { get; set; }              // Order of the active question; null in Lobby
+    public DateTime? CurrentQuestionStartedAtUtc { get; set; }  // when the server showed the question
+    public DateTime? CurrentQuestionEndsAtUtc { get; set; }     // StartedAt + TimeLimitSeconds; null if there is no limit
     public DateTime? EndedAtUtc { get; set; }
 
     public List<Player> Players { get; set; } = new();

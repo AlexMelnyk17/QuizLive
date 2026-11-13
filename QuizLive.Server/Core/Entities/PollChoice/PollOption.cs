@@ -3,7 +3,7 @@
     public class PollOption
     {
         public int Id { get; set; }
-        public int PollQuestionId { get; set; }             // Cascade, унікально з Order
+        public int PollQuestionId { get; set; }             // Cascade, unique with Order
         public PollQuestion Question { get; set; } = null!;
         public string Text { get; set; } = "";              // 300
         public int Order { get; set; }

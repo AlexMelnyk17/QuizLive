@@ -1,7 +1,7 @@
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Exceptions;
+using QuizLive.Server.Application.Quizzes;
 using QuizLive.Server.Core.Entities.Games;
 using QuizLive.Server.Core.Enums;
 using QuizLive.Server.Infrastructure.Data;
@@ -11,9 +11,6 @@ namespace QuizLive.Server.Application.Games
     public class GameService(AppDbContext db, ICurrentUser currentUser, IGameNotifier notifier) : IGameService
     {
         private const int MaxCodeAttempts = 5;
-
-        // SQLITE_CONSTRAINT_UNIQUE
-        private const int SqliteUniqueViolation = 2067;
 
         public async Task<GameDto> CreateAsync(CreateGameRequest request)
         {
@@ -28,7 +25,7 @@ namespace QuizLive.Server.Application.Games
                     QuestionCount = q.OpenQuestions.Count + q.PollQuestions.Count + q.QuizQuestions.Count
                 })
                 .FirstOrDefaultAsync()
-                ?? throw new NotFoundException($"Quiz {request.QuizId} was not found.");
+                ?? throw new NotFoundException(QuizMessages.NotFound(request.QuizId));
 
             if (quiz.IsArchived)
             {
@@ -59,7 +56,7 @@ namespace QuizLive.Server.Application.Games
                     await db.SaveChangesAsync();
                     break;
                 }
-                catch (DbUpdateException ex) when (IsUniqueViolation(ex) && attempt < MaxCodeAttempts)
+                catch (DbUpdateException ex) when (ex.IsUniqueViolation() && attempt < MaxCodeAttempts)
                 {
                 }
             }
@@ -201,7 +198,7 @@ namespace QuizLive.Server.Application.Games
             {
                 await db.SaveChangesAsync();
             }
-            catch (DbUpdateException ex) when (IsUniqueViolation(ex))
+            catch (DbUpdateException ex) when (ex.IsUniqueViolation())
             {
                 // Another player took the same nickname between the check and the insert.
                 throw new ConflictException($"The nickname \"{nickname}\" is already taken in this game.");
@@ -211,8 +208,5 @@ namespace QuizLive.Server.Application.Games
 
             return new JoinGameResponse(game.Id, player.Id, player.Nickname, player.Token);
         }
-
-        private static bool IsUniqueViolation(DbUpdateException ex) =>
-            ex.InnerException is SqliteException { SqliteExtendedErrorCode: SqliteUniqueViolation };
     }
 }

@@ -6,7 +6,7 @@ namespace QuizLive.Server.Core.Entities.Identity
 {
     public class AppUser : IdentityUser
     {
-        // Вхід за UserName + пароль. Email не використовується.
+        // Login by UserName + password. Email is not used.
         public List<Quiz> OwnedQuizzes { get; set; } = new();
         public List<GameSessionRecord> HostedGames { get; set; } = new();
     }

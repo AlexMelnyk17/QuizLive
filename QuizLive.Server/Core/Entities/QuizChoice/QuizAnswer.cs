@@ -11,8 +11,8 @@ namespace QuizLive.Server.Core.Entities.QuizChoice
         public Player Player { get; set; } = null!;
         public int QuizOptionId { get; set; }               // Restrict
         public QuizOption Option { get; set; } = null!;
-        public bool IsCorrect { get; set; }                 // вердикт на момент відповіді
-        public int? ElapsedMs { get; set; }                 // рахує сервер
+        public bool IsCorrect { get; set; }                 // verdict at the time of answering
+        public int? ElapsedMs { get; set; }                 // computed by the server
         public int? Points { get; set; }
         public DateTime AnsweredAtUtc { get; set; } = DateTime.UtcNow;
     }

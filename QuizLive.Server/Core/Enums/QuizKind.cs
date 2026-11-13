@@ -2,8 +2,8 @@
 {
     public enum QuizKind
     {
-        OpenText = 0,   // відкрите питання, правильної відповіді немає
-        PollChoice = 1,   // вибір одного варіанта, правильної відповіді немає
-        QuizChoice = 2    // вибір одного варіанта, один правильний
+        OpenText = 0,   // open question, no correct answer
+        PollChoice = 1,   // single choice, no correct answer
+        QuizChoice = 2    // single choice, exactly one correct
     }
 }
