@@ -4,7 +4,7 @@ namespace QuizLive.Server.Core.Entities.PollChoice
     public class PollQuestion
     {
         public int Id { get; set; }
-        public int QuizId { get; set; }                     // Cascade, унікально з Order
+        public int QuizId { get; set; }                     // Cascade, unique with Order
         public Quiz Quiz { get; set; } = null!;
         public string Text { get; set; } = "";              // 1000
         public int Order { get; set; }

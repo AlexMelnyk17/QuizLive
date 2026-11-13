@@ -12,7 +12,7 @@ public class Quiz
     public int Id { get; set; }
     public string Title { get; set; } = "";             // 200
     public string? Description { get; set; }            // 2000
-    public QuizKind Kind { get; set; }                  // не змінювати, коли є питання
+    public QuizKind Kind { get; set; }                  // must not change once questions exist
     public string OwnerId { get; set; } = "";           // FK → AspNetUsers, Restrict
     public AppUser Owner { get; set; } = null!;
     public bool IsArchived { get; set; }

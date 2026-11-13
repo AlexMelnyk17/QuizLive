@@ -9,7 +9,7 @@ namespace QuizLive.Server.Core.Entities.Games
         public int Id { get; set; }
         public int GameSessionRecordId { get; set; }        // Cascade
         public GameSessionRecord GameSession { get; set; } = null!;
-        public string Nickname { get; set; } = "";          // 40, унікальний у межах гри
+        public string Nickname { get; set; } = "";          // 40, unique within a game
         public string Token { get; set; } = Guid.NewGuid().ToString("N");   // 64
         public DateTime JoinedAtUtc { get; set; } = DateTime.UtcNow;
 
