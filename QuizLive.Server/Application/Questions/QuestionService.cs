@@ -339,6 +339,18 @@ namespace QuizLive.Server.Application.Questions
                 AddError("imageUrl", QuestionMessages.ImageUrlInvalid);
             }
 
+            // Model validation checks option fields but not null items, so they are rejected here.
+            var hasNullOption = false;
+
+            for (var i = 0; i < options.Count; i++)
+            {
+                if (options[i] is null)
+                {
+                    AddError($"options[{i}]", QuestionMessages.OptionRequired);
+                    hasNullOption = true;
+                }
+            }
+
             switch (kind)
             {
                 case QuizKind.OpenText:
@@ -354,6 +366,11 @@ namespace QuizLive.Server.Application.Questions
                         AddError("options", QuestionMessages.MinOptions(MinOptions));
                     }
 
+                    if (hasNullOption)
+                    {
+                        break;
+                    }
+
                     for (var i = 0; i < options.Count; i++)
                     {
                         if (options[i].IsCorrect is not null)
@@ -367,6 +384,11 @@ namespace QuizLive.Server.Application.Questions
                     if (options.Count < MinOptions)
                     {
                         AddError("options", QuestionMessages.MinOptions(MinOptions));
+                    }
+
+                    if (hasNullOption)
+                    {
+                        break;
                     }
 
                     for (var i = 0; i < options.Count; i++)
