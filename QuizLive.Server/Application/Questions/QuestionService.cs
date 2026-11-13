@@ -413,6 +413,11 @@ namespace QuizLive.Server.Application.Questions
                 AddError("basePoints", QuestionMessages.PointsOnlyInQuizChoice);
             }
 
+            if (!string.IsNullOrWhiteSpace(request.ImageUrl) && !IsSafeImageUrl(request.ImageUrl.Trim()))
+            {
+                AddError("imageUrl", QuestionMessages.ImageUrlInvalid);
+            }
+
             switch (kind)
             {
                 case QuizKind.OpenText:
@@ -465,5 +470,12 @@ namespace QuizLive.Server.Application.Questions
                     errors.ToDictionary(e => e.Key, e => e.Value.ToArray()));
             }
         }
+
+        // The URL is rendered as <img src>, so only absolute http(s) links are allowed:
+        // this rejects javascript:, data:, vbscript:, file: and relative paths.
+        private static bool IsSafeImageUrl(string url) =>
+            Uri.TryCreate(url, UriKind.Absolute, out var uri)
+            && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+            && !string.IsNullOrEmpty(uri.Host);
     }
 }

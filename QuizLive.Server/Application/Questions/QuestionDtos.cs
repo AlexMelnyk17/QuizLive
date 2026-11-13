@@ -7,7 +7,7 @@ namespace QuizLive.Server.Application.Questions
         [Required, StringLength(1000)] string Text,
         [Range(5, 300)] int? TimeLimitSeconds,
         [Range(0, 10000)] int? BasePoints,
-        [StringLength(500), Url] string? ImageUrl,
+        [StringLength(500)] string? ImageUrl,
         [MaxLength(10)] List<OptionRequest>? Options);
 
     // Порядок варіантів береться з їхньої позиції в масиві Options.
