@@ -65,7 +65,6 @@ namespace QuizLive.Server.Application.Questions
             var kind = await GetOwnQuizKindAsync(quizId, forEdit: true);
 
             Validate(kind, request);
-            await EnsureNoAnswersAsync(kind, questionId);
 
             var options = request.Options ?? [];
 
@@ -74,21 +73,21 @@ namespace QuizLive.Server.Application.Questions
             switch (kind)
             {
                 case QuizKind.OpenText:
-                    var openQuestion = await FindQuestionAsync(db.OpenQuestions, quizId, questionId);
+                    var openQuestion = await FindEditableQuestionAsync(db.OpenQuestions, quizId, questionId);
 
                     ApplyCommonFields(openQuestion, request);
                     await SaveQuestionAsync();
                     break;
 
                 case QuizKind.PollChoice:
-                    var pollQuestion = await FindQuestionAsync(db.PollQuestions.Include(q => q.Options), quizId, questionId);
+                    var pollQuestion = await FindEditableQuestionAsync(db.PollQuestions.Include(q => q.Options), quizId, questionId);
 
                     ApplyCommonFields(pollQuestion, request);
                     await ReplaceOptionsAsync(pollQuestion.Options, ToPollOptions(options));
                     break;
 
                 case QuizKind.QuizChoice:
-                    var quizQuestion = await FindQuestionAsync(db.QuizQuestions.Include(q => q.Options), quizId, questionId);
+                    var quizQuestion = await FindEditableQuestionAsync(db.QuizQuestions.Include(q => q.Options), quizId, questionId);
 
                     ApplyCommonFields(quizQuestion, request);
                     quizQuestion.BasePoints = request.BasePoints;
@@ -107,8 +106,6 @@ namespace QuizLive.Server.Application.Questions
         public async Task DeleteAsync(int quizId, int questionId)
         {
             var kind = await GetOwnQuizKindAsync(quizId, forEdit: true);
-
-            await EnsureNoAnswersAsync(kind, questionId);
 
             await using var transaction = await db.Database.BeginTransactionAsync();
 
@@ -142,14 +139,15 @@ namespace QuizLive.Server.Application.Questions
             return await QuestionQueries.ForQuiz(db, quizId, kind).ToListAsync();
         }
 
-        private async Task EnsureNoAnswersAsync(QuizKind kind, int questionId)
+        // Takes an already found question, so answers are only checked for a question of the requested quiz.
+        private async Task EnsureNoAnswersAsync(Question question)
         {
-            var hasAnswers = kind switch
+            var hasAnswers = question switch
             {
-                QuizKind.OpenText => await db.OpenAnswers.AnyAsync(a => a.OpenQuestionId == questionId),
-                QuizKind.PollChoice => await db.PollAnswers.AnyAsync(a => a.PollQuestionId == questionId),
-                QuizKind.QuizChoice => await db.QuizAnswers.AnyAsync(a => a.QuizQuestionId == questionId),
-                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+                OpenQuestion => await db.OpenAnswers.AnyAsync(a => a.OpenQuestionId == question.Id),
+                PollQuestion => await db.PollAnswers.AnyAsync(a => a.PollQuestionId == question.Id),
+                QuizQuestion => await db.QuizAnswers.AnyAsync(a => a.QuizQuestionId == question.Id),
+                _ => throw new ArgumentOutOfRangeException(nameof(question), question.GetType().Name, null)
             };
 
             if (hasAnswers)
@@ -169,11 +167,15 @@ namespace QuizLive.Server.Application.Questions
             return question.Id;
         }
 
-        private static async Task<T> FindQuestionAsync<T>(IQueryable<T> questions, int quizId, int questionId)
+        private async Task<T> FindEditableQuestionAsync<T>(IQueryable<T> questions, int quizId, int questionId)
             where T : Question
         {
-            return await questions.FirstOrDefaultAsync(q => q.Id == questionId && q.QuizId == quizId)
+            var question = await questions.FirstOrDefaultAsync(q => q.Id == questionId && q.QuizId == quizId)
                 ?? throw QuestionNotFound(questionId);
+
+            await EnsureNoAnswersAsync(question);
+
+            return question;
         }
 
         private static void ApplyCommonFields(Question question, QuestionRequest request)
@@ -202,6 +204,8 @@ namespace QuizLive.Server.Application.Questions
 
             var question = questions.FirstOrDefault(q => q.Id == questionId)
                 ?? throw QuestionNotFound(questionId);
+
+            await EnsureNoAnswersAsync(question);
 
             db.Set<T>().Remove(question);
             questions.Remove(question);
