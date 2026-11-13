@@ -10,6 +10,7 @@ namespace QuizLive.Server.Application.Questions
         public const string PollHasNoCorrectOption = "Poll options have no correct answer.";
         public const string IsCorrectRequired = "Specify whether the option is correct.";
         public const string ExactlyOneCorrect = "Exactly one option must be correct.";
+        public const string OptionRequired = "Option must not be null.";
         public const string ImageUrlInvalid = "Image URL must be an absolute http or https link.";
 
         public const string OrderValidationFailed = "Question order validation failed.";
