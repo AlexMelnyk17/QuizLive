@@ -21,6 +21,18 @@ namespace QuizLive.Server.Application.Games
         DateTime? EndedAtUtc,
         List<GamePlayerDto> Players);
 
+    // A game in the host's list: the player count instead of the players.
+    public record GameSummaryDto(
+        int Id,
+        string Code,
+        int QuizId,
+        string QuizTitle,
+        QuizKind QuizKind,
+        GameStatus Status,
+        DateTime CreatedAtUtc,
+        DateTime? EndedAtUtc,
+        int PlayerCount);
+
     public record GamePlayerDto(
         int Id,
         string Nickname,

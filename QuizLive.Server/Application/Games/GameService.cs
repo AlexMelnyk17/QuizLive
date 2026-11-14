@@ -64,6 +64,31 @@ namespace QuizLive.Server.Application.Games
             return await GetByIdAsync(game.Id);
         }
 
+        public async Task<List<GameSummaryDto>> GetMyGamesAsync(int? quizId = null, GameStatus? status = null)
+        {
+            var userId = currentUser.UserId;
+
+            var games = db.GameSessionRecords
+                .AsNoTracking()
+                .Where(g => g.HostUserId == userId);
+
+            if (quizId is not null)
+            {
+                games = games.Where(g => g.QuizId == quizId);
+            }
+
+            if (status is not null)
+            {
+                games = games.Where(g => g.Status == status);
+            }
+
+            return await games
+                .OrderByDescending(g => g.CreatedAtUtc)
+                .ThenByDescending(g => g.Id)
+                .Select(GameMappings.ToSummaryDto)
+                .ToListAsync();
+        }
+
         public async Task<GameDto> GetByIdAsync(int id)
         {
             var game = await HostGames(id, currentUser.UserId)

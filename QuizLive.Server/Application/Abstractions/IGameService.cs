@@ -1,10 +1,12 @@
 using QuizLive.Server.Application.Games;
+using QuizLive.Server.Core.Enums;
 
 namespace QuizLive.Server.Application.Abstractions
 {
     public interface IGameService
     {
         Task<GameDto> CreateAsync(CreateGameRequest request);
+        Task<List<GameSummaryDto>> GetMyGamesAsync(int? quizId = null, GameStatus? status = null);
         Task<GameDto> GetByIdAsync(int id);
         Task EndAsync(int id);
         Task<GameLookupDto> GetByCodeAsync(string code);
