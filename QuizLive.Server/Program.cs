@@ -6,6 +6,7 @@ using QuizLive.Server.Application.Commands;
 using QuizLive.Server.Application.Games;
 using QuizLive.Server.Application.Questions;
 using QuizLive.Server.Application.Quizzes;
+using QuizLive.Server.Application.Stats;
 using QuizLive.Server.Infrastructure.Auth;
 using QuizLive.Server.Infrastructure.Data;
 using QuizLive.Server.Infrastructure.ErrorHandling;
@@ -38,6 +39,7 @@ namespace QuizLive.Server
             builder.Services.AddScoped<IQuizService, QuizService>();
             builder.Services.AddScoped<IQuestionService, QuestionService>();
             builder.Services.AddScoped<IGameService, GameService>();
+            builder.Services.AddScoped<IStatsService, StatsService>();
             builder.Services.AddSignalR();
             builder.Services.AddSingleton<IGameNotifier, SignalRGameNotifier>();
 
