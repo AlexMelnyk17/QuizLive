@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuizLive.Server.Tests", "QuizLive.Server.Tests\QuizLive.Server.Tests.csproj", "{34DE51AF-2DA3-4D69-BFC7-9C391B3CD1D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{8E359C0A-1BEF-64AB-824E-F8C4B0FDDE25}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E359C0A-1BEF-64AB-824E-F8C4B0FDDE25}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8E359C0A-1BEF-64AB-824E-F8C4B0FDDE25}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{34DE51AF-2DA3-4D69-BFC7-9C391B3CD1D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34DE51AF-2DA3-4D69-BFC7-9C391B3CD1D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34DE51AF-2DA3-4D69-BFC7-9C391B3CD1D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34DE51AF-2DA3-4D69-BFC7-9C391B3CD1D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
