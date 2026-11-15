@@ -20,6 +20,7 @@ namespace QuizLive.Server.API.Controllers
         /// <response code="401">The token is missing, invalid or expired.</response>
         [HttpGet]
         [ProducesResponseType<HostStatsDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<HostStatsDto>> Get()
         {
             return await statsService.GetMyStatsAsync();
