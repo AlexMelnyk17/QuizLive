@@ -70,7 +70,6 @@ namespace QuizLive.Server.Application.Stats
                 .Where(g => g.HostUserId == userId);
 
             var total = await games.CountAsync();
-            var active = await games.Where(g => g.EndedAtUtc == null).CountAsync();
             var finished = await games.Where(g => g.EndedAtUtc != null).CountAsync();
 
             var byStatusRows = await games
@@ -86,7 +85,7 @@ namespace QuizLive.Server.Application.Stats
             var byStatus = ToStatusCounts(byStatusRows.ToDictionary(r => r.Status, r => r.Count));
             var byKind = ToKindCounts(byKindRows.ToDictionary(r => r.Kind, r => r.Count));
 
-            return new GameStatsDto(total, active, finished, byStatus, byKind);
+            return new GameStatsDto(total, finished, byStatus, byKind);
         }
 
         private async Task<PlayerStatsDto> BuildPlayerStatsAsync(string userId, int gameTotal)

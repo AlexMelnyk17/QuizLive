@@ -15,7 +15,6 @@ namespace QuizLive.Server.Application.Stats
 
     public record GameStatsDto(
         int Total,
-        int Active,
         int Finished,
         StatusCountsDto ByStatus,
         KindCountsDto ByKind);
