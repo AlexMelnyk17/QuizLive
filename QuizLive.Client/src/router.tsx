@@ -10,6 +10,7 @@ import { z } from 'zod'
 import { LoginPage, readSession, RegisterPage } from '@modules/auth'
 import { DashboardPage } from '@modules/dashboard'
 import { HomePage } from '@modules/home'
+import { StatisticsPage } from '@modules/statistics'
 import { sanitizeRedirectPath } from '@shared/redirect'
 
 const rootRoute = createRootRoute({
@@ -33,8 +34,6 @@ const loginRoute = createRoute({
 	beforeLoad: ({ search }) => {
 		const session = readSession()
 		if (session) {
-			// TanStack Router navigation
-			// eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router redirect
 			throw redirect({ to: sanitizeRedirectPath(search.redirect) })
 		}
 	},
@@ -47,7 +46,6 @@ const registerRoute = createRoute({
 	beforeLoad: () => {
 		const session = readSession()
 		if (session) {
-			// eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router redirect
 			throw redirect({ to: '/dashboard' })
 		}
 	},
@@ -60,7 +58,6 @@ const dashboardRoute = createRoute({
 	beforeLoad: () => {
 		const session = readSession()
 		if (!session) {
-			// eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router redirect
 			throw redirect({
 				to: '/login',
 				search: { redirect: '/dashboard' },
@@ -70,11 +67,27 @@ const dashboardRoute = createRoute({
 	component: DashboardPage,
 })
 
+const statisticsRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: '/statistics',
+	beforeLoad: () => {
+		const session = readSession()
+		if (!session) {
+			throw redirect({
+				to: '/login',
+				search: { redirect: '/statistics' },
+			})
+		}
+	},
+	component: StatisticsPage,
+})
+
 const routeTree = rootRoute.addChildren([
 	indexRoute,
 	loginRoute,
 	registerRoute,
 	dashboardRoute,
+	statisticsRoute,
 ])
 
 export const router = createRouter({ routeTree })
