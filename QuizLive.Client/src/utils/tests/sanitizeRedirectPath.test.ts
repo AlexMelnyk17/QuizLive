@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { sanitizeRedirectPath } from '@shared/redirect'
+import { sanitizeRedirectPath } from '@utils/sanitizeRedirectPath'
 
 describe('sanitizeRedirectPath', () => {
 	it('returns fallback for missing or unsafe paths', () => {

@@ -27,7 +27,6 @@
 			"@layout/*": ["src/layout/*"],
 			"@modules/*": ["src/modules/*"],
 			"@providers/*": ["src/providers/*"],
-			"@shared/*": ["src/shared/*"],
 			"@theme": ["src/theme/index.ts"],
 			"@theme/*": ["src/theme/*"],
 			"@components/ui": ["src/components/ui/index.ts"],

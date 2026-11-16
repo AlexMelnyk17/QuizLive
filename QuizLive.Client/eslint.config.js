@@ -25,6 +25,8 @@ export default defineConfig([
 			}
 		},
 		rules: {
+			// TanStack Router uses throw redirect() (not Error); re-enable when using a layout-route helper.
+			'@typescript-eslint/only-throw-error': 'off',
 			'no-restricted-imports': [
 				'error',
 				{

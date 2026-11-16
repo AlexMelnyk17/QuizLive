@@ -1,4 +1,4 @@
-/** Same-app path safe for post-login redirect (no open redirect). */
+/** Sanitize the post-login redirect to a safe same-app path (prevents open redirect). */
 export function sanitizeRedirectPath(
 	redirect: string | undefined,
 	fallback = '/dashboard'

@@ -15,7 +15,6 @@
 		"^@components/ui$",
 		"^@components/ui/(.*)$",
 		"^@providers/(.*)$",
-		"^@shared/(.*)$",
 		"^@modules/(.*)$",
 		"^@assets/(.*)$",
 		"^@config$",
