@@ -5,9 +5,14 @@ export const PATHS = {
 	dashboard: '/dashboard',
 	statistics: '/statistics',
 	quizzes: '/quizzes',
-	quizDetails: '/quizzes/$quizId'
+	quizDetails: '/quizzes/$quizId',
+	quizStats: '/quizzes/$quizId/stats',
+	gameStats: '/quizzes/$quizId/games/$gameId/stats',
 } as const
 
 export const pathTo = {
-	quizDetails: (quizId: number) => `/quizzes/${quizId}`
+	quizDetails: (quizId: number) => `/quizzes/${quizId}`,
+	quizStats: (quizId: number) => `/quizzes/${quizId}/stats`,
+	gameStats: (quizId: number, gameId: number) =>
+		`/quizzes/${quizId}/games/${gameId}/stats`,
 }
