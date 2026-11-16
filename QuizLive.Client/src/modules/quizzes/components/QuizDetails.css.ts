@@ -94,6 +94,7 @@ export const optionItem = style({
 	padding: `${vars.spacing[2]} ${vars.spacing[3]}`,
 	borderRadius: vars.radii.md,
 	border: `1px solid ${vars.colors.border}`,
+	backgroundColor: vars.colors.surfaceSunken,
 	overflowWrap: 'anywhere'
 })
 

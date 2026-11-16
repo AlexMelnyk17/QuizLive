@@ -1,4 +1,7 @@
+import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
+
+import { PATHS } from '@config/routes'
 
 import { Alert } from '@components/ui/Alert'
 import { Badge } from '@components/ui/Badge'
@@ -52,6 +55,7 @@ export function QuizDetails({
 	onDeleted,
 	onBack
 }: QuizDetailsProps) {
+	const navigate = useNavigate()
 	const deleteQuiz = useDeleteQuiz()
 	// After deletion the quiz is gone, so it must not be fetched again into a 404.
 	const quiz = useQuiz(quizId, !deleteQuiz.isSuccess)
@@ -150,6 +154,18 @@ export function QuizDetails({
 				</div>
 
 				<div className={quizDetailsActions}>
+					<Button
+						variant='outline'
+						size='sm'
+						onClick={() =>
+							void navigate({
+								to: PATHS.quizStats,
+								params: { quizId: String(quizId) },
+							})
+						}
+					>
+						{QUIZ_DETAILS_COPY.viewStats}
+					</Button>
 					{onEdit && !data.isArchived ? (
 						<Button variant='primary' size='sm' onClick={() => onEdit(quizId)}>
 							{QUIZ_DETAILS_COPY.edit}
