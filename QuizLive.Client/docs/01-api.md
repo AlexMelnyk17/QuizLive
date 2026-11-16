@@ -46,7 +46,7 @@ Schemas live in `schemas.ts`; DTO types in `types.ts` via `z.infer<typeof schema
 
 - Failed responses throw `ApiError` (`@api/apiError`) with RFC 7807 problem details when available.
 - **MUST** handle domain logic with `error instanceof ApiError` and `error.status`, not string matching.
-- Field validation from the server: use `getFieldErrors` / `toFieldPath` (`@api/fieldErrors`) for React Hook Form paths.
+- Field validation from the server: use `getFieldErrors` / `toFieldPath` (`@api/getFieldErrors`, `@api/toFieldPath`) for React Hook Form paths.
 - `skipAuth: true` only for intentionally public endpoints.
 - On **401** with a sent bearer token, the client calls `onUnauthorized` from `configureApiClient` (session clear) — **MUST NOT** duplicate that in each caller.
 
