@@ -1,7 +1,9 @@
 {
 	"private": true,
 	"scripts": {
-		"prepare": "husky"
+		"prepare": "husky",
+		"coverage:client": "npm --prefix QuizLive.Client run test:coverage && dotnet tool restore && dotnet reportgenerator -reports:\"QuizLive.Client/coverage/cobertura-coverage.xml\" -targetdir:QuizLive.Client/coverage/summary -reporttypes:\"MarkdownSummaryGithub;TextSummary\"",
+		"coverage:server": "dotnet tool restore && dotnet test QuizLive.sln --settings QuizLive.Server.Tests/coverlet.runsettings --collect \"XPlat Code Coverage\" --results-directory coverage/server/raw && dotnet reportgenerator -reports:\"coverage/server/raw/**/coverage.cobertura.xml\" -targetdir:coverage/server/report -reporttypes:\"Html;Cobertura;MarkdownSummaryGithub;TextSummary\""
 	},
 	"devDependencies": {
 		"husky": "^9.1.7",

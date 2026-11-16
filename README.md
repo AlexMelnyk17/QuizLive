@@ -70,3 +70,26 @@ To seed a different database, pass a config override after `db seed`:
 dotnet run --project QuizLive.Server -- db seed "--ConnectionStrings:Default=Data Source=other.db"
 ```
 
+## 5. Test coverage
+
+Coverage shows which code the tests actually run. It does not tell whether the tests check the right things, and there are no thresholds yet.
+
+At the repository root:
+
+```bash
+npm run coverage:server   # server tests (xUnit) with coverlet, report by ReportGenerator
+npm run coverage:client   # client tests (Vitest), summary by ReportGenerator
+```
+
+The server command needs the .NET SDK (`dotnet tool restore` is run for you). The client command needs `npm install` in `QuizLive.Client` first. To run only the client tests with coverage: `npm run test:coverage` in `QuizLive.Client`.
+
+| Reports | Server (`coverage/server/report/`) | Client (`QuizLive.Client/coverage/`) |
+| ------- | ---------------------------------- | ------------------------------------ |
+| HTML (open `index.html`) | yes | yes |
+| Cobertura XML | `Cobertura.xml` | `cobertura-coverage.xml` |
+| Markdown summary | `SummaryGithub.md` | `summary/SummaryGithub.md` |
+
+Generated EF migrations are excluded from the server numbers (see `QuizLive.Server.Tests/coverlet.runsettings`). Report folders are git-ignored.
+
+`.github/workflows/coverage.yml` runs both commands on pull requests, adds the summaries to the job page and uploads the report folders as the `coverage-server` and `coverage-client` artifacts.
+
