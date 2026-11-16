@@ -1,5 +1,7 @@
 import { useNavigate } from '@tanstack/react-router'
 
+import { PATHS } from '@config/routes'
+
 import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
 
 import { QuizList } from '@modules/quizzes/components/QuizList'
@@ -12,7 +14,7 @@ export function DashboardPage() {
 			<QuizList
 				onOpenQuiz={quizId =>
 					void navigate({
-						to: '/quizzes/$quizId',
+						to: PATHS.quizDetails,
 						params: { quizId: String(quizId) }
 					})
 				}

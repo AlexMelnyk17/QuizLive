@@ -4,6 +4,8 @@ import type { FormEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
+import { PATHS } from '@config/routes'
+
 import { Alert } from '@components/ui/Alert'
 import { Button } from '@components/ui/Button'
 import { Heading } from '@components/ui/Heading'
@@ -12,9 +14,7 @@ import { Stack } from '@components/ui/Stack'
 import { Text } from '@components/ui/Text'
 
 import { AuthLayout } from '@layout/AuthLayout/AuthLayout'
-import { useLogin } from '@modules/auth/hooks/useLogin'
-import { loginFormSchema } from '@modules/auth/schemas'
-import { submitLogin } from '@modules/auth/utils/submitLogin'
+import { AUTH_COPY } from '@modules/auth/constants'
 import {
 	field,
 	fieldError,
@@ -24,11 +24,15 @@ import {
 	formFooter,
 	inlineLink,
 } from '@modules/auth/components/AuthForm.css'
+import { useLogin } from '@modules/auth/hooks/useLogin'
+import { loginFormSchema } from '@modules/auth/schemas'
+import { submitLogin } from '@modules/auth/utils/submitLogin'
+
 type LoginFormValues = z.infer<typeof loginFormSchema>
 
 export function LoginPage() {
 	const navigate = useNavigate()
-	const search = useSearch({ from: '/login' })
+	const search = useSearch({ from: PATHS.login })
 	const login = useLogin()
 
 	const {
@@ -55,9 +59,9 @@ export function LoginPage() {
 
 	return (
 		<AuthLayout>
-			<Heading level={2}>Log in</Heading>
+			<Heading level={2}>{AUTH_COPY.login.title}</Heading>
 			<Text tone="muted" size="sm">
-				Sign in to create and manage your quizzes.
+				{AUTH_COPY.login.subtitle}
 			</Text>
 
 			<form onSubmit={onSubmit} noValidate>
@@ -66,7 +70,7 @@ export function LoginPage() {
 						<Alert
 							className={formAlert}
 							variant="danger"
-							title="Could not log in"
+							title={AUTH_COPY.login.errorTitle}
 						>
 							{errors.root.message}
 						</Alert>
@@ -74,7 +78,7 @@ export function LoginPage() {
 
 					<div className={field}>
 						<label className={fieldLabel} htmlFor="login-userName">
-							User name
+							{AUTH_COPY.login.userNameLabel}
 						</label>
 						<Input
 							id="login-userName"
@@ -92,7 +96,7 @@ export function LoginPage() {
 
 					<div className={field}>
 						<label className={fieldLabel} htmlFor="login-password">
-							Password
+							{AUTH_COPY.login.passwordLabel}
 						</label>
 						<Input
 							id="login-password"
@@ -116,7 +120,7 @@ export function LoginPage() {
 							fullWidth
 							loading={login.isPending}
 						>
-							Log in
+							{AUTH_COPY.login.submit}
 						</Button>
 					</div>
 				</Stack>
@@ -124,10 +128,10 @@ export function LoginPage() {
 
 			<div className={formFooter}>
 				<Text size="sm" tone="muted">
-					No account yet?
+					{AUTH_COPY.login.noAccount}
 				</Text>{' '}
-				<Link to="/register" className={inlineLink}>
-					Register
+				<Link to={PATHS.register} className={inlineLink}>
+					{AUTH_COPY.login.registerLink}
 				</Link>
 			</div>
 		</AuthLayout>

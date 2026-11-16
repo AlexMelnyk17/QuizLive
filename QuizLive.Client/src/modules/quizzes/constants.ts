@@ -12,6 +12,28 @@ export const QUIZ_KIND_LABELS: Record<QuizKindValue, string> = {
 	[QuizKind.QuizChoice]: 'Quiz'
 }
 
+export const QUIZ_FORMAT_COPY = {
+	questionSingular: 'question',
+	questionPlural: 'questions',
+	pointSingular: 'point',
+	pointPlural: 'points',
+	noTimeLimit: 'No time limit',
+	secondsSuffix: 's'
+} as const
+
+export const QUIZZES_API = {
+	base: '/quizzes',
+	list: (archived: boolean) => `/quizzes?archived=${archived}`,
+	byId: (quizId: number) => `/quizzes/${quizId}`,
+	create: '/quizzes',
+	archiveAction: 'archive',
+	unarchiveAction: 'unarchive',
+	questions: (quizId: number) => `/quizzes/${quizId}/questions`,
+	questionById: (quizId: number, questionId: number) =>
+		`/quizzes/${quizId}/questions/${questionId}`,
+	reorder: (quizId: number) => `/quizzes/${quizId}/questions/order`
+} as const
+
 export const QUIZ_LIST_COPY = {
 	filterLabel: 'Show quizzes',
 	tabs: { active: 'Active', archived: 'Archived' },

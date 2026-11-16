@@ -28,7 +28,7 @@ if (error.status === 404) { /* ... */ }
 void navigate({ to: '/dashboard' })
 ```
 
-For HTTP status and API codes, use named constants (e.g. `HTTP_STATUS.NOT_FOUND` in shared `api/` or module `constants.ts`) even though they are not `0` / `1` / `-1`.
+For HTTP status and API codes, use named constants (e.g. `HTTP_STATUS.NOT_FOUND` in shared `api/` or module `constants.ts`) even though they are not `0` / `1` / `-1`. ESLint enforces `@typescript-eslint/no-magic-numbers` with the same allowlist in `api/`, hooks, utils, and `router.tsx` (not in `*.css.ts` or UI primitives).
 
 ## R-2. Single source of truth (MUST)
 

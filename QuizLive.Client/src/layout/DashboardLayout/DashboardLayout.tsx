@@ -1,14 +1,15 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 
+import { PATHS } from '@config/routes'
+
 import { Avatar } from '@components/ui/Avatar'
 import { Button } from '@components/ui/Button'
 import { Divider } from '@components/ui/Divider'
 import { Heading } from '@components/ui/Heading'
 import { Text } from '@components/ui/Text'
 
-import { signOut, useSession } from '@modules/auth/store/sessionStore'
-
+import { DASHBOARD_LAYOUT_COPY } from '@layout/constants'
 import {
 	dashboardHeader,
 	dashboardHeaderActions,
@@ -18,6 +19,7 @@ import {
 	dashboardNavLink,
 	dashboardRoot,
 } from '@layout/DashboardLayout/DashboardLayout.css'
+import { signOut, useSession } from '@modules/auth/store/sessionStore'
 
 export type DashboardLayoutProps = {
 	children: ReactNode
@@ -26,14 +28,14 @@ export type DashboardLayoutProps = {
 
 export function DashboardLayout({
 	children,
-	title = 'My quizzes',
+	title = DASHBOARD_LAYOUT_COPY.defaultTitle,
 }: DashboardLayoutProps) {
 	const navigate = useNavigate()
 	const session = useSession()
 
 	const handleSignOut = () => {
 		signOut()
-		void navigate({ to: '/' })
+		void navigate({ to: PATHS.home })
 	}
 
 	return (
@@ -41,21 +43,24 @@ export function DashboardLayout({
 			<header className={dashboardHeader}>
 				<Heading level={2}>{title}</Heading>
 				<div className={dashboardHeaderActions}>
-					<nav className={dashboardHeaderNav} aria-label="Host area">
-						<Link to="/dashboard" className={dashboardNavLink}>
-							My quizzes
+					<nav
+						className={dashboardHeaderNav}
+						aria-label={DASHBOARD_LAYOUT_COPY.hostNavLabel}
+					>
+						<Link to={PATHS.dashboard} className={dashboardNavLink}>
+							{DASHBOARD_LAYOUT_COPY.navQuizzes}
 						</Link>
-						<Link to="/statistics" className={dashboardNavLink}>
-							Statistics
+						<Link to={PATHS.statistics} className={dashboardNavLink}>
+							{DASHBOARD_LAYOUT_COPY.navStatistics}
 						</Link>
 					</nav>
 					<Divider orientation="vertical" length="short" spacing="sm" />
 					<Button
 						variant="primary"
 						disabled
-						aria-label="Create quiz (not available yet)"
+						aria-label={DASHBOARD_LAYOUT_COPY.createQuizAria}
 					>
-						Create quiz
+						{DASHBOARD_LAYOUT_COPY.createQuiz}
 					</Button>
 					{session ? (
 						<>
@@ -66,7 +71,7 @@ export function DashboardLayout({
 									{session.user.userName}
 								</Text>
 								<Button variant="outline" size="sm" onClick={handleSignOut}>
-									Sign out
+									{DASHBOARD_LAYOUT_COPY.signOut}
 								</Button>
 							</div>
 						</>

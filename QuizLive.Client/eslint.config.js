@@ -41,5 +41,55 @@ export default defineConfig([
 			]
 		}
 	},
+	{
+		files: [
+			'src/api/**/*.ts',
+			'src/modules/**/api/**/*.ts',
+			'src/modules/**/hooks/**/*.ts',
+			'src/modules/**/utils/**/*.ts',
+			'src/router.tsx',
+			'src/utils/**/*.ts'
+		],
+		ignores: ['**/*.test.ts'],
+		rules: {
+			'@typescript-eslint/no-magic-numbers': [
+				'error',
+				{
+					ignore: [0, 1, -1],
+					ignoreEnums: true,
+					ignoreNumericLiteralTypes: true,
+					ignoreReadonlyClassProperties: true,
+					ignoreTypeIndexes: true
+				}
+			]
+		}
+	},
+	{
+		files: [
+			'src/modules/**/components/**/*.{ts,tsx}',
+			'src/layout/**/*.{ts,tsx}'
+		],
+		rules: {
+			'no-restricted-imports': [
+				'error',
+				{
+					patterns: [
+						{
+							group: ['../*', './*'],
+							message:
+								'Use path aliases (@theme, @components/ui, @modules, @src, etc.) instead of relative imports.'
+						}
+					],
+					paths: [
+						{
+							name: '@api/client',
+							message:
+								'Components must call module *Api.ts helpers, not @api/client directly.'
+						}
+					]
+				}
+			]
+		}
+	},
 	eslintConfigPrettier
 ])

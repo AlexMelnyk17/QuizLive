@@ -4,7 +4,10 @@ import type { FormEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
+import { PATHS } from '@config/routes'
+
 import { ApiError } from '@api/apiError'
+import { HTTP_STATUS } from '@api/httpStatus'
 import { Alert } from '@components/ui/Alert'
 import { Button } from '@components/ui/Button'
 import { Heading } from '@components/ui/Heading'
@@ -13,6 +16,7 @@ import { Stack } from '@components/ui/Stack'
 import { Text } from '@components/ui/Text'
 
 import { AuthLayout } from '@layout/AuthLayout/AuthLayout'
+import { AUTH_COPY } from '@modules/auth/constants'
 import {
 	field,
 	fieldError,
@@ -44,10 +48,10 @@ export function RegisterPage() {
 	const submitRegister = async (values: RegisterFormValues) => {
 		try {
 			await registerMutation.mutateAsync(values)
-			void navigate({ to: '/dashboard' })
+			void navigate({ to: PATHS.dashboard })
 		} catch (err) {
 			if (err instanceof ApiError) {
-				if (err.status === 400 && err.errors) {
+				if (err.status === HTTP_STATUS.BAD_REQUEST && err.errors) {
 					const userNameMsg = err.errors.userName?.[0]
 					const passwordMsg = err.errors.password?.[0]
 					if (userNameMsg) {
@@ -58,23 +62,23 @@ export function RegisterPage() {
 					}
 					if (!userNameMsg && !passwordMsg) {
 						setError('root', {
-							message: err.detail ?? 'Registration failed.',
+							message: err.detail ?? AUTH_COPY.register.failed,
 						})
 					}
 					return
 				}
-				if (err.status === 409) {
+				if (err.status === HTTP_STATUS.CONFLICT) {
 					setError('userName', {
-						message: err.detail ?? 'User name is already taken.',
+						message: err.detail ?? AUTH_COPY.register.userNameTaken,
 					})
 					return
 				}
 				setError('root', {
-					message: err.detail ?? 'Registration failed. Please try again.',
+					message: err.detail ?? AUTH_COPY.register.failedRetry,
 				})
 				return
 			}
-			setError('root', { message: 'Registration failed. Please try again.' })
+			setError('root', { message: AUTH_COPY.register.failedRetry })
 		}
 	}
 
@@ -84,9 +88,9 @@ export function RegisterPage() {
 
 	return (
 		<AuthLayout>
-			<Heading level={2}>Register</Heading>
+			<Heading level={2}>{AUTH_COPY.register.title}</Heading>
 			<Text tone="muted" size="sm">
-				Create an account to host your own quizzes.
+				{AUTH_COPY.register.subtitle}
 			</Text>
 
 			<form onSubmit={onSubmit} noValidate>
@@ -95,7 +99,7 @@ export function RegisterPage() {
 						<Alert
 							className={formAlert}
 							variant="danger"
-							title="Could not register"
+							title={AUTH_COPY.register.errorTitle}
 						>
 							{errors.root.message}
 						</Alert>
@@ -103,7 +107,7 @@ export function RegisterPage() {
 
 					<div className={field}>
 						<label className={fieldLabel} htmlFor="register-userName">
-							User name
+							{AUTH_COPY.register.userNameLabel}
 						</label>
 						<Input
 							id="register-userName"
@@ -121,7 +125,7 @@ export function RegisterPage() {
 
 					<div className={field}>
 						<label className={fieldLabel} htmlFor="register-password">
-							Password
+							{AUTH_COPY.register.passwordLabel}
 						</label>
 						<Input
 							id="register-password"
@@ -145,7 +149,7 @@ export function RegisterPage() {
 							fullWidth
 							loading={registerMutation.isPending}
 						>
-							Create account
+							{AUTH_COPY.register.submit}
 						</Button>
 					</div>
 				</Stack>
@@ -153,10 +157,10 @@ export function RegisterPage() {
 
 			<div className={formFooter}>
 				<Text size="sm" tone="muted">
-					Already have an account?
+					{AUTH_COPY.register.hasAccount}
 				</Text>{' '}
-				<Link to="/login" className={inlineLink}>
-					Log in
+				<Link to={PATHS.login} className={inlineLink}>
+					{AUTH_COPY.register.loginLink}
 				</Link>
 			</div>
 		</AuthLayout>

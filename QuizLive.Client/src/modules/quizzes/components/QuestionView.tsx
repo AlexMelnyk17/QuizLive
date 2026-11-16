@@ -15,7 +15,8 @@ import {
 } from '@modules/quizzes/components/QuizDetails.css'
 import { QUIZ_DETAILS_COPY, QuizKind } from '@modules/quizzes/constants'
 import type { QuestionDto, QuizKindValue } from '@modules/quizzes/types'
-import { formatPoints, formatTimeLimit } from '@modules/quizzes/utils'
+import { formatPoints } from '@modules/quizzes/utils/formatPoints'
+import { formatTimeLimit } from '@modules/quizzes/utils/formatTimeLimit'
 
 export type QuestionViewProps = {
 	question: QuestionDto

@@ -2,6 +2,8 @@ import type { StatusCounts } from '@modules/statistics/types'
 
 export const STATS_QUERY_KEY = ['stats', 'host'] as const
 
+export const STAT_FORMAT_FRACTION_DIGITS = 1
+
 export const STATISTICS_PAGE_COPY = {
 	title: 'Statistics',
 	noActivity:

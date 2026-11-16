@@ -41,6 +41,8 @@ Specifiers within a group are sorted alphabetically.
 - Type-aware `recommendedTypeChecked`
 - `eslint-plugin-react-hooks` — [Rules of Hooks](https://react.dev/reference/rules/rules-of-hooks)
 - `eslint-plugin-react-refresh` — compatible with Vite HMR
+- `@typescript-eslint/no-magic-numbers` — in `api/`, module `api/`, `hooks/`, `utils/`, `router.tsx`, and shared `utils/` only; allows `0`, `1`, `-1` (see [08-constants-and-routes.md](./08-constants-and-routes.md) R-1)
+- `no-restricted-imports` — no relative `../` imports; components/layout **MUST NOT** import `@api/client`
 - `@typescript-eslint/only-throw-error` is **off** only because TanStack Router `throw redirect(...)` is intentional. **MUST NOT** throw non-Error values elsewhere.
 
 `npm run lint` must pass. Pre-commit: Prettier + ESLint on staged files; pre-push: `npm run verify`.
