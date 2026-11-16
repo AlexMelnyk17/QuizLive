@@ -6,6 +6,9 @@ globalStyle('*, *::before, *::after', {
 	boxSizing: 'border-box',
 })
 
+globalStyle('html', {
+	scrollbarGutter: 'stable',
+})
 
 globalStyle('body', {
 	margin: 0,

@@ -18,6 +18,7 @@ export const darkTheme = createTheme(vars, {
 	colors: {
 		bg: palette.gray900,
 		surface: palette.gray800,
+		surfaceSunken: palette.gray900,
 		surfaceRaised: '#2f303a',
 		text: palette.gray400,
 		textMuted: '#6b7280',

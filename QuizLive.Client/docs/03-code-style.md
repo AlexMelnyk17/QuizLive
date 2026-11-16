@@ -64,7 +64,7 @@ Specifiers within a group are sorted alphabetically.
 
 - **MUST** use function components only (React 19; no new class components).
 - **SHOULD** use named exports. UI primitives expose named symbols from their folder `index.ts` where allowed.
-- Props: `type ComponentProps = { ... }` immediately above the component.
+- Props: `export type ComponentProps = { ... }` above the component; destructure in the parameter list with that type — `export function Foo({ a, b }: FooProps)`. **MUST NOT** inline object types in the signature (`({ a }: { a: string })`) or take an unused `props` bag when fields can be destructured.
 - **MUST** follow file export rules (component-only exports, one hook/util per file): [07-solid.md](./07-solid.md).
 
 ## R-6. React hygiene (MUST)

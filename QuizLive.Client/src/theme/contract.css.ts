@@ -16,6 +16,7 @@ export const vars = createThemeContract({
 	colors: {
 		bg: null,
 		surface: null,
+		surfaceSunken: null,
 		surfaceRaised: null,
 		text: null,
 		textMuted: null,
