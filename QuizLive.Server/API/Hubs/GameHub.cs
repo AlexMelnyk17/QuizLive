@@ -15,12 +15,15 @@ namespace QuizLive.Server.API.Hubs
     {
         public const string PlayerIdKey = "PlayerId";
         public const string GameIdKey = "GameId";
+        public const string RoleKey = "Role";
 
         // Both connect methods check access first, then join the group, and only then read the state.
         // The other way round, a player who joins in between would be missing from both the snapshot
         // and the event. The cost is a possible duplicate, so a client must deduplicate by player id.
         public async Task<PlayerGameStateDto> ConnectAsPlayer(string playerToken)
         {
+            EnsureNotConnected();
+
             var gameId = await gameService.GetActivePlayerGameIdAsync(playerToken);
 
             await Groups.AddToGroupAsync(Context.ConnectionId, GameGroups.All(gameId));
@@ -40,6 +43,7 @@ namespace QuizLive.Server.API.Hubs
 
             Context.Items[PlayerIdKey] = state.PlayerId;
             Context.Items[GameIdKey] = state.GameId;
+            Context.Items[RoleKey] = ConnectionRole.Player;
 
             return state;
         }
@@ -47,6 +51,8 @@ namespace QuizLive.Server.API.Hubs
         [Authorize]
         public async Task<GameDto> ConnectAsHost(int gameId)
         {
+            EnsureNotConnected();
+
             // Not ICurrentUser: it relies on IHttpContextAccessor, which is unreliable inside a hub.
             var userId = Context.UserIdentifier
                 ?? throw new UnauthorizedException("The user is not authenticated.");
@@ -71,8 +77,20 @@ namespace QuizLive.Server.API.Hubs
             }
 
             Context.Items[GameIdKey] = gameId;
+            Context.Items[RoleKey] = ConnectionRole.Host;
 
             return game;
+        }
+
+        // One connection joins one game, once. A repeated call would leave it in the groups of the first
+        // game and overwrite its identity. Invocations on one connection run one at a time, and a failed
+        // connect sets nothing, so the client can retry after an error.
+        private void EnsureNotConnected()
+        {
+            if (Context.Items.ContainsKey(GameIdKey))
+            {
+                throw new ConflictException("This connection has already joined a game.");
+            }
         }
     }
 }

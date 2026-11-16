@@ -187,6 +187,74 @@ namespace QuizLive.Server.Tests.Games
             Assert.Contains(SecretDetail, entry.Exception?.Message);
         }
 
+        [Fact]
+        public async Task ConnectAsPlayer_Twice_OnOneConnection_IsRejected()
+        {
+            var host = await factory.CreateAuthorizedClientAsync();
+            var quiz = await host.CreatePlayableQuizAsync(QuizKind.OpenText);
+            var game = await host.CreateGameAsync(quiz.Id);
+            var player = await host.JoinAsync(game.Code, "Ann");
+
+            await using var connection = await StartAsync(factory);
+            await connection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", player.Token, Ct);
+
+            var error = await Assert.ThrowsAsync<HubException>(
+                () => connection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", player.Token, Ct));
+
+            Assert.Contains("already joined a game", error.Message);
+        }
+
+        [Fact]
+        public async Task ConnectAsHost_Twice_OnOneConnection_IsRejected()
+        {
+            var host = await factory.CreateAuthorizedClientAsync();
+            var quiz = await host.CreatePlayableQuizAsync(QuizKind.OpenText);
+            var game = await host.CreateGameAsync(quiz.Id);
+
+            await using var connection = await StartAsync(factory, host.BearerToken());
+            await connection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+
+            var error = await Assert.ThrowsAsync<HubException>(
+                () => connection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct));
+
+            Assert.Contains("already joined a game", error.Message);
+        }
+
+        [Fact]
+        public async Task ConnectAsHost_AfterConnectAsPlayer_OnOneConnection_IsRejected()
+        {
+            var host = await factory.CreateAuthorizedClientAsync();
+            var quiz = await host.CreatePlayableQuizAsync(QuizKind.OpenText);
+            var game = await host.CreateGameAsync(quiz.Id);
+            var player = await host.JoinAsync(game.Code, "Ann");
+
+            await using var connection = await StartAsync(factory, host.BearerToken());
+            await connection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", player.Token, Ct);
+
+            var error = await Assert.ThrowsAsync<HubException>(
+                () => connection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct));
+
+            Assert.Contains("already joined a game", error.Message);
+        }
+
+        [Fact]
+        public async Task FailedConnect_DoesNotBlockALaterSuccessfulOne()
+        {
+            var host = await factory.CreateAuthorizedClientAsync();
+            var quiz = await host.CreatePlayableQuizAsync(QuizKind.OpenText);
+            var game = await host.CreateGameAsync(quiz.Id);
+            var player = await host.JoinAsync(game.Code, "Ann");
+
+            await using var connection = await StartAsync(factory);
+
+            await Assert.ThrowsAsync<HubException>(
+                () => connection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", "no-such-token", Ct));
+
+            var state = await connection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", player.Token, Ct);
+
+            Assert.Equal(game.Id, state.GameId);
+        }
+
         private static async Task<HubConnection> StartAsync(WebApplicationFactory<Program> app, string? accessToken = null)
         {
             var connection = app.CreateHubConnection(accessToken);
