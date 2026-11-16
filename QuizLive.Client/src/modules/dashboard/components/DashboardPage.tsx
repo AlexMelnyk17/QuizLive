@@ -1,12 +1,22 @@
-import { Text } from '@components/ui/Text'
+import { useNavigate } from '@tanstack/react-router'
 
 import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
-import { QUIZZES_LIST_COMING_SOON_MESSAGE } from '@modules/dashboard/constants'
+
+import { QuizList } from '@modules/quizzes/components/QuizList'
 
 export function DashboardPage() {
+	const navigate = useNavigate()
+
 	return (
 		<DashboardLayout>
-			<Text tone="muted">{QUIZZES_LIST_COMING_SOON_MESSAGE}</Text>
+			<QuizList
+				onOpenQuiz={quizId =>
+					void navigate({
+						to: '/quizzes/$quizId',
+						params: { quizId: String(quizId) }
+					})
+				}
+			/>
 		</DashboardLayout>
 	)
 }

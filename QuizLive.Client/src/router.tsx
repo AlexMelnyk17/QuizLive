@@ -10,6 +10,7 @@ import { z } from 'zod'
 import { LoginPage, readSession, RegisterPage } from '@modules/auth'
 import { DashboardPage } from '@modules/dashboard'
 import { HomePage } from '@modules/home'
+import { QuizDetailsPage } from '@modules/quizzes/components/QuizDetailsPage'
 import { StatisticsPage } from '@modules/statistics'
 import { sanitizeRedirectPath } from '@utils/sanitizeRedirectPath'
 
@@ -67,6 +68,21 @@ const dashboardRoute = createRoute({
 	component: DashboardPage,
 })
 
+const quizListRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: '/quizzzes',
+	beforeLoad: () => {
+		const session = readSession()
+		if (!session) {
+			throw redirect({
+				to: '/login',
+				search: { redirect: '/quizzes' },
+			})
+		}
+	},
+	component: StatisticsPage,
+})
+
 const statisticsRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: '/statistics',
@@ -82,12 +98,29 @@ const statisticsRoute = createRoute({
 	component: StatisticsPage,
 })
 
+const quizDetailsRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: '/quizzes/$quizId',
+	beforeLoad: ({ location }) => {
+		const session = readSession()
+		if (!session) {
+			throw redirect({
+				to: '/login',
+				search: { redirect: location.href },
+			})
+		}
+	},
+	component: QuizDetailsPage,
+})
+
 const routeTree = rootRoute.addChildren([
 	indexRoute,
 	loginRoute,
 	registerRoute,
 	dashboardRoute,
 	statisticsRoute,
+	quizListRoute,
+	quizDetailsRoute,
 ])
 
 export const router = createRouter({ routeTree })

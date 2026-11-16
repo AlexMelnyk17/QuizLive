@@ -8,8 +8,7 @@ import {
 	YAxis,
 } from 'recharts'
 
-import { QUIZ_KIND_LABELS } from '@modules/dashboard/constants'
-import { QuizKind } from '@modules/dashboard/types'
+import { QUIZ_KIND_LABELS, QuizKind } from '@modules/quizzes/constants'
 import { gamesByKindColors } from '@modules/statistics/chartColors'
 import { StatsChartCard } from '@modules/statistics/components/charts/StatsChartCard'
 import {
