@@ -1,3 +1,5 @@
+import type { StatusCounts } from '@modules/statistics/types'
+
 export const STATS_QUERY_KEY = ['stats', 'host'] as const
 
 export const STATISTICS_PAGE_COPY = {
@@ -31,3 +33,10 @@ export const GAME_STATUS_LABELS = {
 	results: 'Results',
 	finished: 'Finished',
 } as const
+
+export const STATUS_KEYS = [
+	'lobby',
+	'question',
+	'results',
+	'finished',
+] as const satisfies readonly (keyof StatusCounts)[]

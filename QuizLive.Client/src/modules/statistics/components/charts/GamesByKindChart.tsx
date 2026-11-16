@@ -3,27 +3,21 @@ import {
 	BarChart,
 	CartesianGrid,
 	Cell,
-	ResponsiveContainer,
 	Tooltip,
 	XAxis,
 	YAxis,
 } from 'recharts'
 
-import { Card } from '@components/ui/Card'
-import { Heading } from '@components/ui/Heading'
-import { Stack } from '@components/ui/Stack'
-import cn from 'clsx'
-
 import { QUIZ_KIND_LABELS } from '@modules/dashboard/constants'
 import { QuizKind } from '@modules/dashboard/types'
+import { gamesByKindColors } from '@modules/statistics/chartColors'
+import { StatsChartCard } from '@modules/statistics/components/charts/StatsChartCard'
 import {
-	gamesByKindColors,
-	statsChartColors,
-} from '@modules/statistics/chartColors'
-import {
-	statsChartHeading,
-	statsChartShell,
-} from '@modules/statistics/components/StatisticsPage.css'
+	statsBarChartMargin,
+	statsCartesianGridProps,
+	statsXAxisTickDefault,
+	statsYAxisProps,
+} from '@modules/statistics/components/charts/statsChartLayout'
 import { STATISTICS_CHART_COPY } from '@modules/statistics/constants'
 import type { KindCounts } from '@modules/statistics/types'
 
@@ -39,45 +33,25 @@ export function GamesByKindChart({ counts }: GamesByKindChartProps) {
 	]
 
 	return (
-		<Card variant="outlined" padding="md" fullWidth>
-			<Stack direction="column" align="stretch">
-				<Heading level={4} className={cn(statsChartHeading)}>
-					{STATISTICS_CHART_COPY.gamesByKind}
-				</Heading>
-				<div className={statsChartShell}>
-					<ResponsiveContainer width="100%" height="100%">
-						<BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-							<CartesianGrid
-								stroke={statsChartColors.grid}
-								strokeDasharray="3 3"
-								vertical={false}
-							/>
-							<XAxis
-								dataKey="label"
-								tick={{ fill: statsChartColors.axis, fontSize: 12 }}
-							/>
-							<YAxis
-								allowDecimals={false}
-								tick={{ fill: statsChartColors.axis, fontSize: 11 }}
-								width={32}
-							/>
-							<Tooltip />
-							<Bar
-								dataKey="value"
-								name={STATISTICS_CHART_COPY.seriesGames}
-								isAnimationActive={false}
-							>
-								{data.map((entry, index) => (
-									<Cell
-										key={entry.key}
-										fill={gamesByKindColors[index % gamesByKindColors.length]}
-									/>
-								))}
-							</Bar>
-						</BarChart>
-					</ResponsiveContainer>
-				</div>
-			</Stack>
-		</Card>
+		<StatsChartCard title={STATISTICS_CHART_COPY.gamesByKind}>
+			<BarChart data={data} margin={statsBarChartMargin}>
+				<CartesianGrid {...statsCartesianGridProps} />
+				<XAxis dataKey="label" tick={statsXAxisTickDefault} />
+				<YAxis {...statsYAxisProps} />
+				<Tooltip />
+				<Bar
+					dataKey="value"
+					name={STATISTICS_CHART_COPY.seriesGames}
+					isAnimationActive={false}
+				>
+					{data.map((entry, index) => (
+						<Cell
+							key={entry.key}
+							fill={gamesByKindColors[index % gamesByKindColors.length]}
+						/>
+					))}
+				</Bar>
+			</BarChart>
+		</StatsChartCard>
 	)
 }
