@@ -99,7 +99,7 @@ namespace QuizLive.Server
 			app.UseAuthorization();
 
             app.MapControllers();
-            app.MapHub<GameHub>("/api/hubs/game");
+            app.MapHub<GameHub>(HubRoutes.Game);
 
             app.MapFallbackToFile("/index.html");
 
