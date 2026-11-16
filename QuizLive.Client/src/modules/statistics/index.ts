@@ -1,0 +1,1 @@
+export { StatisticsPage } from '@modules/statistics/components/StatisticsPage'

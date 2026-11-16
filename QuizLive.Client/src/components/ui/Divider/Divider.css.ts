@@ -4,6 +4,7 @@ import { vars } from '@theme/contract.css'
 
 export const divider = recipe({
 	base: {
+		display: 'block',
 		border: 'none',
 		margin: 0,
 		flexShrink: 0,
@@ -17,8 +18,6 @@ export const divider = recipe({
 			},
 			vertical: {
 				width: '1px',
-				height: '100%',
-				alignSelf: 'stretch',
 			},
 		},
 		spacing: {
@@ -26,6 +25,10 @@ export const divider = recipe({
 			sm: {},
 			md: {},
 			lg: {},
+		},
+		length: {
+			inherit: {},
+			short: {},
 		},
 	},
 	compoundVariants: [
@@ -53,9 +56,24 @@ export const divider = recipe({
 			variants: { orientation: 'vertical', spacing: 'lg' },
 			style: { marginInline: vars.spacing[6] },
 		},
+		{
+			variants: { orientation: 'vertical', length: 'inherit' },
+			style: {
+				alignSelf: 'stretch',
+				minHeight: '1.25rem',
+			},
+		},
+		{
+			variants: { orientation: 'vertical', length: 'short' },
+			style: {
+				height: '1.75rem',
+				alignSelf: 'center',
+			},
+		},
 	],
 	defaultVariants: {
 		orientation: 'horizontal',
 		spacing: 'md',
+		length: 'inherit',
 	},
 })

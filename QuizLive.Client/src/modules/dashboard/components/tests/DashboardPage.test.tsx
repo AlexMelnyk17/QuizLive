@@ -1,4 +1,5 @@
 import { screen } from '@testing-library/react'
+import React from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { QUIZZES_LIST_COMING_SOON_MESSAGE } from '@modules/dashboard/constants'
@@ -6,6 +7,9 @@ import { DashboardPage } from '@modules/dashboard/components/DashboardPage'
 import { renderWithTheme } from '@src/test/testUtils'
 
 vi.mock('@tanstack/react-router', () => ({
+	Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
+		<a href={to}>{children}</a>
+	),
 	useNavigate: () => vi.fn(),
 }))
 
@@ -30,6 +34,10 @@ describe('DashboardPage', () => {
 		expect(
 			screen.getByRole('button', { name: /Create quiz \(not available yet\)/i })
 		).toBeDisabled()
+		expect(screen.getByRole('link', { name: /Statistics/i })).toHaveAttribute(
+			'href',
+			'/statistics'
+		)
 		expect(fetchSpy).not.toHaveBeenCalled()
 		fetchSpy.mockRestore()
 	})

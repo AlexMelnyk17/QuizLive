@@ -34,6 +34,28 @@ export const dashboardHeaderActions = style({
 	gap: vars.spacing[2],
 })
 
+export const dashboardHeaderNav = style({
+	display: 'flex',
+	flexWrap: 'wrap',
+	alignItems: 'center',
+	gap: vars.spacing[1],
+})
+
+export const dashboardNavLink = style({
+	display: 'inline-flex',
+	alignItems: 'center',
+	padding: `${vars.spacing[2]} ${vars.spacing[3]}`,
+	borderRadius: vars.radii.md,
+	fontSize: vars.fontSizes.sm,
+	fontWeight: vars.fontWeights.medium,
+	color: vars.colors.textHeading,
+	textDecoration: 'none',
+	transition: `background-color ${vars.durations.normal}`,
+	':hover': {
+		backgroundColor: vars.colors.primaryMuted,
+	},
+})
+
 export const dashboardMain = style({
 	flex: 1,
 })

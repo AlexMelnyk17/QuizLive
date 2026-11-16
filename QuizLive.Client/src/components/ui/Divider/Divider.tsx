@@ -14,11 +14,14 @@ export function Divider({
 	className,
 	orientation,
 	spacing,
+	length,
 }: DividerProps) {
+	const resolvedOrientation = orientation ?? 'horizontal'
+
 	return (
 		<hr
-			className={cn(divider({ orientation, spacing }), className)}
-			aria-orientation={orientation ?? 'horizontal'}
+			className={cn(divider({ orientation, spacing, length }), className)}
+			aria-orientation={resolvedOrientation}
 		/>
 	)
 }
