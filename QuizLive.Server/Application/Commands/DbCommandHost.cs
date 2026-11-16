@@ -15,6 +15,7 @@ public static class DbCommandHost
         return command.ToLowerInvariant() switch
         {
             "seed" => await SeedAsync(args[2..], cancellationToken),
+            "seed-stats" => await SeedStatsAsync(args[2..], cancellationToken),
             _ => UnknownCommand(command),
         };
     }
@@ -38,10 +39,29 @@ public static class DbCommandHost
         return 0;
     }
 
+    private static async Task<int> SeedStatsAsync(string[] args, CancellationToken cancellationToken)
+    {
+        var builder = Host.CreateApplicationBuilder(args);
+
+        builder.Services.AddQuizLiveDbContext(builder.Configuration);
+        builder.Services.AddScoped<StatsDemoSeeder>();
+
+        using var host = builder.Build();
+        using var scope = host.Services.CreateScope();
+
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await db.Database.MigrateAsync(cancellationToken);
+
+        await scope.ServiceProvider.GetRequiredService<StatsDemoSeeder>().SeedAsync(cancellationToken);
+
+        Console.WriteLine("Stats demo data seeded successfully.");
+        return 0;
+    }
+
     private static int UnknownCommand(string command)
     {
         Console.Error.WriteLine($"Unknown database command: {command}");
-        Console.Error.WriteLine("Available commands: seed");
+        Console.Error.WriteLine("Available commands: seed, seed-stats");
         return 1;
     }
 }

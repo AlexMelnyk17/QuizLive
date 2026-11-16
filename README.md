@@ -70,3 +70,13 @@ To seed a different database, pass a config override after `db seed`:
 dotnet run --project QuizLive.Server -- db seed "--ConnectionStrings:Default=Data Source=other.db"
 ```
 
+### Large stats demo (`seed-stats`)
+
+Creates **12 extra quizzes** (4 per kind, titles prefixed `[Stats demo]`) for user **quizzer**, each with **14–21 finished games**, **5–15 players**, and randomized answers. Safe to run once per database (skips if stats demo quizzes already exist). Creates **quizzer** if missing.
+
+```bash
+dotnet run --project QuizLive.Server -- db seed-stats
+```
+
+Run `db seed` first if you also want the original three Ukrainian demo quizzes.
+
