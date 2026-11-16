@@ -213,6 +213,8 @@ namespace QuizLive.Server.Tests.Games
             public Task<GameLookupDto> GetByCodeAsync(string code) => throw new NotImplementedException();
             public Task<JoinGameResponse> JoinAsync(string code, JoinGameRequest request) => throw new NotImplementedException();
             public Task<GameDto> GetActiveHostGameAsync(int gameId, string hostUserId) => throw new NotImplementedException();
+            public Task EnsureActiveHostGameAsync(int gameId, string hostUserId) => throw new NotImplementedException();
+            public Task<int> GetActivePlayerGameIdAsync(string playerToken) => throw new NotImplementedException();
         }
 
         private class CapturingLoggerProvider : ILoggerProvider

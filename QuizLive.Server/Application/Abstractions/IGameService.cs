@@ -16,5 +16,10 @@ namespace QuizLive.Server.Application.Abstractions
         // hostUserId must come from the authenticated connection (Context.UserIdentifier), never from a client argument.
         Task<GameDto> GetActiveHostGameAsync(int gameId, string hostUserId);
         Task<PlayerGameStateDto> GetPlayerStateAsync(string playerToken);
+
+        // Light access checks: a connection may join a game's SignalR group only after one of them passes,
+        // and the full state is read afterwards, so an event sent in between is not lost.
+        Task EnsureActiveHostGameAsync(int gameId, string hostUserId);
+        Task<int> GetActivePlayerGameIdAsync(string playerToken);
     }
 }
