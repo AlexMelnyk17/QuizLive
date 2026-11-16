@@ -30,5 +30,6 @@ namespace QuizLive.Server.Application.Quizzes
         QuizKind Kind,
         bool IsArchived,
         DateTime CreatedAtUtc,
-        List<QuestionDto> Questions);
+        List<QuestionDto> Questions,
+        bool HasGames);
 }

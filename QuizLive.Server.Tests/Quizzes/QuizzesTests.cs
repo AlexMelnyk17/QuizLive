@@ -41,6 +41,19 @@ namespace QuizLive.Server.Tests.Quizzes
             Assert.Equal("Math", details.Title);
             Assert.Equal(QuizKind.QuizChoice, details.Kind);
             Assert.Equal(question.Id, Assert.Single(details.Questions).Id);
+            Assert.False(details.HasGames);
+        }
+
+        [Fact]
+        public async Task GetById_QuizWithGame_ReportsHasGames()
+        {
+            var client = await factory.CreateAuthorizedClientAsync();
+            var quiz = await client.CreatePlayableQuizAsync(QuizKind.QuizChoice);
+            await client.CreateGameAsync(quiz.Id);
+
+            var details = await GetQuizAsync(client, quiz.Id);
+
+            Assert.True(details.HasGames);
         }
 
         // Regression for #33: the list endpoint returned 500.

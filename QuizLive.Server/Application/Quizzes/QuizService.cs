@@ -43,7 +43,8 @@ namespace QuizLive.Server.Application.Quizzes
                 quiz.Kind,
                 quiz.IsArchived,
                 quiz.CreatedAtUtc,
-                questions);
+                questions,
+                await db.GameSessionRecords.AnyAsync(game => game.QuizId == id));
         }
 
         public async Task<QuizDto> CreateAsync(CreateQuizRequest request)
