@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, screen } from '@testing-library/react'
+import { cleanup, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -82,12 +82,14 @@ describe('QuizCreatePage', () => {
 			screen.getByRole('radio', { name: QUIZ_KIND_LABELS[QuizKind.PollChoice] })
 		)
 		await user.click(
-			screen.getByRole('button', { name: QUIZ_FORM_COPY.submitCreate })
+			within(screen.getByRole('main')).getByRole('button', {
+				name: QUIZ_FORM_COPY.submitCreate
+			})
 		)
 
 		await vi.waitFor(() => {
 			expect(navigateMock).toHaveBeenCalledWith({
-				to: PATHS.quizDetails,
+				to: PATHS.quizEdit,
 				params: { quizId: '9' }
 			})
 		})
@@ -107,7 +109,9 @@ describe('QuizCreatePage', () => {
 
 		await user.type(screen.getByLabelText(QUIZ_FORM_COPY.fields.title), 'Math')
 		await user.click(
-			screen.getByRole('button', { name: QUIZ_FORM_COPY.submitCreate })
+			within(screen.getByRole('main')).getByRole('button', {
+				name: QUIZ_FORM_COPY.submitCreate
+			})
 		)
 
 		expect(

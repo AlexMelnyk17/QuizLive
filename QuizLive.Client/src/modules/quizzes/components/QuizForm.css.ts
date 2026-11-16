@@ -7,7 +7,9 @@ export const quizForm = style({
 	flexDirection: 'column',
 	gap: vars.spacing[4],
 	width: '100%',
-	maxWidth: '40rem'
+	maxWidth: '40rem',
+	marginInline: 'auto',
+	minWidth: 0
 })
 
 export const field = style({

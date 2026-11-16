@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import cn from 'clsx'
-import type { FormEvent } from 'react'
+import { useId } from 'react'
+import type { FormEvent, ReactNode } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 
 import { Alert } from '@components/ui/Alert'
@@ -10,6 +11,7 @@ import { Radio } from '@components/ui/Radio'
 import { Text } from '@components/ui/Text'
 import { Textarea } from '@components/ui/Textarea'
 
+import { formPanel } from '@modules/quizzes/components/QuizEditor.css'
 import {
 	field,
 	fieldError,
@@ -45,9 +47,22 @@ export type QuizFormProps = {
 	submitLabel: string
 	onSubmit: (values: QuizFormValues) => Promise<unknown>
 	onCancel: () => void
+	initialValues?: QuizFormValues
+	kindReadOnly?: boolean
+	children?: ReactNode
+	disabled?: boolean
 }
 
-export function QuizForm({ submitLabel, onSubmit, onCancel }: QuizFormProps) {
+export function QuizForm({
+	submitLabel,
+	onSubmit,
+	onCancel,
+	initialValues,
+	kindReadOnly = false,
+	children,
+	disabled = false
+}: QuizFormProps) {
+	const formId = useId()
 	const {
 		register,
 		handleSubmit,
@@ -57,7 +72,7 @@ export function QuizForm({ submitLabel, onSubmit, onCancel }: QuizFormProps) {
 		formState: { errors, isSubmitting }
 	} = useForm<QuizFormValues>({
 		resolver: zodResolver(quizFormSchema),
-		defaultValues: DEFAULT_VALUES
+		defaultValues: initialValues ?? DEFAULT_VALUES
 	})
 	const kind = useWatch({ control, name: 'kind' })
 
@@ -87,91 +102,119 @@ export function QuizForm({ submitLabel, onSubmit, onCancel }: QuizFormProps) {
 	}
 
 	const onFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+		if (disabled) {
+			event.preventDefault()
+			return
+		}
 		void handleSubmit(submit)(event)
 	}
 
 	return (
-		<form onSubmit={onFormSubmit} noValidate className={quizForm}>
-			{errors.root?.message ? (
-				<Alert variant='danger' title={QUIZ_FORM_COPY.errorTitle}>
-					{errors.root.message}
-				</Alert>
-			) : null}
+		<div className={cn(quizForm, formPanel)}>
+			<form id={formId} onSubmit={onFormSubmit} noValidate className={quizForm}>
+				<fieldset disabled={disabled} className={cn(field, quizForm)}>
+					{errors.root?.message ? (
+						<Alert variant='danger' title={QUIZ_FORM_COPY.errorTitle}>
+							{errors.root.message}
+						</Alert>
+					) : null}
 
-			<div className={field}>
-				<label className={fieldLabel} htmlFor='quiz-title'>
-					{QUIZ_FORM_COPY.fields.title}
-				</label>
-				<Input
-					id='quiz-title'
-					invalid={Boolean(errors.title)}
-					fullWidth
-					{...register('title')}
-				/>
-				{errors.title?.message ? (
-					<p className={fieldError} role='alert'>
-						{errors.title.message}
-					</p>
-				) : null}
-			</div>
+					<div className={field}>
+						<label className={fieldLabel} htmlFor='quiz-title'>
+							{QUIZ_FORM_COPY.fields.title}
+						</label>
+						<Input
+							id='quiz-title'
+							placeholder={QUIZ_FORM_COPY.placeholders.title}
+							invalid={Boolean(errors.title)}
+							fullWidth
+							{...register('title')}
+						/>
+						{errors.title?.message ? (
+							<p className={fieldError} role='alert'>
+								{errors.title.message}
+							</p>
+						) : null}
+					</div>
 
-			<div className={field}>
-				<label className={fieldLabel} htmlFor='quiz-description'>
-					{QUIZ_FORM_COPY.fields.description}
-				</label>
-				<Textarea
-					id='quiz-description'
-					rows={4}
-					invalid={Boolean(errors.description)}
-					{...register('description')}
-				/>
-				{errors.description?.message ? (
-					<p className={fieldError} role='alert'>
-						{errors.description.message}
-					</p>
-				) : null}
-			</div>
+					<div className={field}>
+						<label className={fieldLabel} htmlFor='quiz-description'>
+							{QUIZ_FORM_COPY.fields.description}
+						</label>
+						<Textarea
+							id='quiz-description'
+							placeholder={QUIZ_FORM_COPY.placeholders.description}
+							rows={4}
+							invalid={Boolean(errors.description)}
+							{...register('description')}
+						/>
+						{errors.description?.message ? (
+							<p className={fieldError} role='alert'>
+								{errors.description.message}
+							</p>
+						) : null}
+					</div>
 
-			<fieldset className={field}>
-				<legend className={fieldLabel}>{QUIZ_FORM_COPY.fields.kind}</legend>
-				<div className={kindOptions}>
-					{QUIZ_KIND_ORDER.map(value => (
-						<div
-							key={value}
-							className={cn(kindOption, kind === value && kindOptionSelected)}
-						>
-							<Radio
-								id={`quiz-kind-${value}`}
-								name='kind'
-								label={QUIZ_KIND_LABELS[value]}
-								checked={kind === value}
-								onChange={() => setValue('kind', value)}
-								aria-describedby={`quiz-kind-${value}-hint`}
-							/>
-							<Text size='sm' tone='muted' id={`quiz-kind-${value}-hint`}>
-								{QUIZ_KIND_DESCRIPTIONS[value]}
-							</Text>
-						</div>
-					))}
-				</div>
-				<Text size='sm' tone='muted'>
-					{QUIZ_FORM_COPY.kindFixedNote}
-				</Text>
-				{errors.kind?.message ? (
-					<p className={fieldError} role='alert'>
-						{errors.kind.message}
-					</p>
-				) : null}
-			</fieldset>
-
+					<fieldset className={field}>
+						<legend className={fieldLabel}>{QUIZ_FORM_COPY.fields.kind}</legend>
+						{kindReadOnly ? (
+							<Text>{QUIZ_KIND_LABELS[kind]}</Text>
+						) : (
+							<div className={kindOptions}>
+								{QUIZ_KIND_ORDER.map(value => (
+									<div
+										key={value}
+										className={cn(
+											kindOption,
+											kind === value && kindOptionSelected
+										)}
+									>
+										<Radio
+											id={`quiz-kind-${value}`}
+											name='kind'
+											label={QUIZ_KIND_LABELS[value]}
+											checked={kind === value}
+											onChange={() => setValue('kind', value)}
+											aria-describedby={`quiz-kind-${value}-hint`}
+										/>
+										<Text size='sm' tone='muted' id={`quiz-kind-${value}-hint`}>
+											{QUIZ_KIND_DESCRIPTIONS[value]}
+										</Text>
+									</div>
+								))}
+							</div>
+						)}
+						<Text size='sm' tone='muted'>
+							{QUIZ_FORM_COPY.kindFixedNote}
+						</Text>
+						{errors.kind?.message ? (
+							<p className={fieldError} role='alert'>
+								{errors.kind.message}
+							</p>
+						) : null}
+					</fieldset>
+				</fieldset>
+			</form>
+			{children}
 			<div className={formActions}>
-				<Button type='submit' variant='primary' loading={isSubmitting}>
+				<Button
+					form={formId}
+					type='submit'
+					variant='primary'
+					loading={isSubmitting}
+					disabled={disabled}
+				>
 					{submitLabel}
 				</Button>
-				<Button type='button' variant='outline' onClick={onCancel}>
+				<Button
+					type='button'
+					variant='outline'
+					disabled={disabled}
+					onClick={onCancel}
+				>
 					{QUIZ_FORM_COPY.cancel}
 				</Button>
 			</div>
-		</form>
+		</div>
 	)
 }

@@ -6,7 +6,8 @@ export const PATHS = {
 	statistics: '/statistics',
 	quizzes: '/quizzes',
 	quizCreate: '/quizzes/new',
-	quizDetails: '/quizzes/$quizId'
+	quizDetails: '/quizzes/$quizId',
+	quizEdit: '/quizzes/$quizId/edit'
 } as const
 
 export const pathTo = {

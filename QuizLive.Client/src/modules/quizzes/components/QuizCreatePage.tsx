@@ -18,7 +18,7 @@ export function QuizCreatePage() {
 		const quiz = await createQuiz.mutateAsync(toCreateQuizRequest(values))
 
 		void navigate({
-			to: PATHS.quizDetails,
+			to: PATHS.quizEdit,
 			params: { quizId: String(quiz.id) }
 		})
 	}

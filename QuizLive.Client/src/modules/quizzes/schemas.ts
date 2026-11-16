@@ -62,4 +62,4 @@ export const questionDtoListSchema = z.array(questionDtoSchema)
 
 export const quizDetailsDtoSchema = quizDtoSchema
 	.omit({ questionCount: true })
-	.extend({ questions: questionDtoListSchema })
+	.extend({ questions: questionDtoListSchema, hasGames: z.boolean() })

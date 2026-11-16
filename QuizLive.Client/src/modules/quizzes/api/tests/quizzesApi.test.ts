@@ -65,7 +65,11 @@ describe('quizzesApi', () => {
 	})
 
 	it('fetches quiz details', async () => {
-		apiRequestMock.mockResolvedValue({ ...quizFields, questions: [question] })
+		apiRequestMock.mockResolvedValue({
+			...quizFields,
+			questions: [question],
+			hasGames: false
+		})
 
 		const result = await fetchQuiz(7)
 

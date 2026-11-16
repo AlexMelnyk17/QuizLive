@@ -6,7 +6,26 @@ export const quizCard = style({
 	display: 'flex',
 	flexDirection: 'column',
 	gap: vars.spacing[3],
-	height: '100%'
+	height: '100%',
+	position: 'relative',
+	transition: `transform ${vars.durations.fast}, box-shadow ${vars.durations.fast}`,
+	selectors: {
+		'&:has(button):hover': { transform: 'scale(1.015)' },
+		'&:has(button):active': { transform: 'scale(1.025)' },
+		'&:focus-within': {
+			outline: `2px solid ${vars.colors.focusRing}`,
+			outlineOffset: '2px'
+		}
+	},
+	'@media': {
+		'(prefers-reduced-motion: reduce)': {
+			transition: 'none',
+			selectors: {
+				'&:has(button):hover': { transform: 'none' },
+				'&:has(button):active': { transform: 'none' }
+			}
+		}
+	}
 })
 
 export const quizCardHeader = style({
@@ -29,6 +48,7 @@ export const quizCardTitleButton = style({
 	color: 'inherit',
 	textAlign: 'left',
 	cursor: 'pointer',
+	':after': { content: '""', position: 'absolute', inset: 0 },
 	':hover': {
 		textDecoration: 'underline'
 	}
@@ -47,11 +67,4 @@ export const quizCardMeta = style({
 	flexWrap: 'wrap',
 	alignItems: 'center',
 	gap: vars.spacing[2]
-})
-
-export const quizCardActions = style({
-	display: 'flex',
-	justifyContent: 'flex-end',
-	gap: vars.spacing[2],
-	marginTop: 'auto'
 })

@@ -11,6 +11,7 @@ import { Text } from '@components/ui/Text'
 
 import { QuestionView } from '@modules/quizzes/components/QuestionView'
 import {
+	actionWithHint,
 	deleteDialogActions,
 	questionList,
 	quizDetails,
@@ -22,7 +23,8 @@ import {
 	quizDetailsSkeletonHeader,
 	quizDetailsSkeletonQuestion,
 	quizDetailsText,
-	quizDetailsTitle
+	quizDetailsTitle,
+	startGameButton
 } from '@modules/quizzes/components/QuizDetails.css'
 import { QuizNotFound } from '@modules/quizzes/components/QuizNotFound'
 import {
@@ -30,8 +32,8 @@ import {
 	QUIZ_KIND_LABELS,
 	QUIZ_LIST_COPY
 } from '@modules/quizzes/constants'
-import { useQuiz } from '@modules/quizzes/hooks/useQuiz'
 import { useDeleteQuiz } from '@modules/quizzes/hooks/useDeleteQuiz'
+import { useQuiz } from '@modules/quizzes/hooks/useQuiz'
 import { useSetQuizArchived } from '@modules/quizzes/hooks/useSetQuizArchived'
 import { formatQuestionCount } from '@modules/quizzes/utils/formatQuestionCount'
 import { formatQuizDate } from '@modules/quizzes/utils/formatQuizDate'
@@ -105,6 +107,11 @@ export function QuizDetails({
 	}
 
 	const data = quiz.data
+	const deleteReason = data.hasGames
+		? QUIZ_DETAILS_COPY.playedDeleteReason
+		: data.isArchived
+			? QUIZ_DETAILS_COPY.archivedDeleteReason
+			: undefined
 	const actionError = setQuizArchived.error ?? deleteQuiz.error
 	// A played quiz cannot be deleted (409); archiving keeps its games and hides it from the active list.
 	const canArchiveInstead =
@@ -118,6 +125,7 @@ export function QuizDetails({
 	}
 
 	const confirmDelete = () => {
+		if (data.isArchived || data.hasGames) return
 		setQuizArchived.reset()
 		deleteQuiz.mutate(quizId, {
 			onSuccess: () => onDeleted?.(),
@@ -150,6 +158,22 @@ export function QuizDetails({
 				</div>
 
 				<div className={quizDetailsActions}>
+					{!data.isArchived ? (
+						<div
+							className={actionWithHint}
+							title={QUIZ_DETAILS_COPY.comingSoon}
+							tabIndex={0}
+						>
+							<Button
+								className={startGameButton}
+								size='sm'
+								disabled
+								title={QUIZ_DETAILS_COPY.comingSoon}
+							>
+								{QUIZ_DETAILS_COPY.startGame}
+							</Button>
+						</div>
+					) : null}
 					{onEdit && !data.isArchived ? (
 						<Button variant='primary' size='sm' onClick={() => onEdit(quizId)}>
 							{QUIZ_DETAILS_COPY.edit}
@@ -165,20 +189,42 @@ export function QuizDetails({
 							? QUIZ_DETAILS_COPY.unarchive
 							: QUIZ_DETAILS_COPY.archive}
 					</Button>
-					<Button
-						variant='danger'
-						size='sm'
-						onClick={() => setIsConfirmingDelete(true)}
+					<div
+						className={actionWithHint}
+						title={deleteReason}
+						tabIndex={deleteReason ? 0 : undefined}
 					>
-						{QUIZ_DETAILS_COPY.delete}
-					</Button>
+						<Button
+							variant='danger'
+							disabled={Boolean(deleteReason)}
+							title={deleteReason}
+							aria-describedby={
+								data.isArchived
+									? 'archived-quiz-notice'
+									: data.hasGames
+										? 'played-quiz-notice'
+										: undefined
+							}
+							size='sm'
+							onClick={() => setIsConfirmingDelete(true)}
+						>
+							{QUIZ_DETAILS_COPY.delete}
+						</Button>
+					</div>
 				</div>
 			</div>
 
 			{data.isArchived ? (
-				<Alert variant='info' title={QUIZ_DETAILS_COPY.archivedNotice.title}>
-					{QUIZ_DETAILS_COPY.archivedNotice.body}
-				</Alert>
+				<div id='archived-quiz-notice'>
+					<Alert variant='info' title={QUIZ_DETAILS_COPY.archivedNotice.title}>
+						{QUIZ_DETAILS_COPY.archivedNotice.body}
+					</Alert>
+				</div>
+			) : null}
+			{data.hasGames ? (
+				<div id='played-quiz-notice'>
+					<Alert variant='info' title={QUIZ_DETAILS_COPY.playedDeleteReason} />
+				</div>
 			) : null}
 
 			{actionError ? (

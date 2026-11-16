@@ -1,12 +1,12 @@
 import { useNavigate, useParams } from '@tanstack/react-router'
 
-import { PATHS } from '@config/routes'
-
 import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
 
 import { QuizDetails } from '@modules/quizzes/components/QuizDetails'
 import { QuizNotFound } from '@modules/quizzes/components/QuizNotFound'
 import { QUIZ_DETAILS_COPY } from '@modules/quizzes/constants'
+
+import { PATHS } from '@config/routes'
 
 export function QuizDetailsPage() {
 	const navigate = useNavigate()
@@ -22,6 +22,12 @@ export function QuizDetailsPage() {
 			{Number.isInteger(quizId) && quizId > 0 ? (
 				<QuizDetails
 					quizId={quizId}
+					onEdit={id =>
+						void navigate({
+							to: PATHS.quizEdit,
+							params: { quizId: String(id) }
+						})
+					}
 					onDeleted={backToList}
 					onBack={backToList}
 				/>

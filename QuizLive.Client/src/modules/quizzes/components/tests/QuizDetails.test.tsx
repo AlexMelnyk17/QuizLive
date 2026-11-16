@@ -31,6 +31,7 @@ const setQuizArchivedMock = vi.mocked(setQuizArchived)
 const deleteQuizMock = vi.mocked(deleteQuiz)
 
 const mathQuiz: QuizDetailsDto = {
+	hasGames: false,
 	id: 7,
 	title: 'Math',
 	description: 'Numbers and shapes',
@@ -239,6 +240,55 @@ describe('QuizDetails', () => {
 			screen.queryByRole('button', { name: QUIZ_DETAILS_COPY.edit })
 		).not.toBeInTheDocument()
 		expect(setQuizArchivedMock).toHaveBeenCalledWith(7, false)
+	})
+
+	it('disables starting games with a coming soon description', async () => {
+		fetchQuizMock.mockResolvedValue(mathQuiz)
+		renderQuizDetails()
+		const start = await screen.findByRole('button', {
+			name: QUIZ_DETAILS_COPY.startGame
+		})
+		expect(start).toBeDisabled()
+		expect(start).toHaveAccessibleDescription(QUIZ_DETAILS_COPY.comingSoon)
+	})
+
+	it('disables deletion for archived quizzes and explains how to enable it', async () => {
+		const user = userEvent.setup()
+		fetchQuizMock.mockResolvedValue({ ...mathQuiz, isArchived: true })
+		renderQuizDetails()
+		const remove = await screen.findByRole('button', {
+			name: QUIZ_DETAILS_COPY.delete
+		})
+		expect(remove).toBeDisabled()
+		expect(remove).toHaveAttribute(
+			'title',
+			QUIZ_DETAILS_COPY.archivedDeleteReason
+		)
+		expect(
+			screen.queryByRole('button', { name: QUIZ_DETAILS_COPY.startGame })
+		).not.toBeInTheDocument()
+		expect(
+			screen.queryByRole('button', { name: QUIZ_DETAILS_COPY.edit })
+		).not.toBeInTheDocument()
+		expect(
+			screen.getByText(QUIZ_DETAILS_COPY.archivedNotice.body)
+		).toBeInTheDocument()
+		await user.click(remove)
+		expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+		expect(deleteQuizMock).not.toHaveBeenCalled()
+	})
+
+	it('disables deletion of a played quiz before sending any delete request', async () => {
+		fetchQuizMock.mockResolvedValue({ ...mathQuiz, hasGames: true })
+		renderQuizDetails()
+		const remove = await screen.findByRole('button', {
+			name: QUIZ_DETAILS_COPY.delete
+		})
+		expect(remove).toBeDisabled()
+		expect(remove).toHaveAccessibleDescription(
+			QUIZ_DETAILS_COPY.playedDeleteReason
+		)
+		expect(deleteQuizMock).not.toHaveBeenCalled()
 	})
 
 	it('deletes the quiz after confirmation', async () => {
