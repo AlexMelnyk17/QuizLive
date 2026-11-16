@@ -17,6 +17,61 @@ import { renderWithTheme } from '@src/test/testUtils'
 afterEach(cleanup)
 
 describe('QuestionForm', () => {
+	it('maps uppercase numeric and correctness errors to the matching fields', async () => {
+		const save = vi.fn().mockRejectedValue(
+			new ApiError(HTTP_STATUS.BAD_REQUEST, {
+				errors: {
+					TIMELIMITSECONDS: ['Invalid time'],
+					BASEPOINTS: ['Invalid points'],
+					'OPTIONS[0].ISCORRECT': ['Invalid correct answer']
+				}
+			})
+		)
+		const user = userEvent.setup()
+		renderWithTheme(
+			<QuestionForm
+				kind={QuizKind.QuizChoice}
+				onSubmit={save}
+				onCancel={vi.fn()}
+			/>
+		)
+		await user.type(screen.getByLabelText(COPY.text), 'Question')
+		await user.type(screen.getByLabelText(COPY.option(0)), 'A')
+		await user.type(screen.getByLabelText(COPY.option(1)), 'B')
+		await user.type(screen.getByLabelText(COPY.time), '30')
+		await user.type(screen.getByLabelText(COPY.points), '100')
+		await user.click(screen.getByRole('radio', { name: COPY.correct(0) }))
+		await user.click(screen.getByRole('button', { name: COPY.save }))
+		expect(await screen.findByText('Invalid time')).toBeInTheDocument()
+		expect(screen.getByText('Invalid points')).toBeInTheDocument()
+		expect(screen.getByText('Invalid correct answer')).toBeInTheDocument()
+		expect(screen.getByLabelText(COPY.time)).toHaveValue(30)
+		expect(screen.getByLabelText(COPY.points)).toHaveValue(100)
+	})
+
+	it('keeps question input after a conflict', async () => {
+		const save = vi
+			.fn()
+			.mockRejectedValue(
+				new ApiError(HTTP_STATUS.CONFLICT, {
+					detail: 'This question has answers.'
+				})
+			)
+		const user = userEvent.setup()
+		renderWithTheme(
+			<QuestionForm
+				kind={QuizKind.OpenText}
+				onSubmit={save}
+				onCancel={vi.fn()}
+			/>
+		)
+		await user.type(screen.getByLabelText(COPY.text), 'Question')
+		await user.click(screen.getByRole('button', { name: COPY.save }))
+		expect(
+			await screen.findByText('This question has answers.')
+		).toBeInTheDocument()
+		expect(screen.getByLabelText(COPY.text)).toHaveValue('Question')
+	})
 	it.each([QuizKind.PollChoice, QuizKind.QuizChoice])(
 		'requires at least two answer options for kind %s',
 		kind => {
@@ -90,25 +145,28 @@ describe('QuestionForm', () => {
 			)
 		}
 	)
-	it('shows server field errors and preserves input', async () => {
-		const save = vi.fn().mockRejectedValue(
-			new ApiError(HTTP_STATUS.BAD_REQUEST, {
-				errors: { 'Options[1].Text': ['Invalid option'] }
-			})
-		)
-		const user = userEvent.setup()
-		renderWithTheme(
-			<QuestionForm
-				kind={QuizKind.PollChoice}
-				onSubmit={save}
-				onCancel={vi.fn()}
-			/>
-		)
-		await user.type(screen.getByLabelText(COPY.text), 'Choose')
-		await user.type(screen.getByLabelText(COPY.option(0)), 'A')
-		await user.type(screen.getByLabelText(COPY.option(1)), 'B')
-		await user.click(screen.getByRole('button', { name: COPY.save }))
-		expect(await screen.findByText('Invalid option')).toBeInTheDocument()
-		expect(screen.getByLabelText(COPY.option(1))).toHaveValue('B')
-	})
+	it.each(['Options[1].Text', 'OPTIONS[1].TEXT', 'oPtIoNs[1].tExT'])(
+		'shows server field error %s and preserves input',
+		async key => {
+			const save = vi.fn().mockRejectedValue(
+				new ApiError(HTTP_STATUS.BAD_REQUEST, {
+					errors: { [key]: ['Invalid option'] }
+				})
+			)
+			const user = userEvent.setup()
+			renderWithTheme(
+				<QuestionForm
+					kind={QuizKind.PollChoice}
+					onSubmit={save}
+					onCancel={vi.fn()}
+				/>
+			)
+			await user.type(screen.getByLabelText(COPY.text), 'Choose')
+			await user.type(screen.getByLabelText(COPY.option(0)), 'A')
+			await user.type(screen.getByLabelText(COPY.option(1)), 'B')
+			await user.click(screen.getByRole('button', { name: COPY.save }))
+			expect(await screen.findByText('Invalid option')).toBeInTheDocument()
+			expect(screen.getByLabelText(COPY.option(1))).toHaveValue('B')
+		}
+	)
 })

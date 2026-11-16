@@ -17,7 +17,7 @@ import { useUpdateQuiz } from '@modules/quizzes/hooks/useUpdateQuiz'
 import type { QuizFormValues } from '@modules/quizzes/types'
 
 import { ApiError } from '@api/apiError'
-import { HTTP_STATUS } from '@api/httpStatus'
+import { isNotFoundError } from '@api/isNotFoundError'
 
 type QuizEditorProps = {
 	quizId: number
@@ -46,12 +46,7 @@ export function QuizEditor({
 		onSaved()
 	}
 
-	if (
-		(quiz.error instanceof ApiError &&
-			quiz.error.status === HTTP_STATUS.NOT_FOUND) ||
-		(updateQuiz.error instanceof ApiError &&
-			updateQuiz.error.status === HTTP_STATUS.NOT_FOUND)
-	) {
+	if ([quiz.error, updateQuiz.error, setArchived.error].some(isNotFoundError)) {
 		return <QuizNotFound onBack={onBack} />
 	}
 	if (quiz.isPending) {
@@ -115,6 +110,7 @@ export function QuizEditor({
 				onCancel={onCancel}
 			>
 				<QuizQuestionsEditor
+					onBack={onBack}
 					quiz={quiz.data}
 					onFormOpenChange={setQuestionFormOpen}
 				/>

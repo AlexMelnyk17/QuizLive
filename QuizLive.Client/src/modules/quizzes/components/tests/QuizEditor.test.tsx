@@ -75,6 +75,126 @@ function renderEditor() {
 }
 
 describe('QuizEditor', () => {
+	it.each(['create', 'update', 'delete', 'reorder'])(
+		'shows a recoverable question-not-found state when %s returns 404',
+		async action => {
+			const first = {
+				id: 11,
+				order: 1,
+				text: 'First question',
+				timeLimitSeconds: null,
+				basePoints: null,
+				imageUrl: null,
+				options: null
+			}
+			const second = { ...first, id: 12, order: 2, text: 'Second question' }
+			vi.mocked(fetchQuiz).mockResolvedValue({
+				...quiz,
+				questions: [first, second]
+			})
+			const missing = new ApiError(HTTP_STATUS.NOT_FOUND, {
+				detail: 'Question was deleted.'
+			})
+			vi.mocked(createQuestion).mockRejectedValue(missing)
+			vi.mocked(updateQuestion).mockRejectedValue(missing)
+			vi.mocked(deleteQuestion).mockRejectedValue(missing)
+			vi.mocked(reorderQuestions).mockRejectedValue(missing)
+			const user = userEvent.setup()
+			renderEditor()
+			await screen.findByText(first.text)
+			if (action === 'create') {
+				await user.click(
+					screen.getByRole('button', { name: QUIZ_DETAILS_COPY.addQuestions })
+				)
+				await user.type(
+					screen.getByLabelText(QUESTION_FORM_COPY.text),
+					'New question'
+				)
+				await user.click(
+					screen.getByRole('button', { name: QUESTION_FORM_COPY.save })
+				)
+			} else if (action === 'update') {
+				await user.click(
+					screen.getAllByRole('button', { name: QUESTION_FORM_COPY.edit })[0]
+				)
+				await user.click(
+					screen.getByRole('button', { name: QUESTION_FORM_COPY.saveEdit })
+				)
+			} else if (action === 'delete') {
+				await user.click(
+					screen.getAllByRole('button', { name: QUESTION_FORM_COPY.delete })[0]
+				)
+				const buttons = screen.getAllByRole('button', {
+					name: QUESTION_FORM_COPY.delete
+				})
+				await user.click(buttons[buttons.length - 1])
+			} else
+				await user.click(
+					screen.getAllByRole('button', {
+						name: QUESTION_FORM_COPY.moveDown
+					})[0]
+				)
+			expect(
+				await screen.findByText(QUESTION_FORM_COPY.notFoundTitle)
+			).toBeInTheDocument()
+			expect(
+				screen.getByRole('button', { name: QUIZ_DETAILS_COPY.notFound.back })
+			).toBeInTheDocument()
+			await user.click(
+				screen.getByRole('button', { name: QUESTION_FORM_COPY.refresh })
+			)
+			expect(await screen.findByText(first.text)).toBeInTheDocument()
+			expect(
+				screen.queryByText(QUESTION_FORM_COPY.notFoundTitle)
+			).not.toBeInTheDocument()
+			expect(
+				screen.getByRole('button', { name: QUIZ_FORM_COPY.submitEdit })
+			).toBeEnabled()
+		}
+	)
+
+	it('shows quiz not found when the quiz disappears during question creation', async () => {
+		const missing = new ApiError(HTTP_STATUS.NOT_FOUND, {})
+		vi.mocked(createQuestion).mockImplementation(() => {
+			vi.mocked(fetchQuiz).mockRejectedValue(missing)
+			return Promise.reject(missing)
+		})
+		const user = userEvent.setup()
+		renderEditor()
+		await user.click(
+			await screen.findByRole('button', {
+				name: QUIZ_DETAILS_COPY.addQuestions
+			})
+		)
+		await user.type(
+			screen.getByLabelText(QUESTION_FORM_COPY.text),
+			'New question'
+		)
+		await user.click(
+			screen.getByRole('button', { name: QUESTION_FORM_COPY.save })
+		)
+		expect(
+			await screen.findByText(QUIZ_DETAILS_COPY.notFound.title)
+		).toBeInTheDocument()
+		expect(
+			screen.queryByRole('button', { name: QUIZ_FORM_COPY.submitEdit })
+		).not.toBeInTheDocument()
+	})
+
+	it('shows quiz not found when unarchiving returns 404', async () => {
+		vi.mocked(fetchQuiz).mockResolvedValue({ ...quiz, isArchived: true })
+		vi.mocked(setQuizArchived).mockRejectedValue(
+			new ApiError(HTTP_STATUS.NOT_FOUND, {})
+		)
+		const user = userEvent.setup()
+		renderEditor()
+		await user.click(
+			await screen.findByRole('button', { name: QUIZ_DETAILS_COPY.unarchive })
+		)
+		expect(
+			await screen.findByText(QUIZ_DETAILS_COPY.notFound.title)
+		).toBeInTheDocument()
+	})
 	it.each([QUESTION_FORM_COPY.moveUp, QUESTION_FORM_COPY.moveDown])(
 		'saves question order with %s',
 		async action => {

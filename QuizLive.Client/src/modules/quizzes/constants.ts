@@ -11,6 +11,10 @@ export const QUESTION_LIMITS = {
 	maxPoints: 10000
 } as const
 export const QUESTION_FORM_COPY = {
+	notFoundTitle: 'Question not found',
+	notFoundBody:
+		'The question or quiz may have been deleted. Refresh the questions or return to your quizzes.',
+	refresh: 'Refresh questions',
 	moveUp: 'Move up',
 	lastQuestionDeleteReason:
 		'A quiz needs at least one question. Add another question before deleting this one.',

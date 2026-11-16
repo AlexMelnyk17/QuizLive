@@ -112,22 +112,28 @@ describe('QuizForm', () => {
 		})
 	})
 
-	it('shows server field errors next to the fields, ignoring key case', async () => {
-		const user = userEvent.setup()
-		const onSubmit = vi.fn().mockRejectedValue(
-			new ApiError(HTTP_STATUS.BAD_REQUEST, {
-				errors: { Title: ['The title is not allowed.'] }
-			})
-		)
-		renderQuizForm(onSubmit)
+	it.each(['Title', 'TITLE', 'tItLe'])(
+		'shows server field errors for key %s next to the field',
+		async key => {
+			const user = userEvent.setup()
+			const onSubmit = vi.fn().mockRejectedValue(
+				new ApiError(HTTP_STATUS.BAD_REQUEST, {
+					errors: { [key]: ['The title is not allowed.'] }
+				})
+			)
+			renderQuizForm(onSubmit)
 
-		await user.type(screen.getByLabelText(QUIZ_FORM_COPY.fields.title), 'Math')
-		await user.click(screen.getByRole('button', { name: SUBMIT_LABEL }))
+			await user.type(
+				screen.getByLabelText(QUIZ_FORM_COPY.fields.title),
+				'Math'
+			)
+			await user.click(screen.getByRole('button', { name: SUBMIT_LABEL }))
 
-		expect(
-			await screen.findByText('The title is not allowed.')
-		).toBeInTheDocument()
-	})
+			expect(
+				await screen.findByText('The title is not allowed.')
+			).toBeInTheDocument()
+		}
+	)
 
 	it('shows the server message for the whole form and keeps the values', async () => {
 		const user = userEvent.setup()

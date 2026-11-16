@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, screen, within } from '@testing-library/react'
+import { act, cleanup, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -63,6 +63,51 @@ function renderQuizCreatePage() {
 }
 
 describe('QuizCreatePage', () => {
+	it('starts with empty fields and validates before calling the API', async () => {
+		const user = userEvent.setup()
+		renderQuizCreatePage()
+		expect(screen.getByLabelText(QUIZ_FORM_COPY.fields.title)).toHaveValue('')
+		expect(
+			screen.getByLabelText(QUIZ_FORM_COPY.fields.description)
+		).toHaveValue('')
+		await user.click(
+			within(screen.getByRole('main')).getByRole('button', {
+				name: QUIZ_FORM_COPY.submitCreate
+			})
+		)
+		expect(
+			await screen.findByText(QUIZ_FORM_COPY.validation.titleRequired)
+		).toBeInTheDocument()
+		expect(createQuizMock).not.toHaveBeenCalled()
+	})
+
+	it('shows a pending save, prevents duplicate submissions and navigates only after success', async () => {
+		let finish: ((quiz: QuizDto) => void) | undefined
+		const pending = new Promise<QuizDto>(resolve => {
+			finish = resolve
+		})
+		createQuizMock.mockReturnValue(pending)
+		const user = userEvent.setup()
+		renderQuizCreatePage()
+		await user.type(screen.getByLabelText(QUIZ_FORM_COPY.fields.title), 'Math')
+		const submit = within(screen.getByRole('main')).getByRole('button', {
+			name: QUIZ_FORM_COPY.submitCreate
+		})
+		await user.click(submit)
+		expect(submit).toBeDisabled()
+		expect(submit).toHaveAttribute('aria-busy', 'true')
+		await user.click(submit)
+		expect(createQuizMock).toHaveBeenCalledTimes(1)
+		expect(navigateMock).not.toHaveBeenCalled()
+		await act(async () => {
+			finish?.(createdQuiz)
+			await pending
+		})
+		expect(navigateMock).toHaveBeenCalledWith({
+			to: PATHS.quizEdit,
+			params: { quizId: String(createdQuiz.id) }
+		})
+	})
 	beforeEach(() => {
 		createQuizMock.mockReset()
 		navigateMock.mockReset()

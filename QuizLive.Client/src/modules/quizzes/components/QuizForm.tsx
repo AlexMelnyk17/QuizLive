@@ -88,7 +88,7 @@ export function QuizForm({
 			}
 
 			// 400 errors belong to fields; 409 and the rest have only a message for the whole form.
-			const fieldErrors = getFieldErrors(error)
+			const fieldErrors = getFieldErrors(error, FORM_FIELDS)
 			const fieldsWithErrors = FORM_FIELDS.filter(name => fieldErrors[name])
 
 			for (const name of fieldsWithErrors) {

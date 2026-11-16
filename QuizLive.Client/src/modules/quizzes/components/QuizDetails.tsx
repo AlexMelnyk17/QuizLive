@@ -40,6 +40,7 @@ import { formatQuizDate } from '@modules/quizzes/utils/formatQuizDate'
 
 import { ApiError } from '@api/apiError'
 import { HTTP_STATUS } from '@api/httpStatus'
+import { isNotFoundError } from '@api/isNotFoundError'
 
 export type QuizDetailsProps = {
 	quizId: number
@@ -59,6 +60,11 @@ export function QuizDetails({
 	const quiz = useQuiz(quizId, !deleteQuiz.isSuccess)
 	const setQuizArchived = useSetQuizArchived()
 	const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
+	if (
+		[quiz.error, deleteQuiz.error, setQuizArchived.error].some(isNotFoundError)
+	) {
+		return <QuizNotFound onBack={onBack} />
+	}
 
 	if (deleteQuiz.isSuccess) {
 		return <Text tone='muted'>{QUIZ_DETAILS_COPY.deleted}</Text>
@@ -80,13 +86,6 @@ export function QuizDetails({
 	}
 
 	if (quiz.isError) {
-		if (
-			quiz.error instanceof ApiError &&
-			quiz.error.status === HTTP_STATUS.NOT_FOUND
-		) {
-			return <QuizNotFound onBack={onBack} />
-		}
-
 		return (
 			<Stack direction='column' align='stretch'>
 				<Alert variant='danger' title={QUIZ_DETAILS_COPY.loadError.title}>

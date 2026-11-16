@@ -10,6 +10,7 @@ import { Stack } from '@components/ui/Stack'
 import { Text } from '@components/ui/Text'
 
 import { QuestionForm } from '@modules/quizzes/components/QuestionForm'
+import { QuestionNotFound } from '@modules/quizzes/components/QuestionNotFound'
 import { QuestionView } from '@modules/quizzes/components/QuestionView'
 import {
 	questionsSection,
@@ -23,18 +24,22 @@ import {
 } from '@modules/quizzes/constants'
 import { useCreateQuestion } from '@modules/quizzes/hooks/useCreateQuestion'
 import { useDeleteQuestion } from '@modules/quizzes/hooks/useDeleteQuestion'
+import { useInvalidateQuizzes } from '@modules/quizzes/hooks/useInvalidateQuizzes'
 import { useReorderQuestions } from '@modules/quizzes/hooks/useReorderQuestions'
 import { useUpdateQuestion } from '@modules/quizzes/hooks/useUpdateQuestion'
 import type { QuestionRequest, QuizDetailsDto } from '@modules/quizzes/types'
 
 import { ApiError } from '@api/apiError'
+import { isNotFoundError } from '@api/isNotFoundError'
 
 export function QuizQuestionsEditor({
 	quiz,
-	onFormOpenChange
+	onFormOpenChange,
+	onBack
 }: {
 	quiz: QuizDetailsDto
 	onFormOpenChange: (open: boolean) => void
+	onBack: () => void
 }) {
 	const [adding, setAdding] = useState(false)
 	const [editingId, setEditingId] = useState<number | null>(null)
@@ -43,6 +48,12 @@ export function QuizQuestionsEditor({
 	const remove = useDeleteQuestion(quiz.id)
 	const create = useCreateQuestion(quiz.id)
 	const reorder = useReorderQuestions(quiz.id)
+	const invalidate = useInvalidateQuizzes()
+	const handleMutationError = (error: unknown) => {
+		if (!isNotFoundError(error)) return
+		closeForm()
+		void invalidate()
+	}
 	const actionsDisabled =
 		adding ||
 		editingId !== null ||
@@ -58,7 +69,11 @@ export function QuizQuestionsEditor({
 		if (moved === undefined) return
 		ids.splice(target, 0, moved)
 		onFormOpenChange(true)
-		reorder.mutate(ids, { onSettled: () => onFormOpenChange(false) })
+		remove.reset()
+		reorder.mutate(ids, {
+			onError: handleMutationError,
+			onSettled: () => onFormOpenChange(false)
+		})
 	}
 	const closeForm = () => {
 		setAdding(false)
@@ -66,8 +81,27 @@ export function QuizQuestionsEditor({
 		onFormOpenChange(false)
 	}
 	const addQuestion = async (request: QuestionRequest) => {
-		await create.mutateAsync(request)
+		await create.mutateAsync(request, { onError: handleMutationError })
 		closeForm()
+	}
+	if (
+		[create.error, update.error, remove.error, reorder.error].some(
+			isNotFoundError
+		)
+	) {
+		return (
+			<QuestionNotFound
+				onBack={onBack}
+				onRefresh={() => {
+					create.reset()
+					update.reset()
+					remove.reset()
+					reorder.reset()
+					closeForm()
+					void invalidate()
+				}}
+			/>
+		)
 	}
 	return (
 		<Stack direction='column' align='stretch' className={questionsSection}>
@@ -106,7 +140,10 @@ export function QuizQuestionsEditor({
 							kind={quiz.kind}
 							question={question}
 							onSubmit={async request => {
-								await update.mutateAsync({ questionId: question.id, request })
+								await update.mutateAsync(
+									{ questionId: question.id, request },
+									{ onError: handleMutationError }
+								)
 								closeForm()
 							}}
 							onCancel={closeForm}
@@ -173,6 +210,7 @@ export function QuizQuestionsEditor({
 											}
 											onClick={() => {
 												remove.reset()
+												reorder.reset()
 												setDeletingId(question.id)
 											}}
 										>
@@ -209,6 +247,7 @@ export function QuizQuestionsEditor({
 						onClick={() => {
 							if (deletingId !== null)
 								remove.mutate(deletingId, {
+									onError: handleMutationError,
 									onSettled: () => setDeletingId(null)
 								})
 						}}

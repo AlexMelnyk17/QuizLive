@@ -79,6 +79,40 @@ function renderQuizDetails(props: Partial<QuizDetailsProps> = {}) {
 }
 
 describe('QuizDetails', () => {
+	it.each(['archive', 'delete'])(
+		'shows not found when %s returns 404',
+		async action => {
+			const user = userEvent.setup()
+			const onBack = vi.fn()
+			fetchQuizMock.mockResolvedValue(mathQuiz)
+			const missing = new ApiError(404, { detail: 'Quiz was deleted.' })
+			setQuizArchivedMock.mockRejectedValue(missing)
+			deleteQuizMock.mockRejectedValue(missing)
+			renderQuizDetails({ onBack })
+			await user.click(
+				await screen.findByRole('button', {
+					name:
+						action === 'archive'
+							? QUIZ_DETAILS_COPY.archive
+							: QUIZ_DETAILS_COPY.delete
+				})
+			)
+			if (action === 'delete')
+				await user.click(
+					screen.getByRole('button', {
+						name: QUIZ_DETAILS_COPY.deleteDialog.confirm
+					})
+				)
+			expect(
+				await screen.findByText(QUIZ_DETAILS_COPY.notFound.title)
+			).toBeInTheDocument()
+			expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+			await user.click(
+				screen.getByRole('button', { name: QUIZ_DETAILS_COPY.notFound.back })
+			)
+			expect(onBack).toHaveBeenCalled()
+		}
+	)
 	beforeEach(() => {
 		fetchQuizMock.mockReset()
 		setQuizArchivedMock.mockReset()

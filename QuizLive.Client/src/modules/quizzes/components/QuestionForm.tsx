@@ -114,15 +114,28 @@ export function QuestionForm({
 							}))
 			})
 		} catch (error) {
-			const fieldErrors = error instanceof ApiError ? getFieldErrors(error) : {}
 			const validPaths: FieldPath<QuestionFormValues>[] = [
 				'text',
 				'timeLimitSeconds',
 				'basePoints',
 				'imageUrl',
 				'options',
+				'correctIndex',
 				...fields.map((_, index) => `options.${index}.text` as const)
 			]
+			const correctnessPaths = fields.map(
+				(_, index) => `options.${index}.isCorrect`
+			)
+			const fieldErrors =
+				error instanceof ApiError
+					? getFieldErrors(error, [...validPaths, ...correctnessPaths])
+					: {}
+			for (const path of correctnessPaths) {
+				if (fieldErrors[path]) {
+					fieldErrors.correctIndex = fieldErrors[path]
+					break
+				}
+			}
 			const matching = validPaths.filter(path => fieldErrors[path])
 			for (const path of matching)
 				setError(path, { message: fieldErrors[path] })
