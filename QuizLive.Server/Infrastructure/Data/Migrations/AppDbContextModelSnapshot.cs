@@ -132,6 +132,10 @@ namespace QuizLive.Server.Data.Migrations
 
                     b.HasIndex("QuizId");
 
+                    b.HasIndex(new[] { "QuizId" }, "IX_GameSessionRecords_QuizId_Active")
+                        .IsUnique()
+                        .HasFilter("\"EndedAtUtc\" IS NULL");
+
                     b.ToTable("GameSessionRecords", null, t =>
                         {
                             t.HasCheckConstraint("CK_GameSessionRecords_CurrentQuestion", "(\"Status\" = 'Lobby' AND \"CurrentQuestionOrder\" IS NULL AND \"CurrentQuestionStartedAtUtc\" IS NULL AND \"CurrentQuestionEndsAtUtc\" IS NULL) OR (\"Status\" IN ('Question','Results') AND \"CurrentQuestionOrder\" IS NOT NULL AND \"CurrentQuestionStartedAtUtc\" IS NOT NULL) OR \"Status\" = 'Finished'");

@@ -10,7 +10,8 @@ public class GameSessionRecord
     public int Id { get; set; }
     public string Code { get; set; } = "";              // 6, unique among active games
                                                         // (index filtered by EndedAtUtc IS NULL)
-    public int QuizId { get; set; }
+    public int QuizId { get; set; }                     // at most one active game per quiz
+                                                        // (index filtered by EndedAtUtc IS NULL)
     public Quiz Quiz { get; set; } = null!;             // Restrict
     public string HostUserId { get; set; } = "";        // FK → AspNetUsers, Restrict
     public AppUser HostUser { get; set; } = null!;
