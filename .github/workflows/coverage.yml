@@ -1,0 +1,77 @@
+# Separate from the CI workflow (#37): it only builds coverage reports and uploads them as artifacts.
+# The jobs run the same npm scripts as a local run (see "Test coverage" in the README).
+name: Coverage
+
+on:
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Run server tests with coverage
+        run: npm run coverage:server
+
+      - name: Add summary to the job
+        if: always()
+        run: cat coverage/server/report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload server report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-server
+          path: coverage/server/report
+          retention-days: 14
+          if-no-files-found: warn
+
+  client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # .NET is needed only for ReportGenerator, which builds the markdown summary.
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: QuizLive.Client/package-lock.json
+
+      - name: Install client dependencies
+        run: npm ci
+        working-directory: QuizLive.Client
+
+      - name: Run client tests with coverage
+        run: npm run coverage:client
+
+      - name: Add summary to the job
+        if: always()
+        run: cat QuizLive.Client/coverage/summary/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload client report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-client
+          path: QuizLive.Client/coverage
+          retention-days: 14
+          if-no-files-found: warn
