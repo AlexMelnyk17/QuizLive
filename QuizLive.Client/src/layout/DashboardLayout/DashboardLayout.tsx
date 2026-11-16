@@ -7,7 +7,7 @@ import { Divider } from '@components/ui/Divider'
 import { Heading } from '@components/ui/Heading'
 import { Text } from '@components/ui/Text'
 
-import { signOut, useSession } from '@modules/auth'
+import { signOut, useSession } from '@modules/auth/store/sessionStore'
 
 import {
 	dashboardHeader,

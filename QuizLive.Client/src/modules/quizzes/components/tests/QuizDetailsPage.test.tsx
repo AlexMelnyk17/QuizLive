@@ -20,7 +20,7 @@ vi.mock('@tanstack/react-router', () => ({
 	useParams: () => paramsMock()
 }))
 
-vi.mock('@modules/auth', () => ({
+vi.mock('@modules/auth/store/sessionStore', () => ({
 	useSession: () => null,
 	signOut: vi.fn()
 }))

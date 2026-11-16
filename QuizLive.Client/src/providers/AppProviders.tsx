@@ -1,7 +1,10 @@
 import type { ReactNode } from 'react'
 
 import { configureApiClient } from '@api/client'
-import { getAccessToken, handleUnauthorized } from '@modules/auth'
+import {
+	getAccessToken,
+	handleUnauthorized
+} from '@modules/auth/store/sessionStore'
 import { QueryProvider } from '@providers/QueryProvider'
 
 configureApiClient({

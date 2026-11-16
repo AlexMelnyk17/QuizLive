@@ -17,7 +17,7 @@ vi.mock('@tanstack/react-router', () => ({
 	useNavigate: () => navigateMock
 }))
 
-vi.mock('@modules/auth', () => ({
+vi.mock('@modules/auth/store/sessionStore', () => ({
 	useSession: () => ({
 		token: 't',
 		expiresAtUtc: new Date(Date.now() + 60_000).toISOString(),
