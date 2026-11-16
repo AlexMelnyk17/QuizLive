@@ -54,6 +54,7 @@ const colorProperties = defineProperties({
 		backgroundColor: {
 			bg: vars.colors.bg,
 			surface: vars.colors.surface,
+			surfaceSunken: vars.colors.surfaceSunken,
 			surfaceRaised: vars.colors.surfaceRaised,
 			primary: vars.colors.primary,
 			primaryMuted: vars.colors.primaryMuted,
