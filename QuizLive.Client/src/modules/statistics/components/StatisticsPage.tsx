@@ -10,11 +10,9 @@ import {
 	STATISTICS_PAGE_COPY,
 } from '@modules/statistics/constants'
 import { useHostStats } from '@modules/statistics/hooks/useHostStats'
-import {
-	formatStatDecimal,
-	formatStatInteger,
-	isHostStatsEmpty,
-} from '@modules/statistics/utils'
+import { formatStatDecimal } from '@modules/statistics/utils/formatStatDecimal'
+import { formatStatInteger } from '@modules/statistics/utils/formatStatInteger'
+import { isHostStatsEmpty } from '@modules/statistics/utils/isHostStatsEmpty'
 import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
 import { GamesByKindChart } from '@modules/statistics/components/charts/GamesByKindChart'
 import { GamesByStatusChart } from '@modules/statistics/components/charts/GamesByStatusChart'

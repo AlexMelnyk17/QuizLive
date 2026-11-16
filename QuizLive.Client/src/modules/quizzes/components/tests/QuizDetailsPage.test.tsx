@@ -3,6 +3,8 @@ import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { PATHS } from '@config/routes'
+
 import type { QuizDetailsProps } from '@modules/quizzes/components/QuizDetails'
 import { QuizDetailsPage } from '@modules/quizzes/components/QuizDetailsPage'
 import { QUIZ_DETAILS_COPY } from '@modules/quizzes/constants'
@@ -20,7 +22,7 @@ vi.mock('@tanstack/react-router', () => ({
 	useParams: () => paramsMock()
 }))
 
-vi.mock('@modules/auth', () => ({
+vi.mock('@modules/auth/store/sessionStore', () => ({
 	useSession: () => null,
 	signOut: vi.fn()
 }))
@@ -69,7 +71,7 @@ describe('QuizDetailsPage', () => {
 				screen.getByRole('button', { name: `Simulate ${action}` })
 			)
 
-			expect(navigateMock).toHaveBeenCalledWith({ to: '/dashboard' })
+			expect(navigateMock).toHaveBeenCalledWith({ to: PATHS.dashboard })
 		}
 	)
 
@@ -88,7 +90,7 @@ describe('QuizDetailsPage', () => {
 				screen.getByText(QUIZ_DETAILS_COPY.notFound.title)
 			).toBeInTheDocument()
 			expect(screen.queryByText(/Details of quiz/)).not.toBeInTheDocument()
-			expect(navigateMock).toHaveBeenCalledWith({ to: '/dashboard' })
+			expect(navigateMock).toHaveBeenCalledWith({ to: PATHS.dashboard })
 		}
 	)
 })

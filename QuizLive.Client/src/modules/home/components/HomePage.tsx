@@ -1,18 +1,20 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 
+import { PATHS } from '@config/routes'
+
 import { Button } from '@components/ui/Button'
 import { Heading } from '@components/ui/Heading'
 import { Text } from '@components/ui/Text'
 
-import { useSession } from '@modules/auth'
-import { HOME_TITLE } from '@modules/home/constants'
+import { useSession } from '@modules/auth/store/sessionStore'
+import { HOME_COPY, HOME_TITLE } from '@modules/home/constants'
 import {
 	homePage,
 	hostSection,
 	inlineLink,
 	section,
 } from '@modules/home/components/HomePage.css'
-import { JoinByCodePanel } from '@modules/join'
+import { JoinByCodePanel } from '@modules/join/components/JoinByCodePanel'
 
 export function HomePage() {
 	const navigate = useNavigate()
@@ -24,7 +26,7 @@ export function HomePage() {
 
 			<section className={section} aria-labelledby="join-heading">
 				<Heading level={2} id="join-heading">
-					Join a quiz
+					{HOME_COPY.joinSectionTitle}
 				</Heading>
 				<JoinByCodePanel autoFocus />
 			</section>
@@ -34,24 +36,28 @@ export function HomePage() {
 				aria-labelledby="host-heading"
 			>
 				<Heading level={2} id="host-heading">
-					Host your own quiz
+					{HOME_COPY.hostSectionTitle}
 				</Heading>
 				<Text tone="muted">
-					To create and manage quizzes you need an authorized account.
+					{HOME_COPY.hostBody}
 				</Text>
 				{session ? (
 					<Button
 						variant="secondary"
-						onClick={() => void navigate({ to: '/dashboard' })}
+						onClick={() => void navigate({ to: PATHS.dashboard })}
 					>
-						Go to dashboard
+						{HOME_COPY.goToDashboard}
 					</Button>
 				) : (
 					<Text>
-						<Link to="/login" className={inlineLink}>Log in</Link>
-						{' or '}
-						<Link to="/register" className={inlineLink}>register</Link>
-						{' to get started.'}
+						<Link to={PATHS.login} className={inlineLink}>
+							{HOME_COPY.logIn}
+						</Link>
+						{HOME_COPY.authJoiner}
+						<Link to={PATHS.register} className={inlineLink}>
+							{HOME_COPY.register}
+						</Link>
+						{HOME_COPY.authSuffix}
 					</Text>
 				)}
 			</section>

@@ -31,13 +31,13 @@ import {
 	QUIZ_LIST_COPY
 } from '@modules/quizzes/constants'
 import { useQuiz } from '@modules/quizzes/hooks/useQuiz'
-import {
-	useDeleteQuiz,
-	useSetQuizArchived
-} from '@modules/quizzes/hooks/useQuizMutations'
-import { formatQuestionCount, formatQuizDate } from '@modules/quizzes/utils'
+import { useDeleteQuiz } from '@modules/quizzes/hooks/useDeleteQuiz'
+import { useSetQuizArchived } from '@modules/quizzes/hooks/useSetQuizArchived'
+import { formatQuestionCount } from '@modules/quizzes/utils/formatQuestionCount'
+import { formatQuizDate } from '@modules/quizzes/utils/formatQuizDate'
 
 import { ApiError } from '@api/apiError'
+import { HTTP_STATUS } from '@api/httpStatus'
 
 export type QuizDetailsProps = {
 	quizId: number
@@ -78,7 +78,10 @@ export function QuizDetails({
 	}
 
 	if (quiz.isError) {
-		if (quiz.error instanceof ApiError && quiz.error.status === 404) {
+		if (
+			quiz.error instanceof ApiError &&
+			quiz.error.status === HTTP_STATUS.NOT_FOUND
+		) {
 			return <QuizNotFound onBack={onBack} />
 		}
 
@@ -106,7 +109,7 @@ export function QuizDetails({
 	// A played quiz cannot be deleted (409); archiving keeps its games and hides it from the active list.
 	const canArchiveInstead =
 		deleteQuiz.error instanceof ApiError &&
-		deleteQuiz.error.status === 409 &&
+		deleteQuiz.error.status === HTTP_STATUS.CONFLICT &&
 		!data.isArchived
 
 	const changeArchived = (archived: boolean) => {

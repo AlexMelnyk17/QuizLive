@@ -15,7 +15,8 @@ import {
 } from '@modules/quizzes/components/QuizListItem.css'
 import { QUIZ_KIND_LABELS, QUIZ_LIST_COPY } from '@modules/quizzes/constants'
 import type { QuizDto } from '@modules/quizzes/types'
-import { formatQuestionCount, formatQuizDate } from '@modules/quizzes/utils'
+import { formatQuestionCount } from '@modules/quizzes/utils/formatQuestionCount'
+import { formatQuizDate } from '@modules/quizzes/utils/formatQuizDate'
 
 export type QuizListItemProps = {
 	quiz: QuizDto

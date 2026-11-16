@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import { ApiError } from '@api/apiError'
-import { getFieldErrors, toFieldPath } from '@api/fieldErrors'
+import { getFieldErrors } from '@api/getFieldErrors'
+import { toFieldPath } from '@api/toFieldPath'
 
 describe('toFieldPath', () => {
 	it.each([

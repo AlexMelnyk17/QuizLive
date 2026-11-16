@@ -1,6 +1,7 @@
-import { ENV } from '@config'
+import { ENV } from '@config/env'
 
 import { ApiError, parseProblemResponse } from '@api/apiError'
+import { HTTP_STATUS } from '@api/httpStatus'
 
 export type ApiRequestOptions = {
 	method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -52,7 +53,7 @@ export async function apiRequest<T>(
 	})
 
 	if (response.ok) {
-		if (response.status === 204) {
+		if (response.status === HTTP_STATUS.NO_CONTENT) {
 			return undefined as T
 		}
 		const text = await response.text()
@@ -62,7 +63,7 @@ export async function apiRequest<T>(
 		return JSON.parse(text) as T
 	}
 
-	if (response.status === 401 && sentBearer && clientConfig) {
+	if (response.status === HTTP_STATUS.UNAUTHORIZED && sentBearer && clientConfig) {
 		clientConfig.onUnauthorized()
 	}
 

@@ -13,7 +13,7 @@ import {
 } from '@modules/quizzes/components/QuizList'
 import { QUIZ_LIST_COPY } from '@modules/quizzes/constants'
 import type { QuizDto } from '@modules/quizzes/types'
-import { formatQuizDate } from '@modules/quizzes/utils'
+import { formatQuizDate } from '@modules/quizzes/utils/formatQuizDate'
 
 import { ApiError } from '@api/apiError'
 

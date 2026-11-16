@@ -2,6 +2,8 @@ import { screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
+import { PATHS } from '@config/routes'
+
 import { HomePage } from '@modules/home/components/HomePage'
 import { renderWithTheme } from '@src/test/testUtils'
 
@@ -16,7 +18,7 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
 	}
 })
 
-vi.mock('@modules/auth', () => ({
+vi.mock('@modules/auth/store/sessionStore', () => ({
 	useSession: () => null,
 }))
 
@@ -34,11 +36,11 @@ describe('HomePage', () => {
 		expect(screen.getByRole('group', { name: /game code/i })).toBeInTheDocument()
 		expect(screen.getByRole('link', { name: /Log in/i })).toHaveAttribute(
 			'href',
-			'/login'
+			PATHS.login
 		)
 		expect(screen.getByRole('link', { name: /register/i })).toHaveAttribute(
 			'href',
-			'/register'
+			PATHS.register
 		)
 		expect(fetchSpy).not.toHaveBeenCalled()
 		fetchSpy.mockRestore()

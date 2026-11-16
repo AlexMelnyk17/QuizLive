@@ -1,5 +1,7 @@
 import { useNavigate, useParams } from '@tanstack/react-router'
 
+import { PATHS } from '@config/routes'
+
 import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
 
 import { QuizDetails } from '@modules/quizzes/components/QuizDetails'
@@ -8,10 +10,10 @@ import { QUIZ_DETAILS_COPY } from '@modules/quizzes/constants'
 
 export function QuizDetailsPage() {
 	const navigate = useNavigate()
-	const quizId = Number(useParams({ from: '/quizzes/$quizId' }).quizId)
+	const quizId = Number(useParams({ from: PATHS.quizDetails }).quizId)
 
 	const backToList = () => {
-		void navigate({ to: '/dashboard' })
+		void navigate({ to: PATHS.dashboard })
 	}
 
 	return (

@@ -3,16 +3,15 @@ import {
 	questionDtoSchema
 } from '@modules/quizzes/schemas'
 import type { QuestionDto, QuestionRequest } from '@modules/quizzes/types'
+import { QUIZZES_API } from '@modules/quizzes/constants'
 
 import { apiRequest } from '@api/client'
-
-const questionsPath = (quizId: number) => `/quizzes/${quizId}/questions`
 
 export async function createQuestion(
 	quizId: number,
 	request: QuestionRequest
 ): Promise<QuestionDto> {
-	const data = await apiRequest<QuestionDto>(questionsPath(quizId), {
+	const data = await apiRequest<QuestionDto>(QUIZZES_API.questions(quizId), {
 		method: 'POST',
 		body: request
 	})
@@ -25,7 +24,7 @@ export async function updateQuestion(
 	request: QuestionRequest
 ): Promise<QuestionDto> {
 	const data = await apiRequest<QuestionDto>(
-		`${questionsPath(quizId)}/${questionId}`,
+		QUIZZES_API.questionById(quizId, questionId),
 		{ method: 'PUT', body: request }
 	)
 	return questionDtoSchema.parse(data)
@@ -35,19 +34,18 @@ export async function deleteQuestion(
 	quizId: number,
 	questionId: number
 ): Promise<void> {
-	await apiRequest<void>(`${questionsPath(quizId)}/${questionId}`, {
+	await apiRequest<void>(QUIZZES_API.questionById(quizId, questionId), {
 		method: 'DELETE'
 	})
 }
 
-// questionIds must list every question of the quiz exactly once, in the new order.
 export async function reorderQuestions(
 	quizId: number,
 	questionIds: number[]
 ): Promise<QuestionDto[]> {
-	const data = await apiRequest<QuestionDto[]>(
-		`${questionsPath(quizId)}/order`,
-		{ method: 'PUT', body: { questionIds } }
-	)
+	const data = await apiRequest<QuestionDto[]>(QUIZZES_API.reorder(quizId), {
+		method: 'PUT',
+		body: { questionIds }
+	})
 	return questionDtoListSchema.parse(data)
 }
