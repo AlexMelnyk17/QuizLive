@@ -16,11 +16,27 @@ namespace QuizLive.Server.API.Hubs
         public const string PlayerIdKey = "PlayerId";
         public const string GameIdKey = "GameId";
 
+        // Both connect methods check access first, then join the group, and only then read the state.
+        // The other way round, a player who joins in between would be missing from both the snapshot
+        // and the event. The cost is a possible duplicate, so a client must deduplicate by player id.
         public async Task<PlayerGameStateDto> ConnectAsPlayer(string playerToken)
         {
-            var state = await gameService.GetPlayerStateAsync(playerToken);
+            var gameId = await gameService.GetActivePlayerGameIdAsync(playerToken);
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, GameGroups.All(state.GameId));
+            await Groups.AddToGroupAsync(Context.ConnectionId, GameGroups.All(gameId));
+
+            PlayerGameStateDto state;
+
+            try
+            {
+                state = await gameService.GetPlayerStateAsync(playerToken);
+            }
+            catch
+            {
+                // The game ended in between: do not keep the connection in the group of a finished game.
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, GameGroups.All(gameId));
+                throw;
+            }
 
             Context.Items[PlayerIdKey] = state.PlayerId;
             Context.Items[GameIdKey] = state.GameId;
@@ -35,10 +51,24 @@ namespace QuizLive.Server.API.Hubs
             var userId = Context.UserIdentifier
                 ?? throw new UnauthorizedException("The user is not authenticated.");
 
-            var game = await gameService.GetActiveHostGameAsync(gameId, userId);
+            await gameService.EnsureActiveHostGameAsync(gameId, userId);
 
             await Groups.AddToGroupAsync(Context.ConnectionId, GameGroups.All(gameId));
             await Groups.AddToGroupAsync(Context.ConnectionId, GameGroups.Host(gameId));
+
+            GameDto game;
+
+            try
+            {
+                game = await gameService.GetActiveHostGameAsync(gameId, userId);
+            }
+            catch
+            {
+                // The game ended in between: do not keep the connection in the groups of a finished game.
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, GameGroups.All(gameId));
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, GameGroups.Host(gameId));
+                throw;
+            }
 
             Context.Items[GameIdKey] = gameId;
 

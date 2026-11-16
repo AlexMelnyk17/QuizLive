@@ -200,10 +200,10 @@ namespace QuizLive.Server.Tests.Games
             Assert.Equal(System.Net.HttpStatusCode.NoContent, response.StatusCode);
         }
 
-        // Only the hub entry point fails; everything else is never reached in this test.
+        // Only the first service call of ConnectAsPlayer fails; everything else is never reached in this test.
         private class FailingGameService : IGameService
         {
-            public Task<PlayerGameStateDto> GetPlayerStateAsync(string playerToken) =>
+            public Task<int> GetActivePlayerGameIdAsync(string playerToken) =>
                 throw new InvalidOperationException(SecretDetail);
 
             public Task<GameDto> CreateAsync(CreateGameRequest request) => throw new NotImplementedException();
@@ -214,7 +214,7 @@ namespace QuizLive.Server.Tests.Games
             public Task<JoinGameResponse> JoinAsync(string code, JoinGameRequest request) => throw new NotImplementedException();
             public Task<GameDto> GetActiveHostGameAsync(int gameId, string hostUserId) => throw new NotImplementedException();
             public Task EnsureActiveHostGameAsync(int gameId, string hostUserId) => throw new NotImplementedException();
-            public Task<int> GetActivePlayerGameIdAsync(string playerToken) => throw new NotImplementedException();
+            public Task<PlayerGameStateDto> GetPlayerStateAsync(string playerToken) => throw new NotImplementedException();
         }
 
         private class CapturingLoggerProvider : ILoggerProvider
