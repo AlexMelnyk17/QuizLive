@@ -18,6 +18,33 @@ describe('toFieldPath', () => {
 })
 
 describe('getFieldErrors', () => {
+	it('matches arbitrary casing to the original camelCase form paths', () => {
+		const error = new ApiError(400, {
+			errors: {
+				TITLE: ['Title error'],
+				tItLe: ['Duplicate'],
+				TIMELIMITSECONDS: ['Time error'],
+				bAsEpOiNtS: ['Points error'],
+				'OPTIONS[1].TEXT': ['Answer error'],
+				'OpTiOnS[0].IsCoRrEcT': ['Correctness error']
+			}
+		})
+		expect(
+			getFieldErrors(error, [
+				'title',
+				'timeLimitSeconds',
+				'basePoints',
+				'options.1.text',
+				'options.0.isCorrect'
+			])
+		).toEqual({
+			title: 'Title error',
+			timeLimitSeconds: 'Time error',
+			basePoints: 'Points error',
+			'options.1.text': 'Answer error',
+			'options.0.isCorrect': 'Correctness error'
+		})
+	})
 	it('returns the first message of each field by form path', () => {
 		const error = new ApiError(400, {
 			errors: {
