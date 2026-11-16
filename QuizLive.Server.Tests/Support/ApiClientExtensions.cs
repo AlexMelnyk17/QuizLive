@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Microsoft.AspNetCore.Mvc.Testing;
 using QuizLive.Server.Application.Auth;
 using QuizLive.Server.Application.Games;
 using QuizLive.Server.Application.Questions;
@@ -15,7 +16,7 @@ namespace QuizLive.Server.Tests.Support
 
         private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
-        public static async Task<HttpClient> CreateAuthorizedClientAsync(this QuizLiveFactory factory)
+        public static async Task<HttpClient> CreateAuthorizedClientAsync(this WebApplicationFactory<Program> factory)
         {
             var client = factory.CreateClient();
             var auth = await client.RegisterAsync();

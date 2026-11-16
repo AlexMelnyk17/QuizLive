@@ -16,11 +16,12 @@ namespace QuizLive.Server.Infrastructure.Realtime
             SendAsync(gameId, nameof(IGameClient.GameEnded), group => group.GameEnded());
 
         // The change is already saved, so a failed broadcast must not fail the request.
+        // The host is not in the players' group, so lobby events go to both groups; a connection is in one of them only.
         private async Task SendAsync(int gameId, string eventName, Func<IGameClient, Task> send)
         {
             try
             {
-                await send(hub.Clients.Group(GameGroups.All(gameId)));
+                await send(hub.Clients.Groups(GameGroups.All(gameId), GameGroups.Host(gameId)));
             }
             catch (Exception ex)
             {
