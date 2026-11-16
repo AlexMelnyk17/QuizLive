@@ -53,7 +53,8 @@ namespace QuizLive.Server.API.Hubs
 
             await gameService.EnsureActiveHostGameAsync(gameId, userId);
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, GameGroups.All(gameId));
+            // The host controls the game but does not take part in it, so the connection stays out of the
+            // players' group. The notifier sends every lobby event to the host group as well.
             await Groups.AddToGroupAsync(Context.ConnectionId, GameGroups.Host(gameId));
 
             GameDto game;
@@ -64,8 +65,7 @@ namespace QuizLive.Server.API.Hubs
             }
             catch
             {
-                // The game ended in between: do not keep the connection in the groups of a finished game.
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, GameGroups.All(gameId));
+                // The game ended in between: do not keep the connection in the group of a finished game.
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, GameGroups.Host(gameId));
                 throw;
             }

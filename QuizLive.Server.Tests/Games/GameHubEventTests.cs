@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;
@@ -30,6 +31,62 @@ namespace QuizLive.Server.Tests.Games
 
             Assert.Equal(player.PlayerId, received.Id);
             Assert.Equal("Ann", received.Nickname);
+        }
+
+        [Fact]
+        public async Task PlayerJoined_IsDeliveredOnceToTheHostAndOnceToEachPlayer()
+        {
+            var host = await factory.CreateAuthorizedClientAsync();
+            var quiz = await host.CreatePlayableQuizAsync(QuizKind.OpenText);
+            var game = await host.CreateGameAsync(quiz.Id);
+            var ann = await host.JoinAsync(game.Code, "Ann");
+
+            await using var hostConnection = factory.CreateHubConnection(host.BearerToken());
+            var hostSees = hostConnection.Subscribe<GamePlayerDto>("PlayerJoined");
+            await hostConnection.StartAsync(Ct);
+            await hostConnection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+
+            await using var annConnection = factory.CreateHubConnection();
+            var annSees = annConnection.Subscribe<GamePlayerDto>("PlayerJoined");
+            await annConnection.StartAsync(Ct);
+            await annConnection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", ann.Token, Ct);
+
+            await host.JoinAsync(game.Code, "Bob");
+
+            Assert.Equal("Bob", (await hostSees.NextAsync()).Nickname);
+            Assert.Equal("Bob", (await annSees.NextAsync()).Nickname);
+
+            // A connection that belonged to two groups would receive the event twice.
+            await hostSees.AssertNoMoreAsync();
+            await annSees.AssertNoMoreAsync();
+        }
+
+        [Fact]
+        public async Task GameEnded_IsDeliveredOnceToTheHostAndThePlayer_EvenWhenEndedTwice()
+        {
+            var host = await factory.CreateAuthorizedClientAsync();
+            var quiz = await host.CreatePlayableQuizAsync(QuizKind.OpenText);
+            var game = await host.CreateGameAsync(quiz.Id);
+            var ann = await host.JoinAsync(game.Code, "Ann");
+
+            await using var hostConnection = factory.CreateHubConnection(host.BearerToken());
+            var hostSees = hostConnection.Subscribe("GameEnded");
+            await hostConnection.StartAsync(Ct);
+            await hostConnection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+
+            await using var annConnection = factory.CreateHubConnection();
+            var annSees = annConnection.Subscribe("GameEnded");
+            await annConnection.StartAsync(Ct);
+            await annConnection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", ann.Token, Ct);
+
+            Assert.Equal(HttpStatusCode.NoContent, (await host.PostAsync($"/api/games/{game.Id}/end", null, Ct)).StatusCode);
+            Assert.Equal(HttpStatusCode.NoContent, (await host.PostAsync($"/api/games/{game.Id}/end", null, Ct)).StatusCode);
+
+            await hostSees.NextAsync();
+            await annSees.NextAsync();
+
+            await hostSees.AssertNoMoreAsync();
+            await annSees.AssertNoMoreAsync();
         }
 
         // The hook makes a player join right after the lobby state was read: the snapshot cannot contain

@@ -27,6 +27,14 @@ namespace QuizLive.Server.Tests.Support
                 throw new TimeoutException("The hub event did not arrive in time.");
             }
         }
+
+        // Waits a short time and checks that nothing else arrived, e.g. a duplicate of the last event.
+        public async Task AssertNoMoreAsync(TimeSpan? quietPeriod = null)
+        {
+            await Task.Delay(quietPeriod ?? TimeSpan.FromMilliseconds(300), TestContext.Current.CancellationToken);
+
+            Assert.False(_events.Reader.TryRead(out _), "An unexpected extra hub event arrived.");
+        }
     }
 
     public static class HubEventExtensions
