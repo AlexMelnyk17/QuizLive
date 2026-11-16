@@ -11,6 +11,7 @@ namespace QuizLive.Server.Application.Games
     public class GameService(AppDbContext db, ICurrentUser currentUser, IGameNotifier notifier) : IGameService
     {
         private const int MaxCodeAttempts = 5;
+        private const string ActiveGameExists = "The quiz already has an active game.";
 
         public async Task<GameDto> CreateAsync(CreateGameRequest request)
         {
@@ -37,6 +38,11 @@ namespace QuizLive.Server.Application.Games
                 throw new ConflictException("The quiz has no questions.");
             }
 
+            if (await HasActiveGameAsync(request.QuizId))
+            {
+                throw new ConflictException(ActiveGameExists);
+            }
+
             var game = new GameSessionRecord
             {
                 QuizId = request.QuizId,
@@ -45,8 +51,9 @@ namespace QuizLive.Server.Application.Games
 
             db.GameSessionRecords.Add(game);
 
-            // The filtered unique index on Code is the real guarantee: if two games get the same code
-            // at the same time, the second insert fails and we retry with a new code.
+            // The filtered unique indexes are the real guarantee. If another game of this quiz was started
+            // at the same time, the insert fails and we report the conflict; otherwise the code collided
+            // with another active game, and we retry with a new code.
             for (var attempt = 1; ; attempt++)
             {
                 game.Code = GameCodeGenerator.Generate();
@@ -56,13 +63,25 @@ namespace QuizLive.Server.Application.Games
                     await db.SaveChangesAsync();
                     break;
                 }
-                catch (DbUpdateException ex) when (ex.IsUniqueViolation() && attempt < MaxCodeAttempts)
+                catch (DbUpdateException ex) when (ex.IsUniqueViolation())
                 {
+                    if (await HasActiveGameAsync(request.QuizId))
+                    {
+                        throw new ConflictException(ActiveGameExists);
+                    }
+
+                    if (attempt == MaxCodeAttempts)
+                    {
+                        throw;
+                    }
                 }
             }
 
             return await GetByIdAsync(game.Id);
         }
+
+        private Task<bool> HasActiveGameAsync(int quizId) =>
+            db.GameSessionRecords.AnyAsync(g => g.QuizId == quizId && g.EndedAtUtc == null);
 
         public async Task<List<GameSummaryDto>> GetMyGamesAsync(int? quizId = null, GameStatus? status = null)
         {

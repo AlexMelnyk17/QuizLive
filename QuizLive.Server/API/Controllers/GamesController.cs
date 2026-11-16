@@ -20,7 +20,7 @@ namespace QuizLive.Server.API.Controllers
         /// <response code="400">The request body failed validation.</response>
         /// <response code="401">The token is missing, invalid or expired.</response>
         /// <response code="404">The quiz does not exist or belongs to another user.</response>
-        /// <response code="409">The quiz is archived or has no questions.</response>
+        /// <response code="409">The quiz is archived, has no questions or already has an active game.</response>
         [HttpPost]
         [ProducesResponseType<GameDto>(StatusCodes.Status201Created)]
         [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]

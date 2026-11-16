@@ -41,6 +41,13 @@ public class GameSessionRecordConfiguration : IEntityTypeConfiguration<GameSessi
             .IsUnique()
             .HasFilter("\"EndedAtUtc\" IS NULL");
 
+        // A quiz can have at most one running game. The FK index is declared explicitly:
+        // otherwise EF treats the filtered unique index as covering QuizId and drops it.
+        builder.HasIndex(g => g.QuizId);
+        builder.HasIndex(g => g.QuizId, "IX_GameSessionRecords_QuizId_Active")
+            .IsUnique()
+            .HasFilter("\"EndedAtUtc\" IS NULL");
+
         builder.HasOne(g => g.HostUser)
             .WithMany(u => u.HostedGames)
             .HasForeignKey(g => g.HostUserId)
