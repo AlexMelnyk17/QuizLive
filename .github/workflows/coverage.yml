@@ -20,15 +20,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The tests target net8.0 (runtime 8), the build uses SDK 9.
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: |
+            8.0.x
+            9.0.x
+
+      # The runner also has a newer SDK (10) and picks it by default, but xunit v3 in VSTest mode
+      # (`--collect`, `--settings`) fails there. The file is created only in CI, not committed.
+      - name: Pin the .NET SDK to 9
+        run: echo '{"sdk":{"version":"9.0.100","rollForward":"latestFeature"}}' > global.json
 
       - name: Run server tests with coverage
         run: npm run coverage:server
 
       - name: Add summary to the job
-        if: always()
+        if: always() && hashFiles('coverage/server/report/SummaryGithub.md') != ''
         run: cat coverage/server/report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload server report
@@ -64,7 +72,7 @@ jobs:
         run: npm run coverage:client
 
       - name: Add summary to the job
-        if: always()
+        if: always() && hashFiles('QuizLive.Client/coverage/summary/SummaryGithub.md') != ''
         run: cat QuizLive.Client/coverage/summary/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload client report
