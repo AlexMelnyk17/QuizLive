@@ -17,7 +17,7 @@ import {
 import { QuizListItem } from '@modules/quizzes/components/QuizListItem'
 import { QUIZ_LIST_COPY } from '@modules/quizzes/constants'
 import { useMyQuizzes } from '@modules/quizzes/hooks/useMyQuizzes'
-import { useSetQuizArchived } from '@modules/quizzes/hooks/useQuizMutations'
+import { useSetQuizArchived } from '@modules/quizzes/hooks/useSetQuizArchived'
 import type { QuizDto } from '@modules/quizzes/types'
 
 import { ApiError } from '@api/apiError'

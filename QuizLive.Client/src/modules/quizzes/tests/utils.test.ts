@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatQuestionCount, parseUtcDate } from '@modules/quizzes/utils'
+import { formatQuestionCount } from '@modules/quizzes/utils/formatQuestionCount'
+import { parseUtcDate } from '@modules/quizzes/utils/parseUtcDate'
 
 describe('parseUtcDate', () => {
 	it('reads a date without an offset as UTC', () => {
