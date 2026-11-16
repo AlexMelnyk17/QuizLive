@@ -1,36 +1,54 @@
-import { screen } from '@testing-library/react'
+import { cleanup, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import React from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { QUIZZES_LIST_COMING_SOON_MESSAGE } from '@modules/dashboard/constants'
 import { DashboardPage } from '@modules/dashboard/components/DashboardPage'
+import type { QuizListProps } from '@modules/quizzes/components/QuizList'
+
 import { renderWithTheme } from '@src/test/testUtils'
+
+const navigateMock = vi.fn()
 
 vi.mock('@tanstack/react-router', () => ({
 	Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
 		<a href={to}>{children}</a>
 	),
-	useNavigate: () => vi.fn(),
+	useNavigate: () => navigateMock
 }))
 
 vi.mock('@modules/auth', () => ({
 	useSession: () => ({
 		token: 't',
 		expiresAtUtc: new Date(Date.now() + 60_000).toISOString(),
-		user: { id: '1', userName: 'quizzer' },
+		user: { id: '1', userName: 'quizzer' }
 	}),
-	signOut: vi.fn(),
+	signOut: vi.fn()
+}))
+
+// The list itself is tested in the quizzes module; here only its wiring into the page.
+vi.mock('@modules/quizzes/components/QuizList', () => ({
+	QuizList: ({ onOpenQuiz }: QuizListProps) => (
+		<button type='button' onClick={() => onOpenQuiz?.(7)}>
+			Open quiz 7
+		</button>
+	)
 }))
 
 describe('DashboardPage', () => {
-	it('shows coming soon message without loading quizzes', () => {
-		const fetchSpy = vi.spyOn(globalThis, 'fetch')
+	afterEach(() => {
+		cleanup()
+	})
+
+	it('shows the quiz list inside the host layout', () => {
 		renderWithTheme(<DashboardPage />)
 
 		expect(
 			screen.getByRole('heading', { name: /My quizzes/i })
 		).toBeInTheDocument()
-		expect(screen.getByText(QUIZZES_LIST_COMING_SOON_MESSAGE)).toBeInTheDocument()
+		expect(
+			screen.getByRole('button', { name: 'Open quiz 7' })
+		).toBeInTheDocument()
 		expect(
 			screen.getByRole('button', { name: /Create quiz \(not available yet\)/i })
 		).toBeDisabled()
@@ -38,7 +56,17 @@ describe('DashboardPage', () => {
 			'href',
 			'/statistics'
 		)
-		expect(fetchSpy).not.toHaveBeenCalled()
-		fetchSpy.mockRestore()
+	})
+
+	it('opens the details of a quiz', async () => {
+		const user = userEvent.setup()
+		renderWithTheme(<DashboardPage />)
+
+		await user.click(screen.getByRole('button', { name: 'Open quiz 7' }))
+
+		expect(navigateMock).toHaveBeenCalledWith({
+			to: '/quizzes/$quizId',
+			params: { quizId: '7' }
+		})
 	})
 })

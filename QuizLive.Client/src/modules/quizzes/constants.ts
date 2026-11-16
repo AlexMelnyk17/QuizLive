@@ -41,6 +41,7 @@ export const QUIZ_LIST_COPY = {
 } as const
 
 export const QUIZ_DETAILS_COPY = {
+	pageTitle: 'Quiz details',
 	edit: 'Edit',
 	archive: 'Archive',
 	unarchive: 'Unarchive',

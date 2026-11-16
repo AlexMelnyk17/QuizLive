@@ -24,6 +24,7 @@ import {
 	quizDetailsText,
 	quizDetailsTitle
 } from '@modules/quizzes/components/QuizDetails.css'
+import { QuizNotFound } from '@modules/quizzes/components/QuizNotFound'
 import {
 	QUIZ_DETAILS_COPY,
 	QUIZ_KIND_LABELS,
@@ -78,17 +79,7 @@ export function QuizDetails({
 
 	if (quiz.isError) {
 		if (quiz.error instanceof ApiError && quiz.error.status === 404) {
-			return (
-				<div className={quizDetailsEmpty}>
-					<Heading level={3}>{QUIZ_DETAILS_COPY.notFound.title}</Heading>
-					<Text tone='muted'>{QUIZ_DETAILS_COPY.notFound.body}</Text>
-					{onBack ? (
-						<Button variant='primary' onClick={onBack}>
-							{QUIZ_DETAILS_COPY.notFound.back}
-						</Button>
-					) : null}
-				</div>
-			)
+			return <QuizNotFound onBack={onBack} />
 		}
 
 		return (
