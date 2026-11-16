@@ -11,7 +11,7 @@ import { LoginPage, readSession, RegisterPage } from '@modules/auth'
 import { DashboardPage } from '@modules/dashboard'
 import { HomePage } from '@modules/home'
 import { StatisticsPage } from '@modules/statistics'
-import { sanitizeRedirectPath } from '@shared/redirect'
+import { sanitizeRedirectPath } from '@utils/sanitizeRedirectPath'
 
 const rootRoute = createRootRoute({
 	component: () => <Outlet />,
