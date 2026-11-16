@@ -7,6 +7,7 @@ import {
 	QUESTION_FORM_COPY as COPY,
 	QuizKind
 } from '@modules/quizzes/constants'
+import { questionFormSchema } from '@modules/quizzes/questionFormSchema'
 
 import { ApiError } from '@api/apiError'
 import { HTTP_STATUS } from '@api/httpStatus'
@@ -16,6 +17,26 @@ import { renderWithTheme } from '@src/test/testUtils'
 afterEach(cleanup)
 
 describe('QuestionForm', () => {
+	it.each([QuizKind.PollChoice, QuizKind.QuizChoice])(
+		'requires at least two answer options for kind %s',
+		kind => {
+			const values = {
+				text: 'Question',
+				timeLimitSeconds: '',
+				basePoints: '',
+				imageUrl: '',
+				correctIndex: '0',
+				options: [{ text: 'Only answer' }]
+			}
+			expect(questionFormSchema(kind).safeParse(values).success).toBe(false)
+			expect(
+				questionFormSchema(kind).safeParse({
+					...values,
+					options: [...values.options, { text: 'Second answer' }]
+				}).success
+			).toBe(true)
+		}
+	)
 	it('adds an open text question without options', async () => {
 		const save = vi.fn().mockResolvedValue(undefined)
 		const user = userEvent.setup()
@@ -70,13 +91,11 @@ describe('QuestionForm', () => {
 		}
 	)
 	it('shows server field errors and preserves input', async () => {
-		const save = vi
-			.fn()
-			.mockRejectedValue(
-				new ApiError(HTTP_STATUS.BAD_REQUEST, {
-					errors: { 'Options[1].Text': ['Invalid option'] }
-				})
-			)
+		const save = vi.fn().mockRejectedValue(
+			new ApiError(HTTP_STATUS.BAD_REQUEST, {
+				errors: { 'Options[1].Text': ['Invalid option'] }
+			})
+		)
 		const user = userEvent.setup()
 		renderWithTheme(
 			<QuestionForm

@@ -19,6 +19,13 @@ export const optionRow = style({
 })
 export const optionInput = style({ flex: 1, minWidth: 0 })
 export const compactAction = style({ alignSelf: 'flex-start' })
+export const reorderActions = style({
+	display: 'flex',
+	justifyContent: 'flex-end',
+	gap: vars.spacing[2],
+	paddingTop: vars.spacing[2],
+	borderTop: `1px solid ${vars.colors.border}`
+})
 export const sectionHeader = style({
 	display: 'flex',
 	alignItems: 'center',
@@ -29,11 +36,12 @@ export const sectionHeader = style({
 export const formPanel = style({
 	width: '100%',
 	minWidth: 0,
-	maxWidth: '44rem',
+	maxWidth: '40rem',
 	marginInline: 'auto',
+	marginBlock: vars.spacing[4],
 	boxSizing: 'border-box',
-	padding: vars.spacing[5],
+	padding: vars.spacing[6],
 	border: `1px solid ${vars.colors.borderStrong}`,
 	borderRadius: vars.radii.lg,
-	'@media': { 'screen and (max-width: 480px)': { padding: vars.spacing[3] } }
+	'@media': { 'screen and (max-width: 480px)': { padding: vars.spacing[4] } }
 })

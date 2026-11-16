@@ -51,6 +51,7 @@ export type QuizFormProps = {
 	kindReadOnly?: boolean
 	children?: ReactNode
 	disabled?: boolean
+	saveDisabledReason?: string
 }
 
 export function QuizForm({
@@ -60,7 +61,8 @@ export function QuizForm({
 	initialValues,
 	kindReadOnly = false,
 	children,
-	disabled = false
+	disabled = false,
+	saveDisabledReason
 }: QuizFormProps) {
 	const formId = useId()
 	const {
@@ -102,7 +104,7 @@ export function QuizForm({
 	}
 
 	const onFormSubmit = (event: FormEvent<HTMLFormElement>) => {
-		if (disabled) {
+		if (disabled || saveDisabledReason) {
 			event.preventDefault()
 			return
 		}
@@ -196,13 +198,21 @@ export function QuizForm({
 				</fieldset>
 			</form>
 			{children}
+			{saveDisabledReason ? (
+				<Text id={`${formId}-save-hint`} size='sm' tone='muted'>
+					{saveDisabledReason}
+				</Text>
+			) : null}
 			<div className={formActions}>
 				<Button
 					form={formId}
 					type='submit'
 					variant='primary'
 					loading={isSubmitting}
-					disabled={disabled}
+					disabled={disabled || Boolean(saveDisabledReason)}
+					aria-describedby={
+						saveDisabledReason ? `${formId}-save-hint` : undefined
+					}
 				>
 					{submitLabel}
 				</Button>

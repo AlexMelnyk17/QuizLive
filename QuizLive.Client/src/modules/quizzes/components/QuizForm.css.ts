@@ -5,7 +5,7 @@ import { vars } from '@theme/contract.css'
 export const quizForm = style({
 	display: 'flex',
 	flexDirection: 'column',
-	gap: vars.spacing[4],
+	gap: vars.spacing[6],
 	width: '100%',
 	maxWidth: '40rem',
 	marginInline: 'auto',
@@ -15,7 +15,7 @@ export const quizForm = style({
 export const field = style({
 	display: 'flex',
 	flexDirection: 'column',
-	gap: vars.spacing[1],
+	gap: vars.spacing[2],
 	margin: 0,
 	padding: 0,
 	border: 'none',
@@ -51,7 +51,7 @@ export const kindOption = style({
 	display: 'flex',
 	flexDirection: 'column',
 	gap: vars.spacing[2],
-	padding: vars.spacing[3],
+	padding: vars.spacing[4],
 	borderRadius: vars.radii.md,
 	border: `1px solid ${vars.colors.border}`
 })
@@ -65,5 +65,7 @@ export const formActions = style({
 	display: 'flex',
 	flexWrap: 'wrap',
 	gap: vars.spacing[2],
-	marginTop: vars.spacing[2]
+	marginTop: 0,
+	paddingTop: vars.spacing[4],
+	borderTop: `1px solid ${vars.colors.border}`
 })

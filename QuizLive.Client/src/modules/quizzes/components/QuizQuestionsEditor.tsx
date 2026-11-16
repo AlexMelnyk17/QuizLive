@@ -1,8 +1,10 @@
+import { ArrowDown, ArrowUp } from 'lucide-react'
 import { useState } from 'react'
 
 import { Alert } from '@components/ui/Alert'
 import { Button } from '@components/ui/Button'
 import { Heading } from '@components/ui/Heading'
+import { Icon } from '@components/ui/Icon'
 import { Modal } from '@components/ui/Modal'
 import { Stack } from '@components/ui/Stack'
 import { Text } from '@components/ui/Text'
@@ -11,6 +13,7 @@ import { QuestionForm } from '@modules/quizzes/components/QuestionForm'
 import { QuestionView } from '@modules/quizzes/components/QuestionView'
 import {
 	questionsSection,
+	reorderActions,
 	sectionHeader
 } from '@modules/quizzes/components/QuizEditor.css'
 import {
@@ -20,6 +23,7 @@ import {
 } from '@modules/quizzes/constants'
 import { useCreateQuestion } from '@modules/quizzes/hooks/useCreateQuestion'
 import { useDeleteQuestion } from '@modules/quizzes/hooks/useDeleteQuestion'
+import { useReorderQuestions } from '@modules/quizzes/hooks/useReorderQuestions'
 import { useUpdateQuestion } from '@modules/quizzes/hooks/useUpdateQuestion'
 import type { QuestionRequest, QuizDetailsDto } from '@modules/quizzes/types'
 
@@ -38,6 +42,24 @@ export function QuizQuestionsEditor({
 	const update = useUpdateQuestion(quiz.id)
 	const remove = useDeleteQuestion(quiz.id)
 	const create = useCreateQuestion(quiz.id)
+	const reorder = useReorderQuestions(quiz.id)
+	const actionsDisabled =
+		adding ||
+		editingId !== null ||
+		deletingId !== null ||
+		remove.isPending ||
+		reorder.isPending
+	const actionError = reorder.error ?? remove.error
+	const moveQuestion = (index: number, direction: -1 | 1) => {
+		const target = index + direction
+		if (actionsDisabled || target < 0 || target >= quiz.questions.length) return
+		const ids = quiz.questions.map(question => question.id)
+		const [moved] = ids.splice(index, 1)
+		if (moved === undefined) return
+		ids.splice(target, 0, moved)
+		onFormOpenChange(true)
+		reorder.mutate(ids, { onSettled: () => onFormOpenChange(false) })
+	}
 	const closeForm = () => {
 		setAdding(false)
 		setEditingId(null)
@@ -53,7 +75,7 @@ export function QuizQuestionsEditor({
 				<Heading level={2}>{QUIZ_DETAILS_COPY.questionsTitle}</Heading>
 				<Button
 					size='sm'
-					disabled={adding || editingId !== null}
+					disabled={actionsDisabled}
 					onClick={() => {
 						setAdding(true)
 						onFormOpenChange(true)
@@ -69,15 +91,15 @@ export function QuizQuestionsEditor({
 					onCancel={closeForm}
 				/>
 			) : null}
-			{remove.error ? (
+			{actionError ? (
 				<Alert variant='danger' title={QUIZ_DETAILS_COPY.actionError.title}>
-					{remove.error instanceof ApiError
-						? (remove.error.detail ?? QUIZ_FORM_COPY.genericError)
+					{actionError instanceof ApiError
+						? (actionError.detail ?? QUIZ_FORM_COPY.genericError)
 						: QUIZ_FORM_COPY.genericError}
 				</Alert>
 			) : null}
 			{quiz.questions.length ? (
-				quiz.questions.map(question =>
+				quiz.questions.map((question, index) =>
 					editingId === question.id ? (
 						<QuestionForm
 							key={question.id}
@@ -94,12 +116,38 @@ export function QuizQuestionsEditor({
 							key={question.id}
 							question={question}
 							kind={quiz.kind}
+							footer={
+								<div className={reorderActions}>
+									<Button
+										size='sm'
+										variant='ghost'
+										aria-label={COPY.moveUp}
+										title={COPY.moveUp}
+										disabled={actionsDisabled || index === 0}
+										onClick={() => moveQuestion(index, -1)}
+									>
+										<Icon icon={ArrowUp} size='sm' />
+									</Button>
+									<Button
+										size='sm'
+										variant='ghost'
+										aria-label={COPY.moveDown}
+										title={COPY.moveDown}
+										disabled={
+											actionsDisabled || index === quiz.questions.length - 1
+										}
+										onClick={() => moveQuestion(index, 1)}
+									>
+										<Icon icon={ArrowDown} size='sm' />
+									</Button>
+								</div>
+							}
 							actions={
 								<div className={sectionHeader}>
 									<Button
 										size='sm'
 										variant='ghost'
-										disabled={adding || editingId !== null}
+										disabled={actionsDisabled}
 										onClick={() => {
 											setEditingId(question.id)
 											onFormOpenChange(true)
@@ -107,17 +155,30 @@ export function QuizQuestionsEditor({
 									>
 										{COPY.edit}
 									</Button>
-									<Button
-										size='sm'
-										variant='ghost'
-										disabled={adding || editingId !== null || remove.isPending}
-										onClick={() => {
-											remove.reset()
-											setDeletingId(question.id)
-										}}
+									<span
+										title={
+											quiz.questions.length === 1
+												? COPY.lastQuestionDeleteReason
+												: undefined
+										}
 									>
-										{COPY.delete}
-									</Button>
+										<Button
+											size='sm'
+											variant='ghost'
+											disabled={actionsDisabled || quiz.questions.length === 1}
+											title={
+												quiz.questions.length === 1
+													? COPY.lastQuestionDeleteReason
+													: undefined
+											}
+											onClick={() => {
+												remove.reset()
+												setDeletingId(question.id)
+											}}
+										>
+											{COPY.delete}
+										</Button>
+									</span>
 								</div>
 							}
 						/>

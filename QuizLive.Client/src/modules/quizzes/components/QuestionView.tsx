@@ -24,9 +24,15 @@ export type QuestionViewProps = {
 	question: QuestionDto
 	kind: QuizKindValue
 	actions?: ReactNode
+	footer?: ReactNode
 }
 
-export function QuestionView({ question, kind, actions }: QuestionViewProps) {
+export function QuestionView({
+	question,
+	kind,
+	actions,
+	footer
+}: QuestionViewProps) {
 	const details = [
 		formatTimeLimit(question.timeLimitSeconds),
 		question.basePoints === null ? null : formatPoints(question.basePoints)
@@ -80,6 +86,7 @@ export function QuestionView({ question, kind, actions }: QuestionViewProps) {
 					))}
 				</ul>
 			)}
+			{footer}
 		</Card>
 	)
 }

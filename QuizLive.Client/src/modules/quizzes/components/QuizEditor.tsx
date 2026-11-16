@@ -38,6 +38,7 @@ export function QuizEditor({
 	const setArchived = useSetQuizArchived()
 
 	const save = async (values: QuizFormValues) => {
+		if (!quiz.data?.questions.length) return
 		await updateQuiz.mutateAsync({
 			title: values.title,
 			description: values.description === '' ? null : values.description
@@ -104,6 +105,11 @@ export function QuizEditor({
 				}}
 				kindReadOnly
 				disabled={questionFormOpen}
+				saveDisabledReason={
+					quiz.data.questions.length === 0
+						? QUIZ_FORM_COPY.questionRequired
+						: undefined
+				}
 				submitLabel={QUIZ_FORM_COPY.submitEdit}
 				onSubmit={save}
 				onCancel={onCancel}

@@ -11,6 +11,10 @@ export const QUESTION_LIMITS = {
 	maxPoints: 10000
 } as const
 export const QUESTION_FORM_COPY = {
+	moveUp: 'Move up',
+	lastQuestionDeleteReason:
+		'A quiz needs at least one question. Add another question before deleting this one.',
+	moveDown: 'Move down',
 	edit: 'Edit question',
 	delete: 'Delete question',
 	saveEdit: 'Save question',
@@ -75,6 +79,7 @@ export const QUIZ_FIELD_LIMITS = {
 } as const
 
 export const QUIZ_FORM_COPY = {
+	questionRequired: 'Add at least one question before saving the quiz.',
 	leaveTitle: 'Leave quiz editing?',
 	leaveBody:
 		'Unsaved changes to the quiz or an open question form will be lost. Saved questions will be kept.',
