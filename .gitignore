@@ -178,6 +178,9 @@ coverage*.json
 coverage*.xml
 coverage*.info
 
+# Coverage reports (npm run coverage:server at the root / npm run test:coverage in the client)
+coverage/
+
 # Visual Studio code coverage results
 *.coverage
 *.coveragexml
