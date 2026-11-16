@@ -1,0 +1,85 @@
+# Separate from the CI workflow (#37): it only builds coverage reports and uploads them as artifacts.
+# The jobs run the same npm scripts as a local run (see "Test coverage" in the README).
+name: Coverage
+
+on:
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The tests target net8.0 (runtime 8), the build uses SDK 9.
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+
+      # The runner also has a newer SDK (10) and picks it by default, but xunit v3 in VSTest mode
+      # (`--collect`, `--settings`) fails there. The file is created only in CI, not committed.
+      - name: Pin the .NET SDK to 9
+        run: echo '{"sdk":{"version":"9.0.100","rollForward":"latestFeature"}}' > global.json
+
+      - name: Run server tests with coverage
+        run: npm run coverage:server
+
+      - name: Add summary to the job
+        if: always() && hashFiles('coverage/server/report/SummaryGithub.md') != ''
+        run: cat coverage/server/report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload server report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-server
+          path: coverage/server/report
+          retention-days: 14
+          if-no-files-found: warn
+
+  client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # .NET is needed only for ReportGenerator, which builds the markdown summary.
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: QuizLive.Client/package-lock.json
+
+      - name: Install client dependencies
+        run: npm ci
+        working-directory: QuizLive.Client
+
+      - name: Run client tests with coverage
+        run: npm run coverage:client
+
+      - name: Add summary to the job
+        if: always() && hashFiles('QuizLive.Client/coverage/summary/SummaryGithub.md') != ''
+        run: cat QuizLive.Client/coverage/summary/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload client report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-client
+          path: QuizLive.Client/coverage
+          retention-days: 14
+          if-no-files-found: warn

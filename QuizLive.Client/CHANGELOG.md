@@ -1,9 +1,11 @@
 This file explains how Visual Studio created the project.
 
 The following tools were used to generate this project:
+
 - create-vite
 
 The following steps were used to generate this project:
+
 - Create react project with create-vite: `npm init --yes vite@latest quizlive.client -- --template=react`.
 - Create project file (`quizlive.client.esproj`).
 - Create `launch.json` to enable debugging.

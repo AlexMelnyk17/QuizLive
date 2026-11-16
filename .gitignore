@@ -43,6 +43,8 @@ obj/x86/
 [Aa][Rr][Mm]64[Ee][Cc]/
 bld/
 [Oo]bj/
+**/obj/Debug/
+**/obj/Release/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
@@ -55,8 +57,8 @@ bld/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
-# Uncomment if you have tasks that create the project's static files in wwwroot
-#wwwroot/
+# SPA build output (vite build)
+QuizLive.Server/wwwroot/
 
 # Visual Studio 2017 auto generated files
 Generated\ Files/
@@ -175,6 +177,9 @@ _TeamCity*
 coverage*.json
 coverage*.xml
 coverage*.info
+
+# Coverage reports (npm run coverage:server at the root / npm run test:coverage in the client)
+coverage/
 
 # Visual Studio code coverage results
 *.coverage
@@ -441,3 +446,7 @@ appsettings.Local.json
 
 # macOS directory custom attributes
 .DS_Store
+# Claude Code
+CLAUDE.md
+CLAUDE.local.md
+.claude/

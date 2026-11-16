@@ -1,0 +1,96 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
+using QuizLive.Server.Application.Abstractions;
+using QuizLive.Server.Application.Exceptions;
+using QuizLive.Server.Application.Games;
+
+namespace QuizLive.Server.API.Hubs
+{
+    /// <summary>
+    /// Realtime channel of a game. Players connect with their player token, the host with a JWT.
+    /// Both connect methods return the current state, so nothing sent before connecting is lost.
+    /// The hub only manages connections and groups; the rules live in <see cref="IGameService"/>.
+    /// </summary>
+    public class GameHub(IGameService gameService) : Hub<IGameClient>
+    {
+        public const string PlayerIdKey = "PlayerId";
+        public const string GameIdKey = "GameId";
+        public const string RoleKey = "Role";
+
+        // Both connect methods check access first, then join the group, and only then read the state.
+        // The other way round, a player who joins in between would be missing from both the snapshot
+        // and the event. The cost is a possible duplicate, so a client must deduplicate by player id.
+        public async Task<PlayerGameStateDto> ConnectAsPlayer(string playerToken)
+        {
+            EnsureNotConnected();
+
+            var gameId = await gameService.GetActivePlayerGameIdAsync(playerToken);
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, GameGroups.All(gameId));
+
+            PlayerGameStateDto state;
+
+            try
+            {
+                state = await gameService.GetPlayerStateAsync(playerToken);
+            }
+            catch
+            {
+                // The game ended in between: do not keep the connection in the group of a finished game.
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, GameGroups.All(gameId));
+                throw;
+            }
+
+            Context.Items[PlayerIdKey] = state.PlayerId;
+            Context.Items[GameIdKey] = state.GameId;
+            Context.Items[RoleKey] = ConnectionRole.Player;
+
+            return state;
+        }
+
+        [Authorize]
+        public async Task<GameDto> ConnectAsHost(int gameId)
+        {
+            EnsureNotConnected();
+
+            // Not ICurrentUser: it relies on IHttpContextAccessor, which is unreliable inside a hub.
+            var userId = Context.UserIdentifier
+                ?? throw new UnauthorizedException("The user is not authenticated.");
+
+            await gameService.EnsureActiveHostGameAsync(gameId, userId);
+
+            // The host controls the game but does not take part in it, so the connection stays out of the
+            // players' group. The notifier sends every lobby event to the host group as well.
+            await Groups.AddToGroupAsync(Context.ConnectionId, GameGroups.Host(gameId));
+
+            GameDto game;
+
+            try
+            {
+                game = await gameService.GetActiveHostGameAsync(gameId, userId);
+            }
+            catch
+            {
+                // The game ended in between: do not keep the connection in the group of a finished game.
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, GameGroups.Host(gameId));
+                throw;
+            }
+
+            Context.Items[GameIdKey] = gameId;
+            Context.Items[RoleKey] = ConnectionRole.Host;
+
+            return game;
+        }
+
+        // One connection joins one game, once. A repeated call would leave it in the groups of the first
+        // game and overwrite its identity. Invocations on one connection run one at a time, and a failed
+        // connect sets nothing, so the client can retry after an error.
+        private void EnsureNotConnected()
+        {
+            if (Context.Items.ContainsKey(GameIdKey))
+            {
+                throw new ConflictException("This connection has already joined a game.");
+            }
+        }
+    }
+}

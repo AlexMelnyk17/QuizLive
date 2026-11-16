@@ -6,10 +6,11 @@
     <!-- Allows the build (or compile) script located on package.json to run on Build -->
     <ShouldRunBuildScript>false</ShouldRunBuildScript>
     <!-- Folder where production build objects will be placed -->
-    <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
+    <BuildOutputFolder>$(MSBuildProjectDirectory)\..\QuizLive.Server\wwwroot</BuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="public\" />
     <Folder Include="src\assets\" />
+    <Folder Include="src\modules\" />
   </ItemGroup>
 </Project>

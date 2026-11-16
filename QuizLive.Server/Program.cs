@@ -1,25 +1,93 @@
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using QuizLive.Server.API.Hubs;
+using QuizLive.Server.Application.Abstractions;
+using QuizLive.Server.Application.Commands;
+using QuizLive.Server.Application.Games;
+using QuizLive.Server.Application.Questions;
+using QuizLive.Server.Application.Quizzes;
+using QuizLive.Server.Application.Stats;
+using QuizLive.Server.Infrastructure.Auth;
+using QuizLive.Server.Infrastructure.Data;
+using QuizLive.Server.Infrastructure.ErrorHandling;
+using QuizLive.Server.Infrastructure.Realtime;
+using System.Reflection;
 
 namespace QuizLive.Server
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task<int> Main(string[] args)
         {
+            if (DbCommandHost.IsDbCommand(args))
+            {
+                return await DbCommandHost.RunAsync(args);
+            }
+
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+			builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
 
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+			builder.Services.AddQuizLiveDbContext(builder.Configuration);
+			builder.Services.AddQuizLiveAuth(builder.Configuration);
+			builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+				
 
-            var app = builder.Build();
+            builder.Services.AddProblemDetails();
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            builder.Services.AddScoped<IQuizService, QuizService>();
+            builder.Services.AddScoped<IQuestionService, QuestionService>();
+            builder.Services.AddScoped<IGameService, GameService>();
+            builder.Services.AddScoped<IStatsService, StatsService>();
+            builder.Services.AddSignalR(options => options.AddFilter<HubExceptionFilter>());
+            builder.Services.AddSingleton<IGameNotifier, SignalRGameNotifier>();
+
+            builder.Services.AddSwaggerGen(options =>
+						{
+							var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+							options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFile));
+
+							options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+							{
+								Type = SecuritySchemeType.Http,
+								Scheme = "bearer",
+								BearerFormat = "JWT",
+								In = ParameterLocation.Header,
+								Description = "Paste the JWT token returned by /api/auth/login."
+							});
+
+							options.AddSecurityRequirement(new OpenApiSecurityRequirement
+							{
+									{
+											new OpenApiSecurityScheme
+											{
+													Reference = new OpenApiReference
+													{
+														Type = ReferenceType.SecurityScheme,
+														Id = "Bearer"
+													}
+											},
+											Array.Empty<string>()
+									}
+							});
+						});
+
+						var app = builder.Build();
+
+            app.UseExceptionHandler();
+            app.UseStatusCodePages();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                await db.Database.MigrateAsync();
+            }
 
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -28,14 +96,16 @@ namespace QuizLive.Server
 
             app.UseHttpsRedirection();
 
-            app.UseAuthorization();
-
+			app.UseAuthentication();
+			app.UseAuthorization();
 
             app.MapControllers();
+            app.MapHub<GameHub>(HubRoutes.Game);
 
             app.MapFallbackToFile("/index.html");
 
-            app.Run();
+            await app.RunAsync();
+            return 0;
         }
     }
 }
