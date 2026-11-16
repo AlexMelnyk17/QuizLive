@@ -24,6 +24,11 @@ namespace QuizLive.Server.Tests.Support
             return client;
         }
 
+        // The JWT of a client created by CreateAuthorizedClientAsync, e.g. to pass it to a hub.
+        public static string BearerToken(this HttpClient client) =>
+            client.DefaultRequestHeaders.Authorization?.Parameter
+            ?? throw new InvalidOperationException("The client is not authorized.");
+
         public static async Task<AuthResponse> RegisterAsync(this HttpClient client, string? userName = null)
         {
             var request = new RegisterRequest(userName ?? $"u{Guid.NewGuid():N}", Password);
