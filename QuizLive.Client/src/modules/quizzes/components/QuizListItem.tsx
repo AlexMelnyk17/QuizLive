@@ -1,12 +1,10 @@
 import { Badge } from '@components/ui/Badge'
-import { Button } from '@components/ui/Button'
 import { Card } from '@components/ui/Card'
 import { Heading } from '@components/ui/Heading'
 import { Text } from '@components/ui/Text'
 
 import {
 	quizCard,
-	quizCardActions,
 	quizCardDescription,
 	quizCardHeader,
 	quizCardMeta,
@@ -20,17 +18,10 @@ import { formatQuizDate } from '@modules/quizzes/utils/formatQuizDate'
 
 export type QuizListItemProps = {
 	quiz: QuizDto
-	isUpdating: boolean
-	onToggleArchived: (quiz: QuizDto) => void
 	onOpen?: (quizId: number) => void
 }
 
-export function QuizListItem({
-	quiz,
-	isUpdating,
-	onToggleArchived,
-	onOpen
-}: QuizListItemProps) {
+export function QuizListItem({ quiz, onOpen }: QuizListItemProps) {
 	return (
 		<Card variant='outlined' padding='md' fullWidth className={quizCard}>
 			<div className={quizCardHeader}>
@@ -64,18 +55,6 @@ export function QuizListItem({
 					{formatQuestionCount(quiz.questionCount)} · Created{' '}
 					{formatQuizDate(quiz.createdAtUtc)}
 				</Text>
-			</div>
-
-			<div className={quizCardActions}>
-				<Button
-					variant='outline'
-					size='sm'
-					loading={isUpdating}
-					onClick={() => onToggleArchived(quiz)}
-					aria-label={`${quiz.isArchived ? QUIZ_LIST_COPY.unarchive : QUIZ_LIST_COPY.archive} "${quiz.title}"`}
-				>
-					{quiz.isArchived ? QUIZ_LIST_COPY.unarchive : QUIZ_LIST_COPY.archive}
-				</Button>
 			</div>
 		</Card>
 	)

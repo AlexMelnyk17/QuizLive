@@ -18,6 +18,7 @@ export function DashboardPage() {
 						params: { quizId: String(quizId) }
 					})
 				}
+				onCreateQuiz={() => void navigate({ to: PATHS.quizCreate })}
 			/>
 		</DashboardLayout>
 	)

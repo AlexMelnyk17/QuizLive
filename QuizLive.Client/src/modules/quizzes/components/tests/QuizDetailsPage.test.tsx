@@ -3,11 +3,11 @@ import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { PATHS } from '@config/routes'
-
 import type { QuizDetailsProps } from '@modules/quizzes/components/QuizDetails'
 import { QuizDetailsPage } from '@modules/quizzes/components/QuizDetailsPage'
 import { QUIZ_DETAILS_COPY } from '@modules/quizzes/constants'
+
+import { PATHS } from '@config/routes'
 
 import { renderWithTheme } from '@src/test/testUtils'
 
@@ -29,9 +29,12 @@ vi.mock('@modules/auth/store/sessionStore', () => ({
 
 // QuizDetails is tested on its own; here only what the page passes to it.
 vi.mock('@modules/quizzes/components/QuizDetails', () => ({
-	QuizDetails: ({ quizId, onDeleted, onBack }: QuizDetailsProps) => (
+	QuizDetails: ({ quizId, onDeleted, onBack, onEdit }: QuizDetailsProps) => (
 		<div>
 			<p>Details of quiz {quizId}</p>
+			<button type='button' onClick={() => onEdit?.(quizId)}>
+				Simulate edit
+			</button>
 			<button type='button' onClick={onDeleted}>
 				Simulate delete
 			</button>
@@ -59,6 +62,16 @@ describe('QuizDetailsPage', () => {
 			screen.getByRole('heading', { name: QUIZ_DETAILS_COPY.pageTitle })
 		).toBeInTheDocument()
 		expect(screen.getByText('Details of quiz 7')).toBeInTheDocument()
+	})
+
+	it('opens the edit page', async () => {
+		const user = userEvent.setup()
+		renderWithTheme(<QuizDetailsPage />)
+		await user.click(screen.getByRole('button', { name: 'Simulate edit' }))
+		expect(navigateMock).toHaveBeenCalledWith({
+			to: PATHS.quizEdit,
+			params: { quizId: '7' }
+		})
 	})
 
 	it.each(['delete', 'back'])(

@@ -1,12 +1,32 @@
 import { z } from 'zod'
 
-import { QuizKind } from '@modules/quizzes/constants'
+import {
+	QUIZ_FIELD_LIMITS,
+	QUIZ_FORM_COPY,
+	QuizKind
+} from '@modules/quizzes/constants'
 
 export const quizKindSchema = z.union([
 	z.literal(QuizKind.OpenText),
 	z.literal(QuizKind.PollChoice),
 	z.literal(QuizKind.QuizChoice)
 ])
+
+export const quizFormSchema = z.object({
+	title: z
+		.string()
+		.trim()
+		.min(1, QUIZ_FORM_COPY.validation.titleRequired)
+		.max(QUIZ_FIELD_LIMITS.titleMax, QUIZ_FORM_COPY.validation.titleMax),
+	description: z
+		.string()
+		.trim()
+		.max(
+			QUIZ_FIELD_LIMITS.descriptionMax,
+			QUIZ_FORM_COPY.validation.descriptionMax
+		),
+	kind: quizKindSchema
+})
 
 export const quizDtoSchema = z.object({
 	id: z.number(),
@@ -42,4 +62,4 @@ export const questionDtoListSchema = z.array(questionDtoSchema)
 
 export const quizDetailsDtoSchema = quizDtoSchema
 	.omit({ questionCount: true })
-	.extend({ questions: questionDtoListSchema })
+	.extend({ questions: questionDtoListSchema, hasGames: z.boolean() })

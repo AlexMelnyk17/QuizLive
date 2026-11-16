@@ -17,6 +17,9 @@ namespace QuizLive.Server.Tests.Support
 
         public FakeGameNotifier Notifier { get; } = new();
 
+        // Tests of hub event delivery need the real notifier, so a derived factory can turn the fake off.
+        protected virtual bool UseFakeNotifier => true;
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             // The connection string is read while services are registered, and only UseSetting is applied that early.
@@ -28,11 +31,14 @@ namespace QuizLive.Server.Tests.Support
                 ["Jwt:Key"] = JwtKey
             }));
 
-            builder.ConfigureTestServices(services =>
+            if (UseFakeNotifier)
             {
-                services.RemoveAll<IGameNotifier>();
-                services.AddSingleton<IGameNotifier>(Notifier);
-            });
+                builder.ConfigureTestServices(services =>
+                {
+                    services.RemoveAll<IGameNotifier>();
+                    services.AddSingleton<IGameNotifier>(Notifier);
+                });
+            }
         }
 
         protected override void Dispose(bool disposing)

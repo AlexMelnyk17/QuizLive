@@ -39,6 +39,7 @@ const setQuizArchivedMock = vi.mocked(setQuizArchived)
 const deleteQuizMock = vi.mocked(deleteQuiz)
 
 const mathQuiz: QuizDetailsDto = {
+	hasGames: false,
 	id: 7,
 	title: 'Math',
 	description: 'Numbers and shapes',
@@ -86,6 +87,40 @@ function renderQuizDetails(props: Partial<QuizDetailsProps> = {}) {
 }
 
 describe('QuizDetails', () => {
+	it.each(['archive', 'delete'])(
+		'shows not found when %s returns 404',
+		async action => {
+			const user = userEvent.setup()
+			const onBack = vi.fn()
+			fetchQuizMock.mockResolvedValue(mathQuiz)
+			const missing = new ApiError(404, { detail: 'Quiz was deleted.' })
+			setQuizArchivedMock.mockRejectedValue(missing)
+			deleteQuizMock.mockRejectedValue(missing)
+			renderQuizDetails({ onBack })
+			await user.click(
+				await screen.findByRole('button', {
+					name:
+						action === 'archive'
+							? QUIZ_DETAILS_COPY.archive
+							: QUIZ_DETAILS_COPY.delete
+				})
+			)
+			if (action === 'delete')
+				await user.click(
+					screen.getByRole('button', {
+						name: QUIZ_DETAILS_COPY.deleteDialog.confirm
+					})
+				)
+			expect(
+				await screen.findByText(QUIZ_DETAILS_COPY.notFound.title)
+			).toBeInTheDocument()
+			expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+			await user.click(
+				screen.getByRole('button', { name: QUIZ_DETAILS_COPY.notFound.back })
+			)
+			expect(onBack).toHaveBeenCalled()
+		}
+	)
 	beforeEach(() => {
 		fetchQuizMock.mockReset()
 		setQuizArchivedMock.mockReset()
@@ -264,6 +299,55 @@ describe('QuizDetails', () => {
 			screen.queryByRole('button', { name: QUIZ_DETAILS_COPY.edit })
 		).not.toBeInTheDocument()
 		expect(setQuizArchivedMock).toHaveBeenCalledWith(7, false)
+	})
+
+	it('disables starting games with a coming soon description', async () => {
+		fetchQuizMock.mockResolvedValue(mathQuiz)
+		renderQuizDetails()
+		const start = await screen.findByRole('button', {
+			name: QUIZ_DETAILS_COPY.startGame
+		})
+		expect(start).toBeDisabled()
+		expect(start).toHaveAccessibleDescription(QUIZ_DETAILS_COPY.comingSoon)
+	})
+
+	it('disables deletion for archived quizzes and explains how to enable it', async () => {
+		const user = userEvent.setup()
+		fetchQuizMock.mockResolvedValue({ ...mathQuiz, isArchived: true })
+		renderQuizDetails()
+		const remove = await screen.findByRole('button', {
+			name: QUIZ_DETAILS_COPY.delete
+		})
+		expect(remove).toBeDisabled()
+		expect(remove).toHaveAttribute(
+			'title',
+			QUIZ_DETAILS_COPY.archivedDeleteReason
+		)
+		expect(
+			screen.queryByRole('button', { name: QUIZ_DETAILS_COPY.startGame })
+		).not.toBeInTheDocument()
+		expect(
+			screen.queryByRole('button', { name: QUIZ_DETAILS_COPY.edit })
+		).not.toBeInTheDocument()
+		expect(
+			screen.getByText(QUIZ_DETAILS_COPY.archivedNotice.body)
+		).toBeInTheDocument()
+		await user.click(remove)
+		expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+		expect(deleteQuizMock).not.toHaveBeenCalled()
+	})
+
+	it('disables deletion of a played quiz before sending any delete request', async () => {
+		fetchQuizMock.mockResolvedValue({ ...mathQuiz, hasGames: true })
+		renderQuizDetails()
+		const remove = await screen.findByRole('button', {
+			name: QUIZ_DETAILS_COPY.delete
+		})
+		expect(remove).toBeDisabled()
+		expect(remove).toHaveAccessibleDescription(
+			QUIZ_DETAILS_COPY.playedDeleteReason
+		)
+		expect(deleteQuizMock).not.toHaveBeenCalled()
 	})
 
 	it('deletes the quiz after confirmation', async () => {

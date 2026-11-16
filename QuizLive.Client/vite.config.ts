@@ -17,6 +17,20 @@ export default defineConfig({
 		setupFiles: ['./src/test/setup.ts'],
 		env: {
 			VITE_API_BASE_URL: '/api'
+		},
+		coverage: {
+			provider: 'v8',
+			include: ['src/**/*.{ts,tsx}'],
+			exclude: [
+				'src/**/tests/**',
+				'src/**/*.test.{ts,tsx}',
+				'src/test/**',
+				'src/**/*.css.ts',
+				'src/**/*.d.ts',
+				'src/main.tsx'
+			],
+			reporter: ['text-summary', 'html', 'cobertura'],
+			reportsDirectory: './coverage'
 		}
 	},
 	server: {

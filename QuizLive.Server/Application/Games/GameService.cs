@@ -114,7 +114,17 @@ namespace QuizLive.Server.Application.Games
                 .Select(GameMappings.ToDto)
                 .FirstOrDefaultAsync();
 
-            return game ?? throw new NotFoundException($"Game {id} was not found.");
+            return game ?? throw GameNotFound(id);
+        }
+
+        public async Task EnsureActiveHostGameAsync(int gameId, string hostUserId)
+        {
+            var isActive = await HostGames(gameId, hostUserId).AnyAsync(g => g.EndedAtUtc == null);
+
+            if (!isActive)
+            {
+                throw GameNotFound(gameId);
+            }
         }
 
         public async Task<GameDto> GetActiveHostGameAsync(int gameId, string hostUserId)
@@ -124,19 +134,25 @@ namespace QuizLive.Server.Application.Games
                 .Select(GameMappings.ToDto)
                 .FirstOrDefaultAsync();
 
-            return game ?? throw new NotFoundException($"Game {gameId} was not found.");
+            return game ?? throw GameNotFound(gameId);
+        }
+
+        public async Task<int> GetActivePlayerGameIdAsync(string playerToken)
+        {
+            RequirePlayerToken(playerToken);
+
+            var gameId = await ActivePlayers(playerToken)
+                .Select(p => (int?)p.GameSessionRecordId)
+                .FirstOrDefaultAsync();
+
+            return gameId ?? throw PlayerNotFound();
         }
 
         public async Task<PlayerGameStateDto> GetPlayerStateAsync(string playerToken)
         {
-            if (string.IsNullOrWhiteSpace(playerToken))
-            {
-                throw new DomainValidationException("Player token is required.");
-            }
+            RequirePlayerToken(playerToken);
 
-            var state = await db.Players
-                .AsNoTracking()
-                .Where(p => p.Token == playerToken && p.GameSession.EndedAtUtc == null)
+            var state = await ActivePlayers(playerToken)
                 .Select(p => new PlayerGameStateDto(
                     p.GameSessionRecordId,
                     p.GameSession.Code,
@@ -150,7 +166,7 @@ namespace QuizLive.Server.Application.Games
                         .ToList()))
                 .FirstOrDefaultAsync();
 
-            return state ?? throw new NotFoundException("Player was not found.");
+            return state ?? throw PlayerNotFound();
         }
 
         // The single ownership rule: a game is visible only to its host.
@@ -159,12 +175,30 @@ namespace QuizLive.Server.Application.Games
                 .AsNoTracking()
                 .Where(g => g.Id == gameId && g.HostUserId == hostUserId);
 
+        // A player token is valid only while its game is running.
+        private IQueryable<Player> ActivePlayers(string playerToken) =>
+            db.Players
+                .AsNoTracking()
+                .Where(p => p.Token == playerToken && p.GameSession.EndedAtUtc == null);
+
+        private static void RequirePlayerToken(string playerToken)
+        {
+            if (string.IsNullOrWhiteSpace(playerToken))
+            {
+                throw new DomainValidationException("Player token is required.");
+            }
+        }
+
+        private static NotFoundException GameNotFound(int gameId) => new($"Game {gameId} was not found.");
+
+        private static NotFoundException PlayerNotFound() => new("Player was not found.");
+
         public async Task EndAsync(int id)
         {
             var userId = currentUser.UserId;
 
             var game = await db.GameSessionRecords.FirstOrDefaultAsync(g => g.Id == id && g.HostUserId == userId)
-                ?? throw new NotFoundException($"Game {id} was not found.");
+                ?? throw GameNotFound(id);
 
             // Ending an already ended game is a no-op.
             if (game.EndedAtUtc is not null)

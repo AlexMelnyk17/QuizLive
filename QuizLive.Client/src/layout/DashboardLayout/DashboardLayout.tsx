@@ -1,15 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 
-import { PATHS } from '@config/routes'
-
-import { Avatar } from '@components/ui/Avatar'
-import { Button } from '@components/ui/Button'
-import { Divider } from '@components/ui/Divider'
-import { Heading } from '@components/ui/Heading'
-import { Text } from '@components/ui/Text'
-
-import { DASHBOARD_LAYOUT_COPY } from '@layout/constants'
 import {
 	dashboardHeader,
 	dashboardHeaderActions,
@@ -17,23 +8,39 @@ import {
 	dashboardHeaderUser,
 	dashboardMain,
 	dashboardNavLink,
-	dashboardRoot,
+	dashboardRoot
 } from '@layout/DashboardLayout/DashboardLayout.css'
+import { DASHBOARD_LAYOUT_COPY } from '@layout/constants'
+
+import { Avatar } from '@components/ui/Avatar'
+import { Button } from '@components/ui/Button'
+import { Divider } from '@components/ui/Divider'
+import { Heading } from '@components/ui/Heading'
+import { Text } from '@components/ui/Text'
+
 import { signOut, useSession } from '@modules/auth/store/sessionStore'
+
+import { PATHS } from '@config/routes'
 
 export type DashboardLayoutProps = {
 	children: ReactNode
 	title?: string
+	onSignOut?: () => void
 }
 
 export function DashboardLayout({
 	children,
 	title = DASHBOARD_LAYOUT_COPY.defaultTitle,
+	onSignOut
 }: DashboardLayoutProps) {
 	const navigate = useNavigate()
 	const session = useSession()
 
 	const handleSignOut = () => {
+		if (onSignOut) {
+			onSignOut()
+			return
+		}
 		signOut()
 		void navigate({ to: PATHS.home })
 	}
@@ -54,23 +61,22 @@ export function DashboardLayout({
 							{DASHBOARD_LAYOUT_COPY.navStatistics}
 						</Link>
 					</nav>
-					<Divider orientation="vertical" length="short" spacing="sm" />
+					<Divider orientation='vertical' length='short' spacing='sm' />
 					<Button
-						variant="primary"
-						disabled
-						aria-label={DASHBOARD_LAYOUT_COPY.createQuizAria}
+						variant='primary'
+						onClick={() => void navigate({ to: PATHS.quizCreate })}
 					>
 						{DASHBOARD_LAYOUT_COPY.createQuiz}
 					</Button>
 					{session ? (
 						<>
-							<Divider orientation="vertical" length="short" spacing="sm" />
+							<Divider orientation='vertical' length='short' spacing='sm' />
 							<div className={dashboardHeaderUser}>
-								<Avatar name={session.user.userName} size="sm" />
-								<Text size="sm" weight="medium">
+								<Avatar name={session.user.userName} size='sm' />
+								<Text size='sm' weight='medium'>
 									{session.user.userName}
 								</Text>
-								<Button variant="outline" size="sm" onClick={handleSignOut}>
+								<Button variant='outline' size='sm' onClick={handleSignOut}>
 									{DASHBOARD_LAYOUT_COPY.signOut}
 								</Button>
 							</div>

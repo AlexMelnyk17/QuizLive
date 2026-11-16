@@ -17,10 +17,6 @@ import {
 import { QuizListItem } from '@modules/quizzes/components/QuizListItem'
 import { QUIZ_LIST_COPY } from '@modules/quizzes/constants'
 import { useMyQuizzes } from '@modules/quizzes/hooks/useMyQuizzes'
-import { useSetQuizArchived } from '@modules/quizzes/hooks/useSetQuizArchived'
-import type { QuizDto } from '@modules/quizzes/types'
-
-import { ApiError } from '@api/apiError'
 
 export type QuizListProps = {
 	onOpenQuiz?: (quizId: number) => void
@@ -30,20 +26,10 @@ export type QuizListProps = {
 export function QuizList({ onOpenQuiz, onCreateQuiz }: QuizListProps) {
 	const [archived, setArchived] = useState(false)
 	const quizzes = useMyQuizzes(archived)
-	const setQuizArchived = useSetQuizArchived()
-
-	const toggleArchived = (quiz: QuizDto) => {
-		setQuizArchived.mutate({ quizId: quiz.id, archived: !quiz.isArchived })
-	}
 
 	const showTab = (showArchived: boolean) => {
 		setArchived(showArchived)
-		setQuizArchived.reset()
 	}
-
-	const updatingQuizId = setQuizArchived.isPending
-		? setQuizArchived.variables.quizId
-		: null
 
 	return (
 		<div className={quizList}>
@@ -69,15 +55,6 @@ export function QuizList({ onOpenQuiz, onCreateQuiz }: QuizListProps) {
 					{QUIZ_LIST_COPY.tabs.archived}
 				</Button>
 			</div>
-
-			{setQuizArchived.isError ? (
-				<Alert variant='danger' title={QUIZ_LIST_COPY.updateError.title}>
-					{setQuizArchived.error instanceof ApiError &&
-					setQuizArchived.error.detail
-						? setQuizArchived.error.detail
-						: QUIZ_LIST_COPY.updateError.body}
-				</Alert>
-			) : null}
 
 			{quizzes.isPending ? (
 				<div className={quizGrid} aria-busy='true'>
@@ -106,13 +83,7 @@ export function QuizList({ onOpenQuiz, onCreateQuiz }: QuizListProps) {
 			) : (
 				<div className={quizGrid}>
 					{quizzes.data.map(quiz => (
-						<QuizListItem
-							key={quiz.id}
-							quiz={quiz}
-							isUpdating={updatingQuizId === quiz.id}
-							onToggleArchived={toggleArchived}
-							onOpen={onOpenQuiz}
-						/>
+						<QuizListItem key={quiz.id} quiz={quiz} onOpen={onOpenQuiz} />
 					))}
 				</div>
 			)}

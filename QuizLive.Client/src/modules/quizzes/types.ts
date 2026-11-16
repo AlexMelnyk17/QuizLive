@@ -5,10 +5,13 @@ import type {
 	questionDtoSchema,
 	quizDetailsDtoSchema,
 	quizDtoSchema,
+	quizFormSchema,
 	quizKindSchema
 } from '@modules/quizzes/schemas'
 
 export type QuizKindValue = z.infer<typeof quizKindSchema>
+
+export type QuizFormValues = z.infer<typeof quizFormSchema>
 
 export type QuizDto = z.infer<typeof quizDtoSchema>
 

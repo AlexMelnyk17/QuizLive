@@ -29,6 +29,7 @@ describe('quiz API schemas', () => {
 
 	it('parses quiz details with questions of every kind', () => {
 		const parsed = quizDetailsDtoSchema.parse({
+			hasGames: false,
 			...quizFields,
 			questions: [
 				{

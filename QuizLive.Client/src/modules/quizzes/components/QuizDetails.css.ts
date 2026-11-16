@@ -43,8 +43,23 @@ export const quizDetailsMeta = style({
 
 export const quizDetailsActions = style({
 	display: 'flex',
+	alignItems: 'flex-start',
 	flexWrap: 'wrap',
 	gap: vars.spacing[2]
+})
+
+export const startGameButton = style({
+	':disabled': {
+		backgroundColor: vars.colors.success,
+		color: vars.colors.onPrimary
+	}
+})
+export const actionWithHint = style({
+	display: 'flex',
+	flexDirection: 'column',
+	alignItems: 'flex-start',
+	gap: vars.spacing[1],
+	maxWidth: '14rem'
 })
 
 export const questionList = style({
@@ -93,8 +108,9 @@ export const optionItem = style({
 	gap: vars.spacing[2],
 	padding: `${vars.spacing[2]} ${vars.spacing[3]}`,
 	borderRadius: vars.radii.md,
-	border: `1px solid ${vars.colors.border}`,
 	backgroundColor: vars.colors.surfaceSunken,
+	border: `1px solid ${vars.colors.borderStrong}`,
+	minWidth: 0,
 	overflowWrap: 'anywhere'
 })
 

@@ -1,37 +1,40 @@
 import {
+	Outlet,
 	createRootRoute,
 	createRoute,
 	createRouter,
-	Outlet,
-	redirect,
+	redirect
 } from '@tanstack/react-router'
 import { z } from 'zod'
-
-import { PATHS } from '@config/routes'
 
 import { LoginPage } from '@modules/auth/components/LoginPage'
 import { RegisterPage } from '@modules/auth/components/RegisterPage'
 import { readSession } from '@modules/auth/store/sessionStore'
 import { DashboardPage } from '@modules/dashboard/components/DashboardPage'
 import { HomePage } from '@modules/home/components/HomePage'
+import { QuizCreatePage } from '@modules/quizzes/components/QuizCreatePage'
 import { QuizDetailsPage } from '@modules/quizzes/components/QuizDetailsPage'
 import { GamePlayStatsPage } from '@modules/statistics/components/GamePlayStatsPage'
 import { QuizPlayStatsPage } from '@modules/statistics/components/QuizPlayStatsPage'
+import { QuizEditPage } from '@modules/quizzes/components/QuizEditPage'
 import { StatisticsPage } from '@modules/statistics/components/StatisticsPage'
+
+import { PATHS } from '@config/routes'
+
 import { sanitizeRedirectPath } from '@utils/sanitizeRedirectPath'
 
 const rootRoute = createRootRoute({
-	component: () => <Outlet />,
+	component: () => <Outlet />
 })
 
 const loginSearchSchema = z.object({
-	redirect: z.string().optional(),
+	redirect: z.string().optional()
 })
 
 const indexRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: PATHS.home,
-	component: HomePage,
+	component: HomePage
 })
 
 const loginRoute = createRoute({
@@ -44,7 +47,7 @@ const loginRoute = createRoute({
 			throw redirect({ to: sanitizeRedirectPath(search.redirect) })
 		}
 	},
-	component: LoginPage,
+	component: LoginPage
 })
 
 const registerRoute = createRoute({
@@ -56,7 +59,7 @@ const registerRoute = createRoute({
 			throw redirect({ to: PATHS.dashboard })
 		}
 	},
-	component: RegisterPage,
+	component: RegisterPage
 })
 
 const dashboardRoute = createRoute({
@@ -67,11 +70,11 @@ const dashboardRoute = createRoute({
 		if (!session) {
 			throw redirect({
 				to: PATHS.login,
-				search: { redirect: PATHS.dashboard },
+				search: { redirect: PATHS.dashboard }
 			})
 		}
 	},
-	component: DashboardPage,
+	component: DashboardPage
 })
 
 const statisticsRoute = createRoute({
@@ -82,11 +85,26 @@ const statisticsRoute = createRoute({
 		if (!session) {
 			throw redirect({
 				to: PATHS.login,
-				search: { redirect: PATHS.statistics },
+				search: { redirect: PATHS.statistics }
 			})
 		}
 	},
-	component: StatisticsPage,
+	component: StatisticsPage
+})
+
+const quizCreateRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: PATHS.quizCreate,
+	beforeLoad: () => {
+		const session = readSession()
+		if (!session) {
+			throw redirect({
+				to: PATHS.login,
+				search: { redirect: PATHS.quizCreate }
+			})
+		}
+	},
+	component: QuizCreatePage
 })
 
 const quizDetailsRoute = createRoute({
@@ -97,11 +115,22 @@ const quizDetailsRoute = createRoute({
 		if (!session) {
 			throw redirect({
 				to: PATHS.login,
-				search: { redirect: location.href },
+				search: { redirect: location.href }
 			})
 		}
 	},
-	component: QuizDetailsPage,
+	component: QuizDetailsPage
+})
+
+const quizEditRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: PATHS.quizEdit,
+	beforeLoad: ({ location }) => {
+		if (!readSession()) {
+			throw redirect({ to: PATHS.login, search: { redirect: location.href } })
+		}
+	},
+	component: QuizEditPage
 })
 
 const quizStatsRoute = createRoute({
@@ -140,9 +169,11 @@ const routeTree = rootRoute.addChildren([
 	registerRoute,
 	dashboardRoute,
 	statisticsRoute,
+	quizCreateRoute,
 	quizDetailsRoute,
 	quizStatsRoute,
 	gameStatsRoute,
+	quizEditRoute
 ])
 
 export const router = createRouter({ routeTree })
