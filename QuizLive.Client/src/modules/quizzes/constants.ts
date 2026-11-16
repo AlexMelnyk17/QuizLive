@@ -40,6 +40,47 @@ export const QUIZ_LIST_COPY = {
 	unarchive: 'Unarchive'
 } as const
 
+export const QUIZ_DETAILS_COPY = {
+	edit: 'Edit',
+	archive: 'Archive',
+	unarchive: 'Unarchive',
+	delete: 'Delete',
+	archivedNotice: {
+		title: 'This quiz is archived',
+		body: 'Unarchive it to edit the quiz.'
+	},
+	questionsTitle: 'Questions',
+	noQuestions: 'This quiz has no questions yet.',
+	addQuestions: 'Add questions',
+	questionLabel: (order: number) => `Question ${order}`,
+	openTextHint: 'Players type their own answer.',
+	correctOption: 'Correct',
+	imageAlt: (order: number) => `Image for question ${order}`,
+	notFound: {
+		title: 'Quiz not found',
+		body: 'It may have been deleted, or it belongs to another host.',
+		back: 'Back to my quizzes'
+	},
+	loadError: {
+		title: 'Could not load the quiz',
+		body: 'Something went wrong while loading the quiz. Try again.',
+		retry: 'Retry'
+	},
+	actionError: {
+		title: 'Could not update the quiz',
+		body: 'Something went wrong. Try again.'
+	},
+	archiveInstead: 'Archive instead',
+	deleteDialog: {
+		title: 'Delete quiz?',
+		body: (title: string) =>
+			`"${title}" and all its questions will be deleted. This cannot be undone.`,
+		cancel: 'Cancel',
+		confirm: 'Delete quiz'
+	},
+	deleted: 'The quiz was deleted.'
+} as const
+
 // Every quiz query starts with this key, so one invalidation refreshes lists and details.
 export const QUIZZES_QUERY_KEY = ['quizzes'] as const
 

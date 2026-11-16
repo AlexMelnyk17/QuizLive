@@ -15,3 +15,11 @@ export function formatQuizDate(value: string): string {
 export function formatQuestionCount(count: number): string {
 	return `${count} ${count === 1 ? 'question' : 'questions'}`
 }
+
+export function formatTimeLimit(seconds: number | null): string {
+	return seconds === null ? 'No time limit' : `${seconds} s`
+}
+
+export function formatPoints(points: number): string {
+	return `${points} ${points === 1 ? 'point' : 'points'}`
+}
