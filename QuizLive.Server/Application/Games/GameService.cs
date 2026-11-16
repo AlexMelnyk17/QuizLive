@@ -189,7 +189,7 @@ namespace QuizLive.Server.Application.Games
             }
         }
 
-        private static NotFoundException GameNotFound(int gameId) => new($"Game {gameId} was not found.");
+        private static NotFoundException GameNotFound(int gameId) => new(GameMessages.NotFound(gameId));
 
         private static NotFoundException PlayerNotFound() => new("Player was not found.");
 
@@ -249,7 +249,7 @@ namespace QuizLive.Server.Application.Games
 
             if (game.Status != GameStatus.Lobby)
             {
-                throw new ConflictException("The game has already started.");
+                throw new ConflictException(GameMessages.AlreadyStarted);
             }
 
             // Compared in memory: SQLite lower() only handles ASCII, so it would miss Cyrillic nicknames.
