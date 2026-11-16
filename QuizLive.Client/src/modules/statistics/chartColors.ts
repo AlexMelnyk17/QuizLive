@@ -14,10 +14,3 @@ export const gamesByKindColors = [
 	statsChartColors.info,
 	statsChartColors.success,
 ] as const
-
-export const gamesByStatusColors = [
-	statsChartColors.info,
-	statsChartColors.warning,
-	statsChartColors.primary,
-	statsChartColors.success,
-] as const

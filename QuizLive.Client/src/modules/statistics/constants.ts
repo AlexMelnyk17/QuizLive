@@ -1,5 +1,3 @@
-import type { StatusCounts } from '@modules/statistics/types'
-
 export const STATS_QUERY_KEY = ['stats', 'host'] as const
 
 export const STAT_FORMAT_FRACTION_DIGITS = 1
@@ -25,20 +23,5 @@ export const STATISTICS_KPI_LABELS = {
 export const STATISTICS_CHART_COPY = {
 	gamesOverTime: 'Games created (last 30 days)',
 	gamesByKind: 'Games by quiz type',
-	gamesByStatus: 'Games by status',
 	seriesGames: 'Games',
 } as const
-
-export const GAME_STATUS_LABELS = {
-	lobby: 'Lobby',
-	question: 'Question',
-	results: 'Results',
-	finished: 'Finished',
-} as const
-
-export const STATUS_KEYS = [
-	'lobby',
-	'question',
-	'results',
-	'finished',
-] as const satisfies readonly (keyof StatusCounts)[]

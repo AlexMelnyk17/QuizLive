@@ -15,7 +15,6 @@ import { formatStatInteger } from '@modules/statistics/utils/formatStatInteger'
 import { isHostStatsEmpty } from '@modules/statistics/utils/isHostStatsEmpty'
 import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
 import { GamesByKindChart } from '@modules/statistics/components/charts/GamesByKindChart'
-import { GamesByStatusChart } from '@modules/statistics/components/charts/GamesByStatusChart'
 import { GamesOverTimeChart } from '@modules/statistics/components/charts/GamesOverTimeChart'
 import {
 	statsChartGrid,
@@ -35,7 +34,7 @@ function StatisticsLoadingState() {
 				))}
 			</div>
 			<div className={statsSkeletonChartGrid}>
-				{Array.from({ length: 3 }, (_, index) => (
+				{Array.from({ length: 2 }, (_, index) => (
 					<Skeleton key={index} variant="rect" style={{ height: '320px' }} />
 				))}
 			</div>
@@ -96,7 +95,6 @@ export function StatisticsPage() {
 					<div className={statsChartGrid}>
 						<GamesOverTimeChart points={data.activity.gamesPerDay} />
 						<GamesByKindChart counts={data.games.byKind} />
-						<GamesByStatusChart counts={data.games.byStatus} />
 					</div>
 				</div>
 			)}
