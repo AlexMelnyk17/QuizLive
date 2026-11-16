@@ -3,6 +3,8 @@ import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { PATHS } from '@config/routes'
+
 import { DashboardPage } from '@modules/dashboard/components/DashboardPage'
 import type { QuizListProps } from '@modules/quizzes/components/QuizList'
 
@@ -65,7 +67,7 @@ describe('DashboardPage', () => {
 		await user.click(screen.getByRole('button', { name: 'Open quiz 7' }))
 
 		expect(navigateMock).toHaveBeenCalledWith({
-			to: '/quizzes/$quizId',
+			to: PATHS.quizDetails,
 			params: { quizId: '7' }
 		})
 	})
