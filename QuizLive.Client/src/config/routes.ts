@@ -5,7 +5,9 @@ export const PATHS = {
 	dashboard: '/dashboard',
 	statistics: '/statistics',
 	quizzes: '/quizzes',
-	quizDetails: '/quizzes/$quizId'
+	quizCreate: '/quizzes/new',
+	quizDetails: '/quizzes/$quizId',
+	quizEdit: '/quizzes/$quizId/edit'
 } as const
 
 export const pathTo = {

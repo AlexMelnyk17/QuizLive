@@ -1,4 +1,5 @@
 import cn from 'clsx'
+import type { ReactNode } from 'react'
 
 import { Badge } from '@components/ui/Badge'
 import { Card } from '@components/ui/Card'
@@ -13,6 +14,7 @@ import {
 	quizDetailsMeta,
 	quizDetailsText
 } from '@modules/quizzes/components/QuizDetails.css'
+import { sectionHeader } from '@modules/quizzes/components/QuizEditor.css'
 import { QUIZ_DETAILS_COPY, QuizKind } from '@modules/quizzes/constants'
 import type { QuestionDto, QuizKindValue } from '@modules/quizzes/types'
 import { formatPoints } from '@modules/quizzes/utils/formatPoints'
@@ -21,9 +23,16 @@ import { formatTimeLimit } from '@modules/quizzes/utils/formatTimeLimit'
 export type QuestionViewProps = {
 	question: QuestionDto
 	kind: QuizKindValue
+	actions?: ReactNode
+	footer?: ReactNode
 }
 
-export function QuestionView({ question, kind }: QuestionViewProps) {
+export function QuestionView({
+	question,
+	kind,
+	actions,
+	footer
+}: QuestionViewProps) {
 	const details = [
 		formatTimeLimit(question.timeLimitSeconds),
 		question.basePoints === null ? null : formatPoints(question.basePoints)
@@ -31,13 +40,16 @@ export function QuestionView({ question, kind }: QuestionViewProps) {
 
 	return (
 		<Card variant='outlined' padding='md' fullWidth className={questionCard}>
-			<div className={quizDetailsMeta}>
-				<Text size='sm' weight='semibold' tone='muted'>
-					{QUIZ_DETAILS_COPY.questionLabel(question.order)}
-				</Text>
-				<Text size='sm' tone='muted'>
-					{details.join(' · ')}
-				</Text>
+			<div className={sectionHeader}>
+				<div className={quizDetailsMeta}>
+					<Text size='sm' weight='semibold' tone='muted'>
+						{QUIZ_DETAILS_COPY.questionLabel(question.order)}
+					</Text>
+					<Text size='sm' tone='muted'>
+						{details.join(' · ')}
+					</Text>
+				</div>
+				{actions}
 			</div>
 
 			<Text weight='medium' className={quizDetailsText}>
@@ -74,6 +86,7 @@ export function QuestionView({ question, kind }: QuestionViewProps) {
 					))}
 				</ul>
 			)}
+			{footer}
 		</Card>
 	)
 }

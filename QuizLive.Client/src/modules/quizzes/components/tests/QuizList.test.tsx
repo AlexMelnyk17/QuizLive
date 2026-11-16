@@ -15,8 +15,6 @@ import { QUIZ_LIST_COPY } from '@modules/quizzes/constants'
 import type { QuizDto } from '@modules/quizzes/types'
 import { formatQuizDate } from '@modules/quizzes/utils/formatQuizDate'
 
-import { ApiError } from '@api/apiError'
-
 import { renderWithTheme } from '@src/test/testUtils'
 
 vi.mock('@modules/quizzes/api/quizzesApi', () => ({
@@ -121,39 +119,14 @@ describe('QuizList', () => {
 		expect(onCreateQuiz).toHaveBeenCalled()
 	})
 
-	it('archives a quiz and reloads the list', async () => {
-		const user = userEvent.setup()
-		fetchMyQuizzesMock.mockResolvedValueOnce([math]).mockResolvedValue([])
-		setQuizArchivedMock.mockResolvedValue()
-		renderQuizList()
-
-		await user.click(
-			await screen.findByRole('button', { name: 'Archive "Math"' })
-		)
-
-		expect(setQuizArchivedMock).toHaveBeenCalledWith(7, true)
-		expect(
-			await screen.findByText(QUIZ_LIST_COPY.empty.active.title)
-		).toBeInTheDocument()
-		expect(fetchMyQuizzesMock).toHaveBeenCalledTimes(2)
-	})
-
-	it('shows the server message when archiving fails', async () => {
-		const user = userEvent.setup()
+	it('has no archive actions on quiz cards', async () => {
 		fetchMyQuizzesMock.mockResolvedValue([math])
-		setQuizArchivedMock.mockRejectedValue(
-			new ApiError(404, { detail: 'Quiz 7 was not found.' })
-		)
 		renderQuizList()
-
-		await user.click(
-			await screen.findByRole('button', { name: 'Archive "Math"' })
-		)
-
-		expect(await screen.findByText('Quiz 7 was not found.')).toBeInTheDocument()
+		await screen.findByRole('heading', { name: 'Math' })
 		expect(
-			screen.getByText(QUIZ_LIST_COPY.updateError.title)
-		).toBeInTheDocument()
+			screen.queryByRole('button', { name: 'Archive "Math"' })
+		).not.toBeInTheDocument()
+		expect(setQuizArchivedMock).not.toHaveBeenCalled()
 	})
 
 	it('shows an error with retry when loading fails', async () => {

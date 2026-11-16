@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { PATHS } from '@config/routes'
 
+import { DASHBOARD_LAYOUT_COPY } from '@layout/constants'
 import { DashboardPage } from '@modules/dashboard/components/DashboardPage'
 import type { QuizListProps } from '@modules/quizzes/components/QuizList'
 
@@ -30,10 +31,15 @@ vi.mock('@modules/auth/store/sessionStore', () => ({
 
 // The list itself is tested in the quizzes module; here only its wiring into the page.
 vi.mock('@modules/quizzes/components/QuizList', () => ({
-	QuizList: ({ onOpenQuiz }: QuizListProps) => (
-		<button type='button' onClick={() => onOpenQuiz?.(7)}>
-			Open quiz 7
-		</button>
+	QuizList: ({ onOpenQuiz, onCreateQuiz }: QuizListProps) => (
+		<>
+			<button type='button' onClick={() => onOpenQuiz?.(7)}>
+				Open quiz 7
+			</button>
+			<button type='button' onClick={onCreateQuiz}>
+				Create from the empty list
+			</button>
+		</>
 	)
 }))
 
@@ -52,12 +58,24 @@ describe('DashboardPage', () => {
 			screen.getByRole('button', { name: 'Open quiz 7' })
 		).toBeInTheDocument()
 		expect(
-			screen.getByRole('button', { name: /Create quiz \(not available yet\)/i })
-		).toBeDisabled()
+			screen.getByRole('button', { name: DASHBOARD_LAYOUT_COPY.createQuiz })
+		).toBeEnabled()
 		expect(screen.getByRole('link', { name: /Statistics/i })).toHaveAttribute(
 			'href',
-			'/statistics'
+			PATHS.statistics
 		)
+	})
+
+	it.each([
+		['the header button', DASHBOARD_LAYOUT_COPY.createQuiz],
+		['the empty list', 'Create from the empty list']
+	])('opens the creation page from %s', async (_, buttonName) => {
+		const user = userEvent.setup()
+		renderWithTheme(<DashboardPage />)
+
+		await user.click(screen.getByRole('button', { name: buttonName }))
+
+		expect(navigateMock).toHaveBeenCalledWith({ to: PATHS.quizCreate })
 	})
 
 	it('opens the details of a quiz', async () => {
