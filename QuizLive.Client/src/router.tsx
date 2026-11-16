@@ -15,6 +15,8 @@ import { readSession } from '@modules/auth/store/sessionStore'
 import { DashboardPage } from '@modules/dashboard/components/DashboardPage'
 import { HomePage } from '@modules/home/components/HomePage'
 import { QuizDetailsPage } from '@modules/quizzes/components/QuizDetailsPage'
+import { GamePlayStatsPage } from '@modules/statistics/components/GamePlayStatsPage'
+import { QuizPlayStatsPage } from '@modules/statistics/components/QuizPlayStatsPage'
 import { StatisticsPage } from '@modules/statistics/components/StatisticsPage'
 import { sanitizeRedirectPath } from '@utils/sanitizeRedirectPath'
 
@@ -102,6 +104,36 @@ const quizDetailsRoute = createRoute({
 	component: QuizDetailsPage,
 })
 
+const quizStatsRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: PATHS.quizStats,
+	beforeLoad: ({ location }) => {
+		const session = readSession()
+		if (!session) {
+			throw redirect({
+				to: PATHS.login,
+				search: { redirect: location.href },
+			})
+		}
+	},
+	component: QuizPlayStatsPage,
+})
+
+const gameStatsRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: PATHS.gameStats,
+	beforeLoad: ({ location }) => {
+		const session = readSession()
+		if (!session) {
+			throw redirect({
+				to: PATHS.login,
+				search: { redirect: location.href },
+			})
+		}
+	},
+	component: GamePlayStatsPage,
+})
+
 const routeTree = rootRoute.addChildren([
 	indexRoute,
 	loginRoute,
@@ -109,6 +141,8 @@ const routeTree = rootRoute.addChildren([
 	dashboardRoute,
 	statisticsRoute,
 	quizDetailsRoute,
+	quizStatsRoute,
+	gameStatsRoute,
 ])
 
 export const router = createRouter({ routeTree })
