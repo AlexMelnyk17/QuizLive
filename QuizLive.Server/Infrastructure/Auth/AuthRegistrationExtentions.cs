@@ -6,6 +6,7 @@ using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Auth;
 using QuizLive.Server.Core.Entities.Identity;
 using QuizLive.Server.Infrastructure.Data;
+using QuizLive.Server.Infrastructure.Realtime;
 
 namespace QuizLive.Server.Infrastructure.Auth
 {
@@ -60,6 +61,25 @@ namespace QuizLive.Server.Infrastructure.Auth
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),
                         ClockSkew = TimeSpan.FromMinutes(1)
+                    };
+
+                    // A browser WebSocket cannot send an Authorization header, so the SignalR client
+                    // passes the token as ?access_token=. It is accepted only for hub paths, because
+                    // tokens in a URL end up in logs.
+                    bearer.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+
+                            if (!string.IsNullOrEmpty(accessToken)
+                                && context.HttpContext.Request.Path.StartsWithSegments(HubRoutes.Prefix))
+                            {
+                                context.Token = accessToken;
+                            }
+
+                            return Task.CompletedTask;
+                        }
                     };
                 });
 

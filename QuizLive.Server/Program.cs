@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using QuizLive.Server.API.Hubs;
@@ -40,7 +41,7 @@ namespace QuizLive.Server
             builder.Services.AddScoped<IQuestionService, QuestionService>();
             builder.Services.AddScoped<IGameService, GameService>();
             builder.Services.AddScoped<IStatsService, StatsService>();
-            builder.Services.AddSignalR();
+            builder.Services.AddSignalR(options => options.AddFilter<HubExceptionFilter>());
             builder.Services.AddSingleton<IGameNotifier, SignalRGameNotifier>();
 
             builder.Services.AddSwaggerGen(options =>
@@ -99,7 +100,7 @@ namespace QuizLive.Server
 			app.UseAuthorization();
 
             app.MapControllers();
-            app.MapHub<GameHub>("/api/hubs/game");
+            app.MapHub<GameHub>(HubRoutes.Game);
 
             app.MapFallbackToFile("/index.html");
 
