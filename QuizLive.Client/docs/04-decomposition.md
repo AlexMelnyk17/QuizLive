@@ -14,7 +14,7 @@ Each `src/modules/<name>/` slice **SHOULD** contain everything needed for that p
 | `components/` | Pages and feature UI |
 | `hooks/` | React Query and feature hooks |
 | `store/` | Zustand (or similar) when client state is needed |
-| `schemas.ts`, `types.ts`, `constants.ts`, `utils.ts` | Domain definitions and pure helpers |
+| `schemas.ts`, `types.ts`, `constants.ts`, `utils.ts` | Domain definitions and pure helpers (`types.ts` holds DTOs and shared aliases — not `XxxProps`; see [02-typescript.md](./02-typescript.md) R-5) |
 
 Domain rules for one feature **MUST NOT** live in `src/utils` unless reused by a second feature.
 
