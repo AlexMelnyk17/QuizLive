@@ -1,4 +1,4 @@
-import { ENV } from '@config'
+import { ENV } from '@config/env'
 
 import { ApiError, parseProblemResponse } from '@api/apiError'
 

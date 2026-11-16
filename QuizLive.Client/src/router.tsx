@@ -7,11 +7,13 @@ import {
 } from '@tanstack/react-router'
 import { z } from 'zod'
 
-import { LoginPage, readSession, RegisterPage } from '@modules/auth'
-import { DashboardPage } from '@modules/dashboard'
-import { HomePage } from '@modules/home'
+import { LoginPage } from '@modules/auth/components/LoginPage'
+import { RegisterPage } from '@modules/auth/components/RegisterPage'
+import { readSession } from '@modules/auth/store/sessionStore'
+import { DashboardPage } from '@modules/dashboard/components/DashboardPage'
+import { HomePage } from '@modules/home/components/HomePage'
 import { QuizDetailsPage } from '@modules/quizzes/components/QuizDetailsPage'
-import { StatisticsPage } from '@modules/statistics'
+import { StatisticsPage } from '@modules/statistics/components/StatisticsPage'
 import { sanitizeRedirectPath } from '@utils/sanitizeRedirectPath'
 
 const rootRoute = createRootRoute({

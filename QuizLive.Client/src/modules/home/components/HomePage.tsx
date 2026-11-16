@@ -4,7 +4,7 @@ import { Button } from '@components/ui/Button'
 import { Heading } from '@components/ui/Heading'
 import { Text } from '@components/ui/Text'
 
-import { useSession } from '@modules/auth'
+import { useSession } from '@modules/auth/store/sessionStore'
 import { HOME_TITLE } from '@modules/home/constants'
 import {
 	homePage,
@@ -12,7 +12,7 @@ import {
 	inlineLink,
 	section,
 } from '@modules/home/components/HomePage.css'
-import { JoinByCodePanel } from '@modules/join'
+import { JoinByCodePanel } from '@modules/join/components/JoinByCodePanel'
 
 export function HomePage() {
 	const navigate = useNavigate()

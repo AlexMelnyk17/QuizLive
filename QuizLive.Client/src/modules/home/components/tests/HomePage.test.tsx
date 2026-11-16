@@ -16,7 +16,7 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
 	}
 })
 
-vi.mock('@modules/auth', () => ({
+vi.mock('@modules/auth/store/sessionStore', () => ({
 	useSession: () => null,
 }))
 
