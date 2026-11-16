@@ -14,6 +14,7 @@ import { RegisterPage } from '@modules/auth/components/RegisterPage'
 import { readSession } from '@modules/auth/store/sessionStore'
 import { DashboardPage } from '@modules/dashboard/components/DashboardPage'
 import { HomePage } from '@modules/home/components/HomePage'
+import { QuizCreatePage } from '@modules/quizzes/components/QuizCreatePage'
 import { QuizDetailsPage } from '@modules/quizzes/components/QuizDetailsPage'
 import { StatisticsPage } from '@modules/statistics/components/StatisticsPage'
 import { sanitizeRedirectPath } from '@utils/sanitizeRedirectPath'
@@ -87,6 +88,21 @@ const statisticsRoute = createRoute({
 	component: StatisticsPage,
 })
 
+const quizCreateRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: PATHS.quizCreate,
+	beforeLoad: () => {
+		const session = readSession()
+		if (!session) {
+			throw redirect({
+				to: PATHS.login,
+				search: { redirect: PATHS.quizCreate },
+			})
+		}
+	},
+	component: QuizCreatePage,
+})
+
 const quizDetailsRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: PATHS.quizDetails,
@@ -108,6 +124,7 @@ const routeTree = rootRoute.addChildren([
 	registerRoute,
 	dashboardRoute,
 	statisticsRoute,
+	quizCreateRoute,
 	quizDetailsRoute,
 ])
 

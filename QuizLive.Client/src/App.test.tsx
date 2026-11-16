@@ -1,7 +1,7 @@
 import { cleanup, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { pathTo } from '@config/routes'
+import { PATHS, pathTo } from '@config/routes'
 
 import { router } from '@src/router'
 import { renderApp } from '@src/test/renderApp'
@@ -27,6 +27,19 @@ describe('App', () => {
 		await waitFor(() => {
 			expect(router.state.location.search).toEqual({
 				redirect: pathTo.quizDetails(7),
+			})
+		})
+	})
+
+	it('sends a signed-out visitor of the creation page to login and back afterwards', async () => {
+		await renderApp(PATHS.quizCreate)
+
+		expect(
+			await screen.findByRole('heading', { name: /Log in/i })
+		).toBeInTheDocument()
+		await waitFor(() => {
+			expect(router.state.location.search).toEqual({
+				redirect: PATHS.quizCreate,
 			})
 		})
 	})

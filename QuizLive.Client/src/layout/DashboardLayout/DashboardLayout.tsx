@@ -57,8 +57,7 @@ export function DashboardLayout({
 					<Divider orientation="vertical" length="short" spacing="sm" />
 					<Button
 						variant="primary"
-						disabled
-						aria-label={DASHBOARD_LAYOUT_COPY.createQuizAria}
+						onClick={() => void navigate({ to: PATHS.quizCreate })}
 					>
 						{DASHBOARD_LAYOUT_COPY.createQuiz}
 					</Button>

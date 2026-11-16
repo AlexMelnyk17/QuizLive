@@ -5,6 +5,7 @@ export const PATHS = {
 	dashboard: '/dashboard',
 	statistics: '/statistics',
 	quizzes: '/quizzes',
+	quizCreate: '/quizzes/new',
 	quizDetails: '/quizzes/$quizId'
 } as const
 

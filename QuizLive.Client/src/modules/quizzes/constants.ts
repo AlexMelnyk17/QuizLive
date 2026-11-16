@@ -12,6 +12,47 @@ export const QUIZ_KIND_LABELS: Record<QuizKindValue, string> = {
 	[QuizKind.QuizChoice]: 'Quiz'
 }
 
+// Quiz kinds in the order they are offered; the first one is the default.
+export const QUIZ_KIND_ORDER = [
+	QuizKind.OpenText,
+	QuizKind.PollChoice,
+	QuizKind.QuizChoice
+] as const
+
+export const QUIZ_KIND_DESCRIPTIONS: Record<QuizKindValue, string> = {
+	[QuizKind.OpenText]:
+		'Players type their own answer. There is no correct answer.',
+	[QuizKind.PollChoice]:
+		'Players pick one option. There is no correct answer.',
+	[QuizKind.QuizChoice]:
+		'Players pick one option, and exactly one is correct. Correct answers earn points.'
+}
+
+// Limits match the server (CreateQuizRequest).
+export const QUIZ_FIELD_LIMITS = {
+	titleMax: 200,
+	descriptionMax: 2000
+} as const
+
+export const QUIZ_FORM_COPY = {
+	createPageTitle: 'Create quiz',
+	fields: {
+		title: 'Title',
+		description: 'Description (optional)',
+		kind: 'Quiz type'
+	},
+	kindFixedNote: 'The type cannot be changed after the quiz is created.',
+	submitCreate: 'Save quiz',
+	cancel: 'Cancel',
+	errorTitle: 'Could not save the quiz',
+	genericError: 'Something went wrong. Try again.',
+	validation: {
+		titleRequired: 'Enter a title.',
+		titleMax: `The title can be at most ${QUIZ_FIELD_LIMITS.titleMax} characters.`,
+		descriptionMax: `The description can be at most ${QUIZ_FIELD_LIMITS.descriptionMax} characters.`
+	}
+} as const
+
 export const QUIZ_FORMAT_COPY = {
 	questionSingular: 'question',
 	questionPlural: 'questions',
