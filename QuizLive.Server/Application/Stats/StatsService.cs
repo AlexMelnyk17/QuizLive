@@ -100,15 +100,16 @@ namespace QuizLive.Server.Application.Stats
                 .Where(p => gameIds.Contains(p.GameSessionRecordId))
                 .CountAsync();
 
-            var maxInOneGame = gameTotal == 0
-                ? 0
-                : await db.Players
-                    .AsNoTracking()
-                    .Where(p => gameIds.Contains(p.GameSessionRecordId))
-                    .GroupBy(p => p.GameSessionRecordId)
-                    .Select(g => g.Count())
-                    .DefaultIfEmpty(0)
-                    .MaxAsync();
+            // One count per game that has players; the maximum is taken in memory,
+            // which also covers games without any players (empty list).
+            var playersPerGame = await db.Players
+                .AsNoTracking()
+                .Where(p => gameIds.Contains(p.GameSessionRecordId))
+                .GroupBy(p => p.GameSessionRecordId)
+                .Select(g => g.Count())
+                .ToListAsync();
+
+            var maxInOneGame = playersPerGame.Count == 0 ? 0 : playersPerGame.Max();
 
             var average = gameTotal == 0
                 ? 0m
