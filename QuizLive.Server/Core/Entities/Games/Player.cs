@@ -1,4 +1,4 @@
-﻿using QuizLive.Server.Core.Entities.OpenText;
+using QuizLive.Server.Core.Entities.OpenText;
 using QuizLive.Server.Core.Entities.PollChoice;
 using QuizLive.Server.Core.Entities.QuizChoice;
 
@@ -12,6 +12,8 @@ namespace QuizLive.Server.Core.Entities.Games
         public string Nickname { get; set; } = "";          // 40, unique within a game
         public string Token { get; set; } = Guid.NewGuid().ToString("N");   // 64
         public DateTime JoinedAtUtc { get; set; } = DateTime.UtcNow;
+
+        public int TotalScore { get; set; }
 
         public List<OpenAnswer> OpenAnswers { get; set; } = new();
         public List<PollAnswer> PollAnswers { get; set; } = new();

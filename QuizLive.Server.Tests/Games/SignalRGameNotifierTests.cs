@@ -70,6 +70,14 @@ public class SignalRGameNotifierTests
         public Exception? Failure { get; init; }
         public bool SynchronousFailure { get; init; }
 
+        public Task AnswerProgress(AnswerProgressDto progress) => Task.CompletedTask;
+        public Task HostResults(HostQuestionResultsDto results) => Task.CompletedTask;
+        public Task PlayerResults(PlayerQuestionResultsDto results) => Task.CompletedTask;
+        public Task Leaderboard(LeaderboardDto leaderboard) => Task.CompletedTask;
+        public Task TimeAdded(QuestionTimeAddedDto timing) => Task.CompletedTask;
+        public Task PlayerPresenceChanged(PlayerPresenceDto presence) => Task.CompletedTask;
+        public Task PlayerLeft(int playerId) => Task.CompletedTask;
+
         public Task PlayerJoined(GamePlayerDto player)
         {
             JoinedPlayers.Add(player);

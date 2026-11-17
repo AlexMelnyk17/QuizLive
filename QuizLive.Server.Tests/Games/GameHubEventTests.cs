@@ -129,8 +129,8 @@ namespace QuizLive.Server.Tests.Games
             await annSees.AssertNoMoreAsync();
         }
 
-        // The hook makes a player join right after the lobby state was read: the snapshot cannot contain
-        // that player, so the event is the only way for the client to learn about them.
+        // A player joins between the preliminary read and the transactional reconnect snapshot.
+        // Both the snapshot and the event may include that player; the client deduplicates by id.
         [Fact]
         public async Task PlayerWhoJoinsWhileTheHostConnects_IsNotLost()
         {
@@ -149,7 +149,7 @@ namespace QuizLive.Server.Tests.Games
 
             var snapshot = await connection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct);
 
-            Assert.Empty(snapshot.Game.Players);
+            Assert.Equal("Late", Assert.Single(snapshot.Game.Players).Nickname);
 
             var received = await joined.NextAsync();
             Assert.Equal("Late", received.Nickname);
@@ -174,7 +174,7 @@ namespace QuizLive.Server.Tests.Games
 
             var state = await connection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", first.Token, Ct);
 
-            Assert.Equal(["Ann"], state.Players.Select(p => p.Nickname));
+            Assert.Equal(["Ann", "Late"], state.Players.Select(p => p.Nickname));
 
             var received = await joined.NextAsync();
             Assert.Equal("Late", received.Nickname);
