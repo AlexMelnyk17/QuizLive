@@ -1,6 +1,10 @@
+import type { HubConnection } from '@microsoft/signalr'
 import type { z } from 'zod'
 
-import type { GAME_ACTION_TYPES } from '@modules/game/constants'
+import type {
+	GAME_ACTION_TYPES,
+	GAME_CONNECTION_STATE
+} from '@modules/game/constants'
 import type {
 	gamePlayerDtoSchema,
 	gameStatusSchema,
@@ -65,6 +69,26 @@ export type GameAction<TQuestion extends { number: number }> =
 	  }
 	| { type: typeof GAME_ACTION_TYPES.questionClosed; number: number }
 	| { type: typeof GAME_ACTION_TYPES.gameEnded }
+
+export type GameConnectionStateValue =
+	(typeof GAME_CONNECTION_STATE)[keyof typeof GAME_CONNECTION_STATE]
+
+export type GameHubConnectionOptions = {
+	// Nothing is connected while this is false, e.g. a player who has no token yet.
+	enabled: boolean
+	// The host gives its JWT; a player gives nothing.
+	accessTokenFactory?: () => string
+	handlers: GameEventHandlers
+	// Joins the game on the hub (ConnectAs*). It runs after the connection starts and after every reconnect.
+	join: (connection: HubConnection) => Promise<void>
+}
+
+export type GameHubConnectionResult = {
+	// Null until the connection has started.
+	connection: HubConnection | null
+	connectionState: GameConnectionStateValue
+	error: string | null
+}
 
 // Every handler is optional: the host listens to some events, a player to others.
 export type GameEventHandlers = {

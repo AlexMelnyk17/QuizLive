@@ -43,6 +43,16 @@ export const GameStatus = {
 	Finished: 3
 } as const
 
+// Where the connection to the hub is. "failed" means it could not be started, or the game could not be
+// joined (a wrong token, an ended game); the error text says which.
+export const GAME_CONNECTION_STATE = {
+	connecting: 'connecting',
+	connected: 'connected',
+	reconnecting: 'reconnecting',
+	disconnected: 'disconnected',
+	failed: 'failed'
+} as const
+
 // What can happen to the state of a game on the client; see gameReducer.
 export const GAME_ACTION_TYPES = {
 	snapshot: 'snapshot',

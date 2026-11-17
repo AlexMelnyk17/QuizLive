@@ -51,6 +51,70 @@ export class FakeHubConnection {
 		return this.handlers.get(event)?.size ?? 0
 	}
 
+	// The life cycle of the connection.
+
+	startCalls = 0
+	stopCalls = 0
+
+	private startOutcome: () => Promise<void> = () => Promise.resolve()
+	private readonly reconnectingCallbacks: (() => void)[] = []
+	private readonly reconnectedCallbacks: (() => void)[] = []
+	private readonly closeCallbacks: (() => void)[] = []
+
+	start(): Promise<void> {
+		this.startCalls++
+
+		return this.startOutcome()
+	}
+
+	stop(): Promise<void> {
+		this.stopCalls++
+
+		return Promise.resolve()
+	}
+
+	failStartWith(error: Error) {
+		this.startOutcome = () => Promise.reject(error)
+	}
+
+	// Makes start() wait until the test lets it go, to test what happens in the meantime.
+	holdStart(): { release: () => void; reject: (error: Error) => void } {
+		let release = () => {}
+		let reject: (error: Error) => void = () => {}
+		const gate = new Promise<void>((resolve, rejectGate) => {
+			release = resolve
+			reject = rejectGate
+		})
+
+		this.startOutcome = () => gate
+
+		return { release, reject }
+	}
+
+	onreconnecting(callback: () => void) {
+		this.reconnectingCallbacks.push(callback)
+	}
+
+	onreconnected(callback: () => void) {
+		this.reconnectedCallbacks.push(callback)
+	}
+
+	onclose(callback: () => void) {
+		this.closeCallbacks.push(callback)
+	}
+
+	simulateReconnecting() {
+		this.reconnectingCallbacks.forEach(callback => callback())
+	}
+
+	simulateReconnected() {
+		this.reconnectedCallbacks.forEach(callback => callback())
+	}
+
+	simulateClose() {
+		this.closeCallbacks.forEach(callback => callback())
+	}
+
 	asHubConnection(): HubConnection {
 		return this as unknown as HubConnection
 	}
