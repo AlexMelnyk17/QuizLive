@@ -8,7 +8,11 @@ using QuizLive.Server.Infrastructure.Data;
 
 namespace QuizLive.Server.Application.Games
 {
-    public class GameService(AppDbContext db, ICurrentUser currentUser, IGameNotifier notifier) : IGameService
+    public class GameService(
+        AppDbContext db,
+        ICurrentUser currentUser,
+        IGameNotifier notifier,
+        IGameFlowService gameFlow) : IGameService
     {
         private const int MaxCodeAttempts = 5;
         private const string ActiveGameExists = "The quiz already has an active game.";
@@ -195,23 +199,12 @@ namespace QuizLive.Server.Application.Games
 
         public async Task EndAsync(int id)
         {
-            var userId = currentUser.UserId;
-
-            var game = await db.GameSessionRecords.FirstOrDefaultAsync(g => g.Id == id && g.HostUserId == userId)
-                ?? throw GameNotFound(id);
-
-            // Ending an already ended game is a no-op.
-            if (game.EndedAtUtc is not null)
+            // The same implementation as the host's EndGame command. Ending an already ended game is a no-op,
+            // and then nothing is sent.
+            if (await gameFlow.EndAsync(id, currentUser.UserId))
             {
-                return;
+                await notifier.GameEndedAsync(id);
             }
-
-            // Setting EndedAtUtc frees the code for new games.
-            game.Status = GameStatus.Finished;
-            game.EndedAtUtc = DateTime.UtcNow;
-
-            await db.SaveChangesAsync();
-            await notifier.GameEndedAsync(id);
         }
 
         public async Task<GameLookupDto> GetByCodeAsync(string code)

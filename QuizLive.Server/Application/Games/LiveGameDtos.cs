@@ -34,4 +34,10 @@ namespace QuizLive.Server.Application.Games
     public record QuestionViews(
         PlayerQuestionDto ForPlayers,
         HostQuestionDto ForHost);
+
+    // The next question, or none when the last one was already shown and the game is finished.
+    public record NextQuestionResult(QuestionViews? Question)
+    {
+        public bool Finished => Question is null;
+    }
 }
