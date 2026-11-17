@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 import { Alert } from '@components/ui/Alert'
 import { Button } from '@components/ui/Button'
 import { Heading } from '@components/ui/Heading'
@@ -12,6 +10,7 @@ import {
 	HOST_LOBBY_COPY,
 	PLAYER_LOBBY_COPY
 } from '@modules/game/constants'
+import { useHostCommand } from '@modules/game/hooks/useHostCommand'
 import type {
 	GameConnectionStateValue,
 	GamePlayerDto
@@ -35,22 +34,7 @@ export function HostLobby({
 	connectionState,
 	onStart
 }: HostLobbyProps) {
-	const [error, setError] = useState<string | null>(null)
-	const [isStarting, setIsStarting] = useState(false)
-
-	const start = async () => {
-		setError(null)
-		setIsStarting(true)
-
-		const message = await onStart()
-
-		// On success the game moves on by an event and this view goes away, so the button stays busy.
-		// Only a refusal gives the button back.
-		if (message) {
-			setError(message)
-			setIsStarting(false)
-		}
-	}
+	const { run: start, error, isRunning } = useHostCommand(onStart)
 
 	return (
 		<>
@@ -81,7 +65,7 @@ export function HostLobby({
 			<Button
 				variant='primary'
 				disabled={players.length === 0}
-				loading={isStarting}
+				loading={isRunning}
 				onClick={() => void start()}
 			>
 				{HOST_LOBBY_COPY.start}

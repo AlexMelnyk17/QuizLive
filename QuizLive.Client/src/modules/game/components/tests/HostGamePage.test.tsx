@@ -7,7 +7,8 @@ import { HostGamePage } from '@modules/game/components/HostGamePage'
 import {
 	GameStatus,
 	HOST_GAME_COPY,
-	HOST_LOBBY_COPY
+	HOST_LOBBY_COPY,
+	HOST_QUESTION_COPY
 } from '@modules/game/constants'
 import { useHostGame } from '@modules/game/hooks/useHostGame'
 import type { HostGameResult } from '@modules/game/types'
@@ -134,6 +135,57 @@ describe('the host page', () => {
 			.click(screen.getByRole('button', { name: HOST_LOBBY_COPY.start }))
 
 		expect(startGame).toHaveBeenCalledOnce()
+	})
+
+	it('shows the running question with the correct option, and shows the results from it', async () => {
+		const showResults = vi.fn().mockResolvedValue(null)
+		hostGameMock.mockReturnValue(
+			hostGame({
+				game: {
+					id: 7,
+					code: '283646',
+					quizId: 3,
+					quizTitle: 'STEM basics',
+					quizKind: 2
+				},
+				status: GameStatus.Question,
+				currentQuestion: {
+					number: 1,
+					total: 3,
+					question: {
+						id: 12,
+						order: 1,
+						text: 'What is 2 + 2?',
+						timeLimitSeconds: null,
+						basePoints: null,
+						imageUrl: null,
+						options: [
+							{ id: 21, order: 1, text: '4', isCorrect: true },
+							{ id: 22, order: 2, text: '5', isCorrect: false }
+						]
+					},
+					timing: {
+						startedAtUtc: '2026-11-17T10:00:00Z',
+						endsAtUtc: null,
+						serverNowUtc: '2026-11-17T10:00:05Z'
+					}
+				},
+				questionReceivedAtMs: 1000,
+				commands: { ...hostGame().commands, showResults }
+			})
+		)
+		renderWithTheme(<HostGamePage />)
+
+		expect(screen.getByText('What is 2 + 2?')).toBeInTheDocument()
+		expect(screen.getByText(HOST_QUESTION_COPY.correct)).toBeInTheDocument()
+
+		await userEvent
+			.setup()
+			.click(
+				screen.getByRole('button', { name: HOST_QUESTION_COPY.showResults })
+			)
+
+		expect(showResults).toHaveBeenCalledOnce()
 	})
 
 	it('shows the text of the server when the host cannot be connected, and lets the host go back', async () => {

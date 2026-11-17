@@ -5,6 +5,7 @@ import { Stack } from '@components/ui/Stack'
 import { Text } from '@components/ui/Text'
 
 import { HostLobby } from '@modules/game/components/HostLobby'
+import { HostQuestionView } from '@modules/game/components/HostQuestionView'
 import { GameStatus, HOST_GAME_COPY } from '@modules/game/constants'
 import { useHostGame } from '@modules/game/hooks/useHostGame'
 
@@ -15,8 +16,16 @@ export type HostGameScreenProps = {
 
 // The game as the host sees it. It joins the game it is mounted with, so the page gives it `key={gameId}`.
 export function HostGameScreen({ gameId, onBack }: HostGameScreenProps) {
-	const { game, status, players, connectionState, error, commands } =
-		useHostGame(gameId)
+	const {
+		game,
+		status,
+		players,
+		currentQuestion,
+		questionReceivedAtMs,
+		connectionState,
+		error,
+		commands
+	} = useHostGame(gameId)
 
 	// The host could not be connected (the game has ended, or is not the host's): the only way on is back.
 	if (error) {
@@ -42,6 +51,16 @@ export function HostGameScreen({ gameId, onBack }: HostGameScreenProps) {
 				players={players}
 				connectionState={connectionState}
 				onStart={commands.startGame}
+			/>
+		)
+	}
+
+	if (status === GameStatus.Question && currentQuestion) {
+		return (
+			<HostQuestionView
+				question={currentQuestion}
+				receivedAtMs={questionReceivedAtMs}
+				onShowResults={commands.showResults}
 			/>
 		)
 	}

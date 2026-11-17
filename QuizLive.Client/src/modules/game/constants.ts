@@ -62,6 +62,12 @@ export const HOST_LOBBY_COPY = {
 	start: 'Start game'
 } as const
 
+export const HOST_QUESTION_COPY = {
+	showResults: 'Show results',
+	openText: 'Players type their own answer.',
+	correct: 'Correct'
+} as const
+
 export const PLAYER_PAGE_COPY = {
 	connecting: 'Connecting to the game…',
 	joined: (nickname: string) => `You joined as ${nickname}`,
