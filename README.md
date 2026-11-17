@@ -100,5 +100,5 @@ The server command needs the .NET SDK (`dotnet tool restore` is run for you). Th
 
 Generated EF migrations are excluded from the server numbers (see `QuizLive.Server.Tests/coverlet.runsettings`). Report folders are git-ignored.
 
-`.github/workflows/coverage.yml` runs both commands on pull requests, adds the summaries to the job page and uploads the report folders as the `coverage-server` and `coverage-client` artifacts.
+`.github/workflows/coverage.yml` runs both commands on pull requests, adds the summaries to the job page and uploads the report folders as the `coverage-server` and `coverage-client` artifacts. The client job also runs `npm run lint` and `npm run typecheck` before coverage.
 
