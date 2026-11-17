@@ -8,8 +8,9 @@ import { Stack } from '@components/ui/Stack'
 
 import {
 	statsChartHeading,
-	statsChartShell,
+	statsChartShell
 } from '@modules/statistics/components/charts/StatsChartCard.css'
+import { useStatsChartShellSize } from '@modules/statistics/hooks/useStatsChartShellSize'
 
 export type StatsChartCardProps = {
 	title: string
@@ -24,8 +25,10 @@ export function StatsChartCard({
 	children,
 	empty,
 	titleClassName,
-	chartClassName,
+	chartClassName
 }: StatsChartCardProps) {
+	const { shellRef, hasSize } = useStatsChartShellSize()
+
 	const renderChart = () => {
 		if (empty) {
 			return empty
@@ -36,21 +39,20 @@ export function StatsChartCard({
 		}
 
 		return (
-			<div className={cn(statsChartShell, chartClassName)}>
-				<ResponsiveContainer width="100%" height="100%">
-					{children}
-				</ResponsiveContainer>
+			<div ref={shellRef} className={cn(statsChartShell, chartClassName)}>
+				{hasSize ? (
+					<ResponsiveContainer width='100%' height='100%'>
+						{children}
+					</ResponsiveContainer>
+				) : null}
 			</div>
 		)
 	}
 
 	return (
-		<Card variant="outlined" padding="md" fullWidth>
-			<Stack direction="column" align="stretch">
-				<Heading
-					level={4}
-					className={cn(statsChartHeading, titleClassName)}
-				>
+		<Card variant='outlined' padding='md' fullWidth>
+			<Stack direction='column' align='stretch'>
+				<Heading level={4} className={cn(statsChartHeading, titleClassName)}>
 					{title}
 				</Heading>
 				{renderChart()}

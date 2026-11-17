@@ -9,7 +9,7 @@ export const gameStatsQueryKey = (gameId: number) =>
 export const STATS_API = {
 	host: '/stats',
 	quizById: (quizId: number) => `/stats/quizzes/${quizId}`,
-	gameById: (gameId: number) => `/stats/games/${gameId}`,
+	gameById: (gameId: number) => `/stats/games/${gameId}`
 } as const
 
 export const STAT_FORMAT_FRACTION_DIGITS = 1
@@ -45,6 +45,21 @@ export const STATISTICS_CHART_MIN_TICK_GAP = 16
 export const STATISTICS_BAR_Y_AXIS_WIDTH = 32
 export const STATISTICS_QUESTION_AXIS_LABEL_MAX = 40
 export const STATISTICS_EMPTY_VALUE = '—'
+
+export const PREFERS_REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
+
+export const HOST_STAT_FORMAT = {
+	integer: 'integer',
+	decimal: 'decimal',
+	text: 'text'
+} as const
+
+export const STATISTICS_MOTION = {
+	cardDurationMs: 280,
+	cardStaggerMs: 50,
+	numberDurationMs: 400,
+	chartDurationMs: 400
+} as const
 export const QUIZ_RUNS_HEADING_ID = 'quiz-runs-heading'
 export const STATISTICS_QUESTION_AXIS_EMPTY_LABEL = 'Question'
 
@@ -55,8 +70,8 @@ export const STATISTICS_PAGE_COPY = {
 	loadError: {
 		title: 'Could not load statistics',
 		body: 'Something went wrong while loading your activity overview. Try again.',
-		retry: 'Retry',
-	},
+		retry: 'Retry'
+	}
 } as const
 
 export const QUIZ_STATS_PAGE_COPY = {
@@ -67,12 +82,12 @@ export const QUIZ_STATS_PAGE_COPY = {
 	loadError: {
 		title: 'Could not load quiz statistics',
 		body: 'Something went wrong while loading play statistics for this quiz. Try again.',
-		retry: 'Retry',
+		retry: 'Retry'
 	},
 	activityChart: 'Games hosted (last 30 days)',
 	runsTitle: 'Finished runs',
 	runsEmpty: 'No finished runs to show.',
-	viewRun: 'View run details',
+	viewRun: 'View run details'
 } as const
 
 export const GAME_STATS_PAGE_COPY = {
@@ -86,20 +101,20 @@ export const GAME_STATS_PAGE_COPY = {
 	playerMetaSeparator: ' · ',
 	notFinished: {
 		title: 'This game has not finished',
-		body: 'Statistics are available only after you end the game in the host view.',
+		body: 'Statistics are available only after you end the game in the host view.'
 	},
 	loadError: {
 		title: 'Could not load run statistics',
 		body: 'Something went wrong while loading this game run. Try again.',
-		retry: 'Retry',
-	},
+		retry: 'Retry'
+	}
 } as const
 
 export const STATISTICS_KPI_LABELS = {
 	quizzes: 'Quizzes',
 	games: 'Games',
 	playerJoins: 'Player joins',
-	averagePlayersPerGame: 'Average players per game',
+	averagePlayersPerGame: 'Average players per game'
 } as const
 
 export const QUIZ_STATS_KPI_LABELS = {
@@ -107,14 +122,14 @@ export const QUIZ_STATS_KPI_LABELS = {
 	playerJoins: 'Player joins',
 	averagePlayersPerGame: 'Average players per game',
 	lastPlayed: 'Last played',
-	averageDuration: 'Average run duration',
+	averageDuration: 'Average run duration'
 } as const
 
 export const GAME_STATS_KPI_LABELS = {
 	players: 'Players',
 	duration: 'Run duration',
 	joinedAt: 'Started',
-	endedAt: 'Ended',
+	endedAt: 'Ended'
 } as const
 
 export const STATISTICS_CHART_COPY = {
@@ -126,7 +141,7 @@ export const STATISTICS_CHART_COPY = {
 	seriesPercent: 'Correct %',
 	seriesPoints: 'Points',
 	otherAnswers: (count: number) => `Other answers (${count})`,
-	noAnswerData: 'No answers to chart yet.',
+	noAnswerData: 'No answers to chart yet.'
 } as const
 
 export const QUIZ_RUN_COPY = {
@@ -134,5 +149,5 @@ export const QUIZ_RUN_COPY = {
 	duration: 'Duration',
 	correctPercent: 'Correct',
 	averagePoints: 'Avg points',
-	answers: 'Answers',
+	answers: 'Answers'
 } as const
