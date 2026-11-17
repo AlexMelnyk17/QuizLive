@@ -12,6 +12,7 @@ import {
 	quizGrid,
 	quizList,
 	quizListFilter,
+	quizListToolbar,
 	quizSkeletonCard
 } from '@modules/quizzes/components/QuizList.css'
 import { QuizListItem } from '@modules/quizzes/components/QuizListItem'
@@ -33,27 +34,34 @@ export function QuizList({ onOpenQuiz, onCreateQuiz }: QuizListProps) {
 
 	return (
 		<div className={quizList}>
-			<div
-				role='group'
-				aria-label={QUIZ_LIST_COPY.filterLabel}
-				className={quizListFilter}
-			>
-				<Button
-					size='sm'
-					variant={archived ? 'outline' : 'primary'}
-					aria-pressed={!archived}
-					onClick={() => showTab(false)}
+			<div className={quizListToolbar}>
+				<div
+					role='group'
+					aria-label={QUIZ_LIST_COPY.filterLabel}
+					className={quizListFilter}
 				>
-					{QUIZ_LIST_COPY.tabs.active}
-				</Button>
-				<Button
-					size='sm'
-					variant={archived ? 'primary' : 'outline'}
-					aria-pressed={archived}
-					onClick={() => showTab(true)}
-				>
-					{QUIZ_LIST_COPY.tabs.archived}
-				</Button>
+					<Button
+						size='sm'
+						variant={archived ? 'outline' : 'primary'}
+						aria-pressed={!archived}
+						onClick={() => showTab(false)}
+					>
+						{QUIZ_LIST_COPY.tabs.active}
+					</Button>
+					<Button
+						size='sm'
+						variant={archived ? 'primary' : 'outline'}
+						aria-pressed={archived}
+						onClick={() => showTab(true)}
+					>
+						{QUIZ_LIST_COPY.tabs.archived}
+					</Button>
+				</div>
+				{onCreateQuiz && (
+					<Button size='sm' variant='primary' onClick={onCreateQuiz}>
+						{QUIZ_LIST_COPY.createQuiz}
+					</Button>
+				)}
 			</div>
 
 			{quizzes.isPending ? (
@@ -79,7 +87,7 @@ export function QuizList({ onOpenQuiz, onCreateQuiz }: QuizListProps) {
 					</div>
 				</Stack>
 			) : quizzes.data.length === 0 ? (
-				<QuizListEmptyState archived={archived} onCreateQuiz={onCreateQuiz} />
+				<QuizListEmptyState archived={archived} />
 			) : (
 				<div className={quizGrid}>
 					{quizzes.data.map(quiz => (
@@ -91,13 +99,7 @@ export function QuizList({ onOpenQuiz, onCreateQuiz }: QuizListProps) {
 	)
 }
 
-function QuizListEmptyState({
-	archived,
-	onCreateQuiz
-}: {
-	archived: boolean
-	onCreateQuiz?: () => void
-}) {
+function QuizListEmptyState({ archived }: { archived: boolean }) {
 	const copy = archived
 		? QUIZ_LIST_COPY.empty.archived
 		: QUIZ_LIST_COPY.empty.active
@@ -106,11 +108,6 @@ function QuizListEmptyState({
 		<div className={quizEmptyState}>
 			<Heading level={3}>{copy.title}</Heading>
 			<Text tone='muted'>{copy.body}</Text>
-			{!archived && onCreateQuiz ? (
-				<Button variant='primary' onClick={onCreateQuiz}>
-					{QUIZ_LIST_COPY.createQuiz}
-				</Button>
-			) : null}
 		</div>
 	)
 }
