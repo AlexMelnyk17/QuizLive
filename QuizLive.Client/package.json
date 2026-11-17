@@ -4,12 +4,11 @@
 	"version": "0.0.0",
 	"type": "module",
 	"lint-staged": {
-		"*.{js,jsx,ts,tsx}": [
-			"node node_modules/prettier/bin/prettier.cjs --write",
-			"node node_modules/eslint/bin/eslint.js --fix"
+		"*.{js,jsx,ts,tsx,json,css,md}": [
+			"prettier --write"
 		],
-		"*.{json,css,md}": [
-			"node node_modules/prettier/bin/prettier.cjs --write"
+		"*.{js,jsx,ts,tsx}": [
+			"eslint --fix"
 		]
 	},
 	"scripts": {
