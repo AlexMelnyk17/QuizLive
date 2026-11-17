@@ -26,7 +26,9 @@ public class SignalRBroadcastTests(RealtimeQuizLiveFactory factory) : IClassFixt
         using var playerSubscription = playerConnection.On<GamePlayerDto>(nameof(IGameClient.PlayerJoined), player => playerEvent.TrySetResult(player));
         await hostConnection.StartAsync(Ct);
         await playerConnection.StartAsync(Ct);
-        await hostConnection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+        var hostState = await hostConnection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct);
+        Assert.Equal(game.Id, hostState.Game.Id);
+        Assert.Null(hostState.CurrentQuestion);
         await playerConnection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", existingPlayer.Token, Ct);
 
         var joined = await factory.CreateClient().JoinAsync(game.Code, "Bohdan");
@@ -55,7 +57,9 @@ public class SignalRBroadcastTests(RealtimeQuizLiveFactory factory) : IClassFixt
         using var playerSubscription = playerConnection.On(nameof(IGameClient.GameEnded), () => playerEvent.TrySetResult());
         await hostConnection.StartAsync(Ct);
         await playerConnection.StartAsync(Ct);
-        await hostConnection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+        var hostState = await hostConnection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct);
+        Assert.Equal(game.Id, hostState.Game.Id);
+        Assert.Null(hostState.CurrentQuestion);
         await playerConnection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", player.Token, Ct);
 
         var response = await host.PostAsync($"/api/games/{game.Id}/end", null, Ct);

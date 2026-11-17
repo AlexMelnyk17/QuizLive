@@ -82,6 +82,11 @@ public class SignalRGameNotifierTests
             return Complete();
         }
 
+        // Lobby tests must fail if a running-game event is unexpectedly sent instead.
+        public Task QuestionShown(PlayerQuestionDto question) => throw new NotSupportedException("Unexpected QuestionShown event in lobby test.");
+        public Task HostQuestionShown(HostQuestionDto question) => throw new NotSupportedException("Unexpected HostQuestionShown event in lobby test.");
+        public Task QuestionClosed(int number) => throw new NotSupportedException("Unexpected QuestionClosed event in lobby test.");
+
         private Task Complete()
         {
             if (Failure is null) return Task.CompletedTask;
