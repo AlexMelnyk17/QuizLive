@@ -120,6 +120,31 @@ export type HostGameResult = {
 	commands: HostGameCommands
 }
 
+// What stays the same during a game for one player. The status and the players change and live in the game state.
+export type PlayerGameInfo = Pick<
+	PlayerGameStateDto,
+	'gameId' | 'code' | 'quizTitle' | 'playerId' | 'nickname'
+>
+
+export type PlayerGameResult = {
+	// Without a player token nothing connects: the player has not joined a game in this tab.
+	hasToken: boolean
+	// Null until the player has joined the game on the hub.
+	player: PlayerGameInfo | null
+	status: GameStatusValue | null
+	players: GamePlayerDto[]
+	// The question without the correct option.
+	currentQuestion: PlayerQuestionDto | null
+	// When the current question arrived, on the device clock; getRemainingMs needs it.
+	questionReceivedAtMs: number | null
+	// The number of the question whose results are shown.
+	closedQuestionNumber: number | null
+	connectionState: GameConnectionStateValue
+	error: string | null
+	// Forgets the player token and disconnects: the player leaves the game on this device.
+	leave: () => void
+}
+
 // Every handler is optional: the host listens to some events, a player to others.
 export type GameEventHandlers = {
 	onPlayerJoined?: (player: GamePlayerDto) => void
