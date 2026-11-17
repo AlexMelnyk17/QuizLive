@@ -111,6 +111,12 @@ namespace QuizLive.Server.Tests.Stats
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
 
+        private Task SeedAsync(Action<AppDbContext> change) => SeedAsync(db =>
+        {
+            change(db);
+            return Task.CompletedTask;
+        });
+
         private async Task SeedAsync(Func<AppDbContext, Task> change)
         {
             using var scope = factory.Services.CreateScope();
