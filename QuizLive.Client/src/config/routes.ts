@@ -8,6 +8,7 @@ export const PATHS = {
 	quizDetails: '/quizzes/$quizId',
 	quizStats: '/quizzes/$quizId/stats',
 	gameStats: '/quizzes/$quizId/games/$gameId/stats',
+	play: '/play',
 	quizCreate: '/quizzes/new',
 	quizEdit: '/quizzes/$quizId/edit'
 } as const

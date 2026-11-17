@@ -44,6 +44,37 @@ export const GameStatus = {
 	Finished: 3
 } as const
 
+export const PLAYER_PAGE_COPY = {
+	connecting: 'Connecting to the game…',
+	joined: (nickname: string) => `You joined as ${nickname}`,
+	gameCode: (code: string) => `Game code: ${code}`,
+	finished: 'Game finished',
+	finishedBody: 'Thanks for playing!',
+	backToStart: 'Back to start'
+} as const
+
+export const PLAYER_QUESTION_COPY = {
+	heading: (number: number, total: number) => `Question ${number} of ${total}`,
+	imageAlt: 'Illustration of the question',
+	timeUp: 'Time is up',
+	closed: 'The question is closed. Waiting for the next question…'
+} as const
+
+export const MS_PER_SECOND = 1000
+
+// How often the countdown of a question is refreshed.
+export const COUNTDOWN_TICK_MS = 1000
+
+export const PLAYER_LOBBY_COPY = {
+	waitingForHost: 'Wait for the host to start the game.',
+	players: (count: number) => `Players (${count})`,
+	noPlayers: 'Waiting for players…',
+	you: 'you',
+	reconnecting: 'The connection was lost. Reconnecting…',
+	disconnected: 'You are disconnected from the game.',
+	leave: 'Leave game'
+} as const
+
 // Where the connection to the hub is. "failed" means it could not be started, or the game could not be
 // joined (a wrong token, an ended game); the error text says which.
 export const GAME_CONNECTION_STATE = {
