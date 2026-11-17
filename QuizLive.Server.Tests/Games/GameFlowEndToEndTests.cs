@@ -37,6 +37,9 @@ namespace QuizLive.Server.Tests.Games
             var hostQuestions = hostConnection.Subscribe<HostQuestionDto>("HostQuestionShown");
             var hostClosed = hostConnection.Subscribe<int>("QuestionClosed");
             var hostEnded = hostConnection.Subscribe("GameEnded");
+            var results = hostConnection.Subscribe<HostQuestionResultsDto>("HostResults");
+            var progress = hostConnection.Subscribe<AnswerProgressDto>("AnswerProgress");
+            var leaderboard = hostConnection.Subscribe<LeaderboardDto>("Leaderboard");
             await hostConnection.StartAsync(Ct);
             await hostConnection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct);
 
@@ -66,25 +69,48 @@ namespace QuizLive.Server.Tests.Games
                     Assert.Equal(number, forPlayer.Number);
                     Assert.Equal(forHost.Question.Text, forPlayer.Text);
                     Assert.Equal(optionCount, forPlayer.Options?.Count ?? 0);
+                    var request = kind == QuizKind.OpenText
+                        ? new SubmitAnswerRequest(number, Text: " Kyiv ")
+                        : new SubmitAnswerRequest(number, forHost.Question.Options!.First(o => o.IsCorrect != false).Id);
+                    await player.Connection.InvokeAsync("SubmitAnswer", request, Ct);
+                    var received = await progress.NextAsync();
+                    Assert.Equal(number, received.Number);
+                    Assert.Equal(2, received.Players);
+                    Assert.InRange(received.Answered, 1, 2);
                 }
 
                 await hostConnection.InvokeAsync("ShowResults", Ct);
 
                 Assert.Equal(number, await hostClosed.NextAsync());
+                var hostResult = await results.NextAsync();
+                Assert.Equal(2, hostResult.Answered);
+                if (kind == QuizKind.OpenText) Assert.Equal(2, Assert.Single(hostResult.OpenAnswers!).Count);
+                else Assert.Equal(2, hostResult.Options!.Sum(o => o.Count));
+                Assert.False((await leaderboard.NextAsync()).IsFinal);
 
                 foreach (var player in players)
                 {
                     Assert.Equal(number, await player.Closed.NextAsync());
+                    var personal = await player.Results.NextAsync();
+                    Assert.True(personal.Answered);
+                    Assert.Equal(kind == QuizKind.QuizChoice ? true : (bool?)null, personal.IsCorrect);
+                    Assert.Equal(kind == QuizKind.QuizChoice, personal.Points > 0);
+                    Assert.False((await player.Leaderboard.NextAsync()).IsFinal);
                 }
 
                 await hostConnection.InvokeAsync("NextQuestion", Ct);
             }
 
             await hostEnded.NextAsync();
+            var final = await leaderboard.NextAsync();
+            Assert.True(final.IsFinal);
+            Assert.Equal(2, final.Entries.Count);
+            Assert.All(final.Entries, p => Assert.Equal(kind == QuizKind.QuizChoice, p.Total > 0));
 
             foreach (var player in players)
             {
                 await player.Ended.NextAsync();
+                Assert.True((await player.Leaderboard.NextAsync()).IsFinal);
             }
 
             // Everything arrived once: nothing is left in any queue.
@@ -146,7 +172,9 @@ namespace QuizLive.Server.Tests.Games
                 connection,
                 connection.Subscribe<PlayerQuestionDto>("QuestionShown"),
                 connection.Subscribe<int>("QuestionClosed"),
-                connection.Subscribe("GameEnded"));
+                connection.Subscribe("GameEnded"),
+                connection.Subscribe<PlayerQuestionResultsDto>("PlayerResults"),
+                connection.Subscribe<LeaderboardDto>("Leaderboard"));
 
             await connection.StartAsync(Ct);
             await connection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", token, Ct);
@@ -158,7 +186,9 @@ namespace QuizLive.Server.Tests.Games
             HubConnection Connection,
             HubEventQueue<PlayerQuestionDto> Questions,
             HubEventQueue<int> Closed,
-            HubEventQueue<bool> Ended) : IAsyncDisposable
+            HubEventQueue<bool> Ended,
+            HubEventQueue<PlayerQuestionResultsDto> Results,
+            HubEventQueue<LeaderboardDto> Leaderboard) : IAsyncDisposable
         {
             public ValueTask DisposeAsync() => Connection.DisposeAsync();
         }

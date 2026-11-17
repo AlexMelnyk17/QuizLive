@@ -3,6 +3,14 @@ namespace QuizLive.Server.Application.Games
     // Method names are the event names the JS client subscribes to.
     public interface IGameClient
     {
+        Task AnswerProgress(AnswerProgressDto progress);
+        Task HostResults(HostQuestionResultsDto results);
+        Task PlayerResults(PlayerQuestionResultsDto results);
+        Task Leaderboard(LeaderboardDto leaderboard);
+        Task TimeAdded(QuestionTimeAddedDto timing);
+        Task PlayerPresenceChanged(PlayerPresenceDto presence);
+        Task PlayerLeft(int playerId);
+
         Task PlayerJoined(GamePlayerDto player);
 
         // The running question for the players: no IsCorrect.
@@ -14,9 +22,6 @@ namespace QuizLive.Server.Application.Games
 
         // The question with this number was closed: the game is now showing its results.
         Task QuestionClosed(int number);
-
-        // The open question now ends later. Clients restart the countdown from this server clock.
-        Task QuestionTimeExtended(QuestionTimingDto timing);
 
         Task GameEnded();
     }

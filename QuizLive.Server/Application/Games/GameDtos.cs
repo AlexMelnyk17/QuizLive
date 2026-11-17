@@ -53,7 +53,11 @@ namespace QuizLive.Server.Application.Games
         int PlayerId,
         string Nickname,
         List<GamePlayerDto> Players,
-        PlayerQuestionDto? CurrentQuestion = null);
+        PlayerQuestionDto? CurrentQuestion = null,
+        bool HasAnswered = false,
+        PlayerQuestionResultsDto? Results = null,
+        LeaderboardDto? Leaderboard = null,
+        List<PlayerPresenceDto>? Presence = null);
 
     // The token is returned only once, on join; the client keeps it to connect to the game later.
     public record JoinGameResponse(

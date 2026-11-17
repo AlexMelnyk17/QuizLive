@@ -12,7 +12,6 @@ using QuizLive.Server.Application.Stats;
 using QuizLive.Server.Infrastructure.Auth;
 using QuizLive.Server.Infrastructure.Data;
 using QuizLive.Server.Infrastructure.ErrorHandling;
-using QuizLive.Server.Infrastructure.Games;
 using QuizLive.Server.Infrastructure.Realtime;
 using System.Reflection;
 
@@ -42,10 +41,13 @@ namespace QuizLive.Server
             builder.Services.AddScoped<IQuizService, QuizService>();
             builder.Services.AddScoped<IQuestionService, QuestionService>();
             builder.Services.AddScoped<IGameService, GameService>();
-            builder.Services.AddScoped<IGameFlowService, GameFlowService>();
-            builder.Services.AddScoped<IStatsService, StatsService>();
+            builder.Services.AddScoped<GameFlowService>();
+            builder.Services.AddScoped<IGameFlowService>(s => s.GetRequiredService<GameFlowService>());
+            builder.Services.AddScoped<LiveGameService>();
             builder.Services.AddSingleton(TimeProvider.System);
-            builder.Services.AddHostedService<QuestionDeadlineService>();
+            builder.Services.AddSingleton<GamePresence>();
+            builder.Services.AddHostedService<LiveGameWorker>();
+            builder.Services.AddScoped<IStatsService, StatsService>();
             builder.Services.AddSignalR(options => options.AddFilter<HubExceptionFilter>());
             builder.Services.AddSingleton<IGameNotifier, SignalRGameNotifier>();
 

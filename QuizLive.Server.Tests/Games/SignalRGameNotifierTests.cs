@@ -29,23 +29,6 @@ public class SignalRGameNotifierTests
         Assert.Empty(logger.Warnings);
     }
 
-    [Fact]
-    public async Task QuestionTimeExtended_TargetsTheGamesPlayerAndHostGroups()
-    {
-        var timing = new QuestionTimingDto(
-            new DateTime(2026, 11, 17, 12, 0, 0, DateTimeKind.Utc),
-            new DateTime(2026, 11, 17, 12, 0, 45, DateTimeKind.Utc),
-            new DateTime(2026, 11, 17, 12, 0, 10, DateTimeKind.Utc));
-        var client = new RecordingClient { RecordTimeExtended = true };
-        var clients = new GroupClients(client);
-        var notifier = new SignalRGameNotifier(new HubContext(clients), new RecordingLogger());
-
-        await notifier.QuestionTimeExtendedAsync(42, timing);
-
-        Assert.Equal(["game:42", "game:42:host"], clients.RequestedGroups);
-        Assert.Equal([timing], client.Extended);
-    }
-
     [Theory]
     [InlineData(false, false)]
     [InlineData(false, true)]
@@ -83,11 +66,17 @@ public class SignalRGameNotifierTests
     private sealed class RecordingClient : IGameClient
     {
         public List<GamePlayerDto> JoinedPlayers { get; } = [];
-        public List<QuestionTimingDto> Extended { get; } = [];
         public int EndedCalls { get; private set; }
         public Exception? Failure { get; init; }
         public bool SynchronousFailure { get; init; }
-        public bool RecordTimeExtended { get; init; }
+
+        public Task AnswerProgress(AnswerProgressDto progress) => Task.CompletedTask;
+        public Task HostResults(HostQuestionResultsDto results) => Task.CompletedTask;
+        public Task PlayerResults(PlayerQuestionResultsDto results) => Task.CompletedTask;
+        public Task Leaderboard(LeaderboardDto leaderboard) => Task.CompletedTask;
+        public Task TimeAdded(QuestionTimeAddedDto timing) => Task.CompletedTask;
+        public Task PlayerPresenceChanged(PlayerPresenceDto presence) => Task.CompletedTask;
+        public Task PlayerLeft(int playerId) => Task.CompletedTask;
 
         public Task PlayerJoined(GamePlayerDto player)
         {
@@ -105,16 +94,6 @@ public class SignalRGameNotifierTests
         public Task QuestionShown(PlayerQuestionDto question) => throw new NotSupportedException("Unexpected QuestionShown event in lobby test.");
         public Task HostQuestionShown(HostQuestionDto question) => throw new NotSupportedException("Unexpected HostQuestionShown event in lobby test.");
         public Task QuestionClosed(int number) => throw new NotSupportedException("Unexpected QuestionClosed event in lobby test.");
-        public Task QuestionTimeExtended(QuestionTimingDto timing)
-        {
-            if (!RecordTimeExtended)
-            {
-                throw new NotSupportedException("Unexpected QuestionTimeExtended event in lobby test.");
-            }
-
-            Extended.Add(timing);
-            return Complete();
-        }
 
         private Task Complete()
         {

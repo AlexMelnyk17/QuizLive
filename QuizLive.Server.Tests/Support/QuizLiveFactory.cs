@@ -5,9 +5,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
 using QuizLive.Server.Application.Abstractions;
-using QuizLive.Server.Infrastructure.Games;
 
 namespace QuizLive.Server.Tests.Support
 {
@@ -33,23 +31,14 @@ namespace QuizLive.Server.Tests.Support
                 ["Jwt:Key"] = JwtKey
             }));
 
-            builder.ConfigureTestServices(services =>
+            if (UseFakeNotifier)
             {
-                // The sweep is started by the tests that need it, after the game under test exists.
-                foreach (var descriptor in services
-                    .Where(d => d.ServiceType == typeof(IHostedService)
-                        && d.ImplementationType == typeof(QuestionDeadlineService))
-                    .ToList())
-                {
-                    services.Remove(descriptor);
-                }
-
-                if (UseFakeNotifier)
+                builder.ConfigureTestServices(services =>
                 {
                     services.RemoveAll<IGameNotifier>();
                     services.AddSingleton<IGameNotifier>(Notifier);
-                }
-            });
+                });
+            }
         }
 
         protected override void Dispose(bool disposing)
