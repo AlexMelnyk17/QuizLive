@@ -18,6 +18,7 @@ export const lightTheme = createTheme(vars, {
 	colors: {
 		bg: palette.white,
 		surface: palette.gray50,
+		surfaceSunken: palette.gray100,
 		surfaceRaised: palette.white,
 		text: palette.gray500,
 		textMuted: palette.gray400,

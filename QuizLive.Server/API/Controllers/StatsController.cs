@@ -25,5 +25,31 @@ namespace QuizLive.Server.API.Controllers
         {
             return await statsService.GetMyStatsAsync();
         }
+
+        /// <summary>Historical play statistics for one owned quiz (finished runs and question breakdowns).</summary>
+        /// <response code="200">Quiz play statistics.</response>
+        /// <response code="401">The token is missing, invalid or expired.</response>
+        /// <response code="404">The quiz does not exist or belongs to another user.</response>
+        [HttpGet("quizzes/{quizId:int}")]
+        [ProducesResponseType<QuizPlayStatsDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<QuizPlayStatsDto>> GetQuiz(int quizId)
+        {
+            return await statsService.GetQuizStatsAsync(quizId);
+        }
+
+        /// <summary>Detailed statistics for one finished game hosted by the current user.</summary>
+        /// <response code="200">Game play statistics.</response>
+        /// <response code="401">The token is missing, invalid or expired.</response>
+        /// <response code="404">The game does not exist or is hosted by another user.</response>
+        /// <response code="409">The game has not finished yet.</response>
+        [HttpGet("games/{gameId:int}")]
+        [ProducesResponseType<GamePlayStatsDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<GamePlayStatsDto>> GetGame(int gameId)
+        {
+            return await statsService.GetGameStatsAsync(gameId);
+        }
     }
 }

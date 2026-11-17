@@ -170,6 +170,7 @@ export const QUIZ_DETAILS_COPY = {
 	playedDeleteReason:
 		'This quiz has games and cannot be deleted. Archive it instead.',
 	pageTitle: 'Quiz details',
+	viewStats: 'Statistics',
 	edit: 'Edit',
 	archive: 'Archive',
 	unarchive: 'Unarchive',

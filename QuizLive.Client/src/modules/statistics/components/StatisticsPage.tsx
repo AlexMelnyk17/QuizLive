@@ -1,105 +1,95 @@
-import { Alert } from '@components/ui/Alert'
-import { Button } from '@components/ui/Button'
-import { Skeleton } from '@components/ui/Skeleton'
-import { Stack } from '@components/ui/Stack'
 import { Text } from '@components/ui/Text'
 
 import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
-import {
-	STATISTICS_KPI_LABELS,
-	STATISTICS_PAGE_COPY,
-} from '@modules/statistics/constants'
-import { useHostStats } from '@modules/statistics/hooks/useHostStats'
-import { formatStatDecimal } from '@modules/statistics/utils/formatStatDecimal'
-import { formatStatInteger } from '@modules/statistics/utils/formatStatInteger'
-import { isHostStatsEmpty } from '@modules/statistics/utils/isHostStatsEmpty'
-import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
 import { GamesByKindChart } from '@modules/statistics/components/charts/GamesByKindChart'
-import { GamesByStatusChart } from '@modules/statistics/components/charts/GamesByStatusChart'
 import { GamesOverTimeChart } from '@modules/statistics/components/charts/GamesOverTimeChart'
+import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
+import { StatsLoadError } from '@modules/statistics/components/StatsLoadError'
+import { StatsPageSkeleton } from '@modules/statistics/components/StatsPageSkeleton'
 import {
 	statsChartGrid,
 	statsEmptyBanner,
 	statsKpiGrid,
 	statsPage,
-	statsSkeletonChartGrid,
-	statsSkeletonGrid,
 } from '@modules/statistics/components/StatisticsPage.css'
+import {
+	STATISTICS_KPI_LABELS,
+	STATISTICS_PAGE_COPY,
+} from '@modules/statistics/constants'
+import { useHostStats } from '@modules/statistics/hooks/useHostStats'
+import type { HostStats } from '@modules/statistics/types'
+import { formatStatDecimal } from '@modules/statistics/utils/formatStatDecimal'
+import { formatStatInteger } from '@modules/statistics/utils/formatStatInteger'
+import { isHostStatsEmpty } from '@modules/statistics/utils/isHostStatsEmpty'
 
-function StatisticsLoadingState() {
+export function StatisticsPage() {
+	const { data, isPending, isError, refetch, isFetching } = useHostStats()
+
+	const renderMain = () => {
+		if (isPending) {
+			return <StatsPageSkeleton kpiCount={4} chartCount={2} />
+		}
+
+		if (isError || !data) {
+			return (
+				<StatsLoadError
+					title={STATISTICS_PAGE_COPY.loadError.title}
+					body={STATISTICS_PAGE_COPY.loadError.body}
+					retryLabel={STATISTICS_PAGE_COPY.loadError.retry}
+					isFetching={isFetching}
+					onRetry={() => void refetch()}
+				/>
+			)
+		}
+
+		return renderReady(data)
+	}
+
+	return (
+		<DashboardLayout title={STATISTICS_PAGE_COPY.title}>
+			{renderMain()}
+		</DashboardLayout>
+	)
+}
+
+function renderReady(data: HostStats) {
 	return (
 		<div className={statsPage}>
-			<div className={statsSkeletonGrid}>
-				{Array.from({ length: 4 }, (_, index) => (
-					<Skeleton key={index} variant="rect" style={{ height: '5.5rem' }} />
-				))}
+			{renderEmptyBanner(data)}
+			<div className={statsKpiGrid}>
+				<StatsKpiCard
+					label={STATISTICS_KPI_LABELS.quizzes}
+					value={formatStatInteger(data.quizzes.total)}
+				/>
+				<StatsKpiCard
+					label={STATISTICS_KPI_LABELS.games}
+					value={formatStatInteger(data.games.total)}
+				/>
+				<StatsKpiCard
+					label={STATISTICS_KPI_LABELS.playerJoins}
+					value={formatStatInteger(data.players.totalJoins)}
+				/>
+				<StatsKpiCard
+					label={STATISTICS_KPI_LABELS.averagePlayersPerGame}
+					value={formatStatDecimal(data.players.averagePerGame)}
+				/>
 			</div>
-			<div className={statsSkeletonChartGrid}>
-				{Array.from({ length: 3 }, (_, index) => (
-					<Skeleton key={index} variant="rect" style={{ height: '320px' }} />
-				))}
+			<div className={statsChartGrid}>
+				<GamesOverTimeChart points={data.activity.gamesPerDay} />
+				<GamesByKindChart counts={data.games.byKind} />
 			</div>
 		</div>
 	)
 }
 
-export function StatisticsPage() {
-	const { data, isPending, isError, refetch, isFetching } = useHostStats()
+function renderEmptyBanner(data: HostStats) {
+	if (!isHostStatsEmpty(data)) {
+		return null
+	}
 
 	return (
-		<DashboardLayout title={STATISTICS_PAGE_COPY.title}>
-			{isPending ? (
-				<StatisticsLoadingState />
-			) : isError || !data ? (
-				<Stack direction="column" align="stretch">
-					<Alert variant="danger" title={STATISTICS_PAGE_COPY.loadError.title}>
-						{STATISTICS_PAGE_COPY.loadError.body}
-					</Alert>
-					<div>
-						<Button
-							variant="primary"
-							size="sm"
-							loading={isFetching}
-							onClick={() => void refetch()}
-						>
-							{STATISTICS_PAGE_COPY.loadError.retry}
-						</Button>
-					</div>
-				</Stack>
-			) : (
-				<div className={statsPage}>
-					{isHostStatsEmpty(data) ? (
-						<div className={statsEmptyBanner}>
-							<Text tone="muted">{STATISTICS_PAGE_COPY.noActivity}</Text>
-						</div>
-					) : null}
-
-					<div className={statsKpiGrid}>
-						<StatsKpiCard
-							label={STATISTICS_KPI_LABELS.quizzes}
-							value={formatStatInteger(data.quizzes.total)}
-						/>
-						<StatsKpiCard
-							label={STATISTICS_KPI_LABELS.games}
-							value={formatStatInteger(data.games.total)}
-						/>
-						<StatsKpiCard
-							label={STATISTICS_KPI_LABELS.playerJoins}
-							value={formatStatInteger(data.players.totalJoins)}
-						/>
-						<StatsKpiCard
-							label={STATISTICS_KPI_LABELS.averagePlayersPerGame}
-							value={formatStatDecimal(data.players.averagePerGame)}
-						/>
-					</div>
-
-					<div className={statsChartGrid}>
-						<GamesOverTimeChart points={data.activity.gamesPerDay} />
-						<GamesByKindChart counts={data.games.byKind} />
-						<GamesByStatusChart counts={data.games.byStatus} />
-					</div>
-				</div>
-			)}
-		</DashboardLayout>
+		<div className={statsEmptyBanner}>
+			<Text tone="muted">{STATISTICS_PAGE_COPY.noActivity}</Text>
+		</div>
 	)
 }

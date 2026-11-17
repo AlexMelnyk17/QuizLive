@@ -14,12 +14,12 @@ Rules apply to **new and changed** code. Older files that bundle several exports
 
 | File pattern | Allowed exports | Must not export |
 | --- | --- | --- |
-| `PascalCase.tsx` (component) | The component matching the filename (`QuizList`), and **optional** `QuizListProps` (or `type XxxProps` used only by that component) | Hooks, fetchers, Zustand store, unrelated helpers, constants used outside this UI, second components |
+| `PascalCase.tsx` (component) | The component matching the filename (`QuizList`), and **optional** `QuizListProps` | Hooks, fetchers, Zustand store, unrelated helpers, constants used outside this UI, second components, **non-props exported types** (those belong in `types.ts` — [02-typescript.md](./02-typescript.md) R-5) |
 | `useXxx.ts` (hook) | **One** `useXxx` hook whose name matches the filename | Components, multiple unrelated hooks, API functions |
 | `camelCase.ts` in `utils/` (shared or module) | **One** primary function whose name matches the filename (e.g. `formatDate.ts` → `formatDate`) | Second public functions — use another file or a non-exported local helper |
 | `*Api.ts` | One async function per endpoint (see [01-api.md](./01-api.md)) | React, hooks, UI |
 | `schemas.ts` | Zod schemas and schema-only helpers | Components, hooks |
-| `types.ts` | Types inferred from schemas / local type aliases | Runtime values, components |
+| `types.ts` | Schema-inferred DTOs, chart/hook/view-model aliases, any named type used outside one file | Runtime values, React components |
 | `constants.ts` | Constants, copy objects, query-key factories (no inline copy — see [08-constants-and-routes.md](./08-constants-and-routes.md)) | Components, side effects |
 | `store/*Store.ts` | Store hook + store-specific selectors/actions tied to that store | Unrelated domain logic, components |
 
@@ -72,7 +72,7 @@ src/utils/sanitizeRedirectPath.ts → export function sanitizeRedirectPath
 
 ### API, schemas, types (MUST)
 
-Already covered in [01-api.md](./01-api.md) and [02-typescript.md](./02-typescript.md): API = one endpoint function; schemas vs types vs constants stay in their named files without UI.
+Already covered in [01-api.md](./01-api.md) and [02-typescript.md](./02-typescript.md): API = one endpoint function; schemas vs types vs constants stay in their named files without UI. Chart row shapes and similar view-models live in the module’s `types.ts`, not in chart components.
 
 ## O — Open / Closed Principle
 

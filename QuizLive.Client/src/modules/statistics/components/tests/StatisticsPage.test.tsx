@@ -179,6 +179,7 @@ describe('StatisticsPage', () => {
 		expect(screen.getByRole('heading', { name: '10' })).toBeInTheDocument()
 		expect(screen.getByRole('heading', { name: /^2[.,]5$/ })).toBeInTheDocument()
 		expect(screen.getByText(STATISTICS_CHART_COPY.gamesByKind)).toBeInTheDocument()
+		expect(screen.queryByText('Games by status')).not.toBeInTheDocument()
 		expect(screen.queryByText(/Your quizzes will be listed/i)).not.toBeInTheDocument()
 	})
 })

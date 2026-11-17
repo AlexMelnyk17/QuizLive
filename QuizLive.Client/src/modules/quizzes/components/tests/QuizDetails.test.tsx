@@ -17,7 +17,15 @@ import type { QuizDetailsDto } from '@modules/quizzes/types'
 
 import { ApiError } from '@api/apiError'
 
+import { PATHS } from '@config/routes'
+
 import { renderWithTheme } from '@src/test/testUtils'
+
+const navigateMock = vi.fn()
+
+vi.mock('@tanstack/react-router', () => ({
+	useNavigate: () => navigateMock,
+}))
 
 vi.mock('@modules/quizzes/api/quizzesApi', () => ({
 	fetchQuiz: vi.fn(),
@@ -117,6 +125,7 @@ describe('QuizDetails', () => {
 		fetchQuizMock.mockReset()
 		setQuizArchivedMock.mockReset()
 		deleteQuizMock.mockReset()
+		navigateMock.mockReset()
 	})
 
 	afterEach(() => {
@@ -129,6 +138,22 @@ describe('QuizDetails', () => {
 		renderQuizDetails()
 
 		expect(document.querySelector('[aria-busy="true"]')).toBeInTheDocument()
+	})
+
+	it('navigates to quiz statistics', async () => {
+		const user = userEvent.setup()
+		fetchQuizMock.mockResolvedValue(mathQuiz)
+
+		renderQuizDetails()
+
+		await user.click(
+			await screen.findByRole('button', { name: QUIZ_DETAILS_COPY.viewStats }),
+		)
+
+		expect(navigateMock).toHaveBeenCalledWith({
+			to: PATHS.quizStats,
+			params: { quizId: '7' },
+		})
 	})
 
 	it('shows the quiz and its questions in order', async () => {

@@ -20,27 +20,6 @@ export const statsChartGrid = style({
 	gap: vars.spacing[6],
 })
 
-export const statsChartHeading = style({
-	marginBottom: vars.spacing[4],
-})
-
-export const statsChartShell = style({
-	width: '100%',
-	height: '280px',
-})
-
-export const statsSkeletonGrid = style({
-	display: 'grid',
-	gridTemplateColumns: 'repeat(auto-fit, minmax(12rem, 1fr))',
-	gap: vars.spacing[4],
-})
-
-export const statsSkeletonChartGrid = style({
-	display: 'grid',
-	gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 22rem), 1fr))',
-	gap: vars.spacing[6],
-})
-
 export const statsEmptyBanner = style({
 	padding: vars.spacing[4],
 	borderRadius: vars.radii.lg,
