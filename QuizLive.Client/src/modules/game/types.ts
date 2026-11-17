@@ -29,3 +29,12 @@ export type HostGameDto = z.infer<typeof hostGameDtoSchema>
 export type HostGameStateDto = z.infer<typeof hostGameStateDtoSchema>
 
 export type PlayerGameStateDto = z.infer<typeof playerGameStateDtoSchema>
+
+// Every handler is optional: the host listens to some events, a player to others.
+export type GameEventHandlers = {
+	onPlayerJoined?: (player: GamePlayerDto) => void
+	onQuestionShown?: (question: PlayerQuestionDto) => void
+	onHostQuestionShown?: (question: HostQuestionDto) => void
+	onQuestionClosed?: (number: number) => void
+	onGameEnded?: () => void
+}

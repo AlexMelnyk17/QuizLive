@@ -20,6 +20,9 @@ export const GAME_HUB_EVENTS = {
 	gameEnded: 'GameEnded'
 } as const
 
+// Pauses before the automatic reconnect attempts. After the last one the connection is closed for good.
+export const GAME_HUB_RECONNECT_DELAYS_MS = [0, 2000, 5000, 10000, 30000]
+
 export const PLAYER_TOKEN_STORAGE_KEY = 'quizlive-player-token'
 
 // The server sends enums as numbers.

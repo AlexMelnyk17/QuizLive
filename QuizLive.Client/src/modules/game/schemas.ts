@@ -67,6 +67,9 @@ export const hostGameDtoSchema = z.object({
 	players: z.array(gamePlayerDtoSchema)
 })
 
+// The payload of QuestionClosed: the number of the question that was closed.
+export const closedQuestionNumberSchema = z.number()
+
 // The answer to ConnectAsHost. currentQuestion is null in the lobby.
 export const hostGameStateDtoSchema = z.object({
 	game: hostGameDtoSchema,
