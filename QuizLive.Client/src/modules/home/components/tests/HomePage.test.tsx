@@ -3,10 +3,11 @@ import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { HomePage } from '@modules/home/components/HomePage'
+import { JOIN_PANEL_COPY } from '@modules/join/constants'
 
 import { PATHS } from '@config/routes'
 
-import { renderWithTheme } from '@src/test/testUtils'
+import { renderWithQuery } from '@src/test/testUtils'
 
 vi.mock('@tanstack/react-router', async importOriginal => {
 	const actual = await importOriginal<typeof import('@tanstack/react-router')>()
@@ -24,16 +25,14 @@ vi.mock('@modules/auth/store/sessionStore', () => ({
 }))
 
 describe('HomePage', () => {
-	it('shows join note and auth links without fetching', () => {
+	it('shows the game code form and auth links without fetching', () => {
 		const fetchSpy = vi.spyOn(globalThis, 'fetch')
-		renderWithTheme(<HomePage />)
+		renderWithQuery(<HomePage />)
 
 		expect(
 			screen.getByRole('heading', { name: /QuizLive Game Server/i })
 		).toBeInTheDocument()
-		expect(
-			screen.getByText(/Joining with a code is not available yet/i)
-		).toBeInTheDocument()
+		expect(screen.getByText(JOIN_PANEL_COPY.intro)).toBeInTheDocument()
 		expect(
 			screen.getByRole('group', { name: /game code/i })
 		).toBeInTheDocument()
