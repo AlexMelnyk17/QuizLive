@@ -194,9 +194,28 @@ const playRoute = createRoute({
 	)
 })
 
+// The host drives the game with the JWT, so the page is protected; after logging in the host comes back to it.
+const hostGameRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: PATHS.hostGame,
+	beforeLoad: ({ location }) => {
+		if (!readSession()) {
+			throw redirect({
+				to: PATHS.login,
+				search: { redirect: location.href }
+			})
+		}
+	},
+	component: lazyRouteComponent(
+		() => import('@modules/game/components/HostGamePage'),
+		'HostGamePage'
+	)
+})
+
 const routeTree = rootRoute.addChildren([
 	indexRoute,
 	playRoute,
+	hostGameRoute,
 	loginRoute,
 	registerRoute,
 	dashboardRoute,

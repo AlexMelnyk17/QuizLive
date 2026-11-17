@@ -49,6 +49,13 @@ export const GameStatus = {
 	Finished: 3
 } as const
 
+export const HOST_GAME_COPY = {
+	pageTitle: 'Host a game',
+	connecting: 'Connecting to the game…',
+	invalidGame: 'This address does not lead to a game.',
+	backToQuizzes: 'Back to my quizzes'
+} as const
+
 export const PLAYER_PAGE_COPY = {
 	connecting: 'Connecting to the game…',
 	joined: (nickname: string) => `You joined as ${nickname}`,

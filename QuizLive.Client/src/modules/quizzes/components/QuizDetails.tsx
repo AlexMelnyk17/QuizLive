@@ -10,6 +10,7 @@ import { Skeleton } from '@components/ui/Skeleton'
 import { Stack } from '@components/ui/Stack'
 import { Text } from '@components/ui/Text'
 
+import { useCreateGame } from '@modules/game/hooks/useCreateGame'
 import { QuestionView } from '@modules/quizzes/components/QuestionView'
 import {
 	actionWithHint,
@@ -24,8 +25,7 @@ import {
 	quizDetailsSkeletonHeader,
 	quizDetailsSkeletonQuestion,
 	quizDetailsText,
-	quizDetailsTitle,
-	startGameButton
+	quizDetailsTitle
 } from '@modules/quizzes/components/QuizDetails.css'
 import { QuizNotFound } from '@modules/quizzes/components/QuizNotFound'
 import {
@@ -63,9 +63,15 @@ export function QuizDetails({
 	// After deletion the quiz is gone, so it must not be fetched again into a 404.
 	const quiz = useQuiz(quizId, !deleteQuiz.isSuccess)
 	const setQuizArchived = useSetQuizArchived()
+	const createGame = useCreateGame()
 	const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
 	if (
-		[quiz.error, deleteQuiz.error, setQuizArchived.error].some(isNotFoundError)
+		[
+			quiz.error,
+			deleteQuiz.error,
+			setQuizArchived.error,
+			createGame.error
+		].some(isNotFoundError)
 	) {
 		return <QuizNotFound onBack={onBack} />
 	}
@@ -127,6 +133,22 @@ export function QuizDetails({
 		setQuizArchived.mutate({ quizId, archived })
 	}
 
+	// Without questions there is nothing to play; the server would answer 409 anyway.
+	const startReason =
+		data.questions.length === 0
+			? QUIZ_DETAILS_COPY.startNeedsQuestions
+			: undefined
+
+	const startGame = () => {
+		createGame.mutate(quizId, {
+			onSuccess: game =>
+				void navigate({
+					to: PATHS.hostGame,
+					params: { gameId: String(game.id) }
+				})
+		})
+	}
+
 	const confirmDelete = () => {
 		if (data.isArchived || data.hasGames) return
 		setQuizArchived.reset()
@@ -176,14 +198,16 @@ export function QuizDetails({
 					{!data.isArchived ? (
 						<div
 							className={actionWithHint}
-							title={QUIZ_DETAILS_COPY.comingSoon}
-							tabIndex={0}
+							title={startReason}
+							tabIndex={startReason ? 0 : undefined}
 						>
 							<Button
-								className={startGameButton}
+								variant='primary'
 								size='sm'
-								disabled
-								title={QUIZ_DETAILS_COPY.comingSoon}
+								disabled={Boolean(startReason)}
+								title={startReason}
+								loading={createGame.isPending}
+								onClick={startGame}
 							>
 								{QUIZ_DETAILS_COPY.startGame}
 							</Button>
@@ -261,6 +285,14 @@ export function QuizDetails({
 							</Button>
 						) : null}
 					</Stack>
+				</Alert>
+			) : null}
+
+			{createGame.error ? (
+				<Alert variant='danger' title={QUIZ_DETAILS_COPY.startError.title}>
+					{createGame.error instanceof ApiError && createGame.error.detail
+						? createGame.error.detail
+						: QUIZ_DETAILS_COPY.startError.body}
 				</Alert>
 			) : null}
 
