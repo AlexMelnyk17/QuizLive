@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.SignalR;
 using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Exceptions;
 using QuizLive.Server.Application.Games;
+using QuizLive.Server.Infrastructure.Data;
+using QuizLive.Server.Infrastructure.Realtime;
+using QuizLive.Server.Core.Enums;
 
 namespace QuizLive.Server.API.Hubs
 {
@@ -12,7 +15,7 @@ namespace QuizLive.Server.API.Hubs
     /// The hub only manages connections and groups and passes the host's commands on; the rules live in
     /// <see cref="IGameService"/> and <see cref="IGameFlowService"/>.
     /// </summary>
-    public class GameHub(IGameService gameService, IGameFlowService gameFlow) : Hub<IGameClient>
+    public class GameHub(IGameService gameService, IGameFlowService gameFlow, LiveGameService live, AppDbContext db, GamePresence presence) : Hub<IGameClient>
     {
         public const string PlayerIdKey = "PlayerId";
         public const string GameIdKey = "GameId";
@@ -30,19 +33,40 @@ namespace QuizLive.Server.API.Hubs
             await Groups.AddToGroupAsync(Context.ConnectionId, GameGroups.All(gameId));
 
             PlayerGameStateDto state;
+            int? connectedPlayerId = null;
 
             try
             {
+                // Validate before taking the writer lock, then read one consistent snapshot of
+                // status, question, answer and results. Closing cannot interleave those reads.
+                await gameService.GetPlayerStateAsync(playerToken);
+                await using var transaction = await db.Database.BeginTransactionAsync();
                 state = await gameService.GetPlayerStateAsync(playerToken);
+                connectedPlayerId = state.PlayerId;
+                await Groups.AddToGroupAsync(Context.ConnectionId, GameGroups.Player(gameId, state.PlayerId));
 
                 // A player who joins in the middle of a game gets the running question, without IsCorrect.
                 var current = await gameFlow.GetCurrentQuestionAsync(gameId);
-                state = state with { CurrentQuestion = current?.ForPlayers };
+                var leaderboard = state.Status == GameStatus.Results ? await live.LeaderboardAsync(gameId) : null;
+                state = state with {
+                    CurrentQuestion = current?.ForPlayers,
+                    HasAnswered = await live.HasAnsweredAsync(gameId, state.PlayerId, current?.ForPlayers.Number),
+                    Leaderboard = leaderboard,
+                    Results = leaderboard is null ? null : await live.PlayerResultsAsync(gameId, state.PlayerId, current!.ForPlayers.Number, leaderboard)
+                };
+                await transaction.CommitAsync();
+                await presence.PlayerConnectedAsync(gameId, state.PlayerId, Context.ConnectionId);
+                state = state with { Presence = await presence.SnapshotAsync(gameId, state.Players.Select(p => p.Id)) };
             }
             catch
             {
                 // The game ended in between: do not keep the connection in the group of a finished game.
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, GameGroups.All(gameId));
+                if (connectedPlayerId is { } id)
+                {
+                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, GameGroups.Player(gameId, id));
+                    await presence.DisconnectedAsync(gameId, id, Context.ConnectionId);
+                }
                 throw;
             }
 
@@ -72,16 +96,26 @@ namespace QuizLive.Server.API.Hubs
 
             try
             {
+                await gameService.GetActiveHostGameAsync(gameId, userId);
+                await using var transaction = await db.Database.BeginTransactionAsync();
                 var game = await gameService.GetActiveHostGameAsync(gameId, userId);
 
                 // A host tab opened in the middle of a game gets the running question, like the other tabs have it.
                 var current = await gameFlow.GetCurrentQuestionAsync(gameId);
-                state = new HostGameStateDto(game, current?.ForHost);
+                var results = game.Status == GameStatus.Results ? await live.HostResultsAsync(gameId, current!.ForHost.Number) : null;
+                state = new HostGameStateDto(game, current?.ForHost, results,
+                    results is null ? null : await live.LeaderboardAsync(gameId),
+                    current is null ? null : await live.ProgressAsync(gameId, current.ForHost.Number));
+                await transaction.CommitAsync();
+                await presence.HostConnectedAsync(gameId, Context.ConnectionId,
+                    () => gameService.EnsureActiveHostGameAsync(gameId, userId));
+                state = state with { Presence = await presence.SnapshotAsync(gameId, game.Players.Select(p => p.Id)) };
             }
             catch
             {
                 // The game ended in between: do not keep the connection in the group of a finished game.
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, GameGroups.Host(gameId));
+                await presence.DisconnectedAsync(gameId, null, Context.ConnectionId);
                 throw;
             }
 
@@ -89,6 +123,29 @@ namespace QuizLive.Server.API.Hubs
             Context.Items[RoleKey] = ConnectionRole.Host;
 
             return state;
+        }
+
+        public Task SubmitAnswer(SubmitAnswerRequest request)
+        {
+            if (!Context.Items.TryGetValue(RoleKey, out var role) || role is not ConnectionRole.Player)
+                throw new UnauthorizedException("Only player connections can submit answers.");
+            return live.SubmitAsync((int)Context.Items[GameIdKey]!, (int)Context.Items[PlayerIdKey]!, request);
+        }
+
+        [Authorize]
+        public Task AddTime(int seconds)
+        {
+            var (gameId, userId) = HostCommandContext();
+            return gameFlow.AddTimeAsync(gameId, userId, seconds);
+        }
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            if (Context.Items.TryGetValue(GameIdKey, out var gameId))
+                await presence.DisconnectedAsync((int)gameId!,
+                    Context.Items.TryGetValue(PlayerIdKey, out var playerId) ? (int)playerId! : null,
+                    Context.ConnectionId);
+            await base.OnDisconnectedAsync(exception);
         }
 
         // The host's commands. A command has no game id: it always acts on the game this connection joined, so

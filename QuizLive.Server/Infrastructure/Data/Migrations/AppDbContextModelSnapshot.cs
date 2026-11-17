@@ -166,6 +166,9 @@ namespace QuizLive.Server.Data.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("TotalScore")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Token")

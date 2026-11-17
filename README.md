@@ -104,3 +104,7 @@ Generated EF migrations are excluded from the server numbers (see `QuizLive.Serv
 
 The client job also checks Prettier formatting, ESLint and TypeScript, then builds production assets with `VITE_API_BASE_URL=/api`. The server job publishes in Release mode with `BuildClientAssets=false`, which skips the SPA project reference because the client is validated independently. This server publish check is not a combined deployment package. Both jobs pin their runtimes and have execution timeouts. Coverage commands target the server test project and client test suite directly.
 
+
+## 6. Live game protocol
+
+See [the live-game contract](docs/live-game.md) for answers, scoring, results, timer and presence events, reconnect state, and client integration.

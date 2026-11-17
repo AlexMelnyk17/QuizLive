@@ -70,10 +70,65 @@ export const hostGameDtoSchema = z.object({
 // The payload of QuestionClosed: the number of the question that was closed.
 export const closedQuestionNumberSchema = z.number()
 
+export const answerProgressDtoSchema = z.object({
+	number: z.number(),
+	answered: z.number(),
+	players: z.number()
+})
+export const playerResultsDtoSchema = z.object({
+	number: z.number(),
+	answered: z.boolean(),
+	isCorrect: z.boolean().nullable(),
+	points: z.number(),
+	total: z.number(),
+	place: z.number()
+})
+export const hostResultsDtoSchema = z.object({
+	number: z.number(),
+	answered: z.number(),
+	players: z.number(),
+	options: z
+		.array(
+			z.object({
+				id: z.number(),
+				text: z.string(),
+				count: z.number(),
+				isCorrect: z.boolean().nullable()
+			})
+		)
+		.nullable(),
+	openAnswers: z
+		.array(z.object({ text: z.string(), count: z.number() }))
+		.nullable()
+})
+export const leaderboardDtoSchema = z.object({
+	entries: z.array(
+		z.object({
+			playerId: z.number(),
+			nickname: z.string(),
+			total: z.number(),
+			place: z.number()
+		})
+	),
+	isFinal: z.boolean()
+})
+export const playerPresenceDtoSchema = z.object({
+	playerId: z.number(),
+	isOnline: z.boolean()
+})
+export const questionTimeAddedDtoSchema = z.object({
+	number: z.number(),
+	timing: questionTimingDtoSchema
+})
+
 // The answer to ConnectAsHost. currentQuestion is null in the lobby.
 export const hostGameStateDtoSchema = z.object({
 	game: hostGameDtoSchema,
-	currentQuestion: hostQuestionDtoSchema.nullable()
+	currentQuestion: hostQuestionDtoSchema.nullable(),
+	results: hostResultsDtoSchema.nullable().optional(),
+	leaderboard: leaderboardDtoSchema.nullable().optional(),
+	answerProgress: answerProgressDtoSchema.nullable().optional(),
+	presence: z.array(playerPresenceDtoSchema).nullable().optional()
 })
 
 // The answer to ConnectAsPlayer. currentQuestion is null in the lobby.
@@ -85,5 +140,9 @@ export const playerGameStateDtoSchema = z.object({
 	playerId: z.number(),
 	nickname: z.string(),
 	players: z.array(gamePlayerDtoSchema),
-	currentQuestion: playerQuestionDtoSchema.nullable()
+	currentQuestion: playerQuestionDtoSchema.nullable(),
+	hasAnswered: z.boolean().optional(),
+	results: playerResultsDtoSchema.nullable().optional(),
+	leaderboard: leaderboardDtoSchema.nullable().optional(),
+	presence: z.array(playerPresenceDtoSchema).nullable().optional()
 })

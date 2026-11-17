@@ -168,7 +168,7 @@ namespace QuizLive.Server.Application.Games
                         .OrderBy(x => x.JoinedAtUtc)
                         .Select(x => new GamePlayerDto(x.Id, x.Nickname, x.JoinedAtUtc))
                         .ToList(),
-                    null))
+                    null, false, null, null, null))
                 .FirstOrDefaultAsync();
 
             // The running question is not part of this query: it lives in three tables, and the hub adds it.

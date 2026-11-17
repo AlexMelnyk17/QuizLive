@@ -5,9 +5,9 @@ namespace QuizLive.Server.Application.Games
     public static class LiveGameMappings
     {
         // Number is the question's Order within the quiz, the same value the game stores in CurrentQuestionOrder.
-        public static QuestionViews ToViews(QuestionDto question, int total, DateTime startedAtUtc, DateTime? endsAtUtc)
+        public static QuestionViews ToViews(QuestionDto question, int total, DateTime startedAtUtc, DateTime? endsAtUtc, DateTime serverNowUtc)
         {
-            var timing = new QuestionTimingDto(startedAtUtc, endsAtUtc, DateTime.UtcNow);
+            var timing = new QuestionTimingDto(startedAtUtc, endsAtUtc, serverNowUtc);
 
             var forPlayers = new PlayerQuestionDto(
                 question.Order,

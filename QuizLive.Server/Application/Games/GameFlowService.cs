@@ -12,7 +12,7 @@ namespace QuizLive.Server.Application.Games
     // repeated command (for example from a second host tab) changes nothing and gets a conflict.
     // After a transition is saved, the service tells the connected clients; the commands are therefore
     // the single place that sends these events, whether they come from the hub or from REST.
-    public class GameFlowService(AppDbContext db, IGameNotifier notifier) : IGameFlowService
+    public class GameFlowService(AppDbContext db, IGameNotifier notifier, LiveGameService live, TimeProvider clock) : IGameFlowService
     {
         private sealed record FlowState(
             GameStatus Status,
@@ -46,7 +46,7 @@ namespace QuizLive.Server.Application.Games
 
             return current is null
                 ? null
-                : LiveGameMappings.ToViews(current, questions.Count, startedAt, game.CurrentQuestionEndsAtUtc);
+                : LiveGameMappings.ToViews(current, questions.Count, startedAt, game.CurrentQuestionEndsAtUtc, clock.GetUtcNow().UtcDateTime);
         }
 
         public async Task<QuestionViews> StartAsync(int gameId, string hostUserId)
@@ -67,7 +67,7 @@ namespace QuizLive.Server.Application.Games
             var first = questions.FirstOrDefault()
                 ?? throw new ConflictException(GameMessages.NoQuestions);
 
-            var startedAt = DateTime.UtcNow;
+            var startedAt = clock.GetUtcNow().UtcDateTime;
             var endsAt = EndOf(first, startedAt);
 
             var changed = await ActiveGame(gameId)
@@ -84,7 +84,7 @@ namespace QuizLive.Server.Application.Games
                 throw new ConflictException(GameMessages.AlreadyStarted);
             }
 
-            var views = LiveGameMappings.ToViews(first, questions.Count, startedAt, endsAt);
+            var views = LiveGameMappings.ToViews(first, questions.Count, startedAt, endsAt, clock.GetUtcNow().UtcDateTime);
             await notifier.QuestionShownAsync(gameId, views);
 
             return views;
@@ -101,17 +101,10 @@ namespace QuizLive.Server.Application.Games
 
             var order = game.CurrentQuestionOrder!.Value;
 
-            // The question order is part of the condition: the answer to "which question was closed" stays true.
-            var changed = await ActiveGame(gameId)
-                .Where(g => g.Status == GameStatus.Question && g.CurrentQuestionOrder == order)
-                .ExecuteUpdateAsync(set => set.SetProperty(g => g.Status, GameStatus.Results));
-
-            if (changed == 0)
+            if (!await CloseQuestionAsync(gameId, order))
             {
                 throw new ConflictException(GameMessages.QuestionNotOpen);
             }
-
-            await notifier.QuestionClosedAsync(gameId, order);
 
             return order;
         }
@@ -130,7 +123,7 @@ namespace QuizLive.Server.Application.Games
 
             // The first question after the current one, so a gap in the numbering would not matter.
             var next = questions.FirstOrDefault(q => q.Order > current);
-            var now = DateTime.UtcNow;
+            var now = clock.GetUtcNow().UtcDateTime;
 
             if (next is null)
             {
@@ -145,6 +138,7 @@ namespace QuizLive.Server.Application.Games
                     throw new ConflictException(GameMessages.ResultsNotShown);
                 }
 
+                await notifier.LeaderboardAsync(gameId, await live.LeaderboardAsync(gameId, final: true));
                 await notifier.GameEndedAsync(gameId);
 
                 return new NextQuestionResult(null);
@@ -165,7 +159,7 @@ namespace QuizLive.Server.Application.Games
                 throw new ConflictException(GameMessages.ResultsNotShown);
             }
 
-            var views = LiveGameMappings.ToViews(next, questions.Count, now, endsAt);
+            var views = LiveGameMappings.ToViews(next, questions.Count, now, endsAt, clock.GetUtcNow().UtcDateTime);
             await notifier.QuestionShownAsync(gameId, views);
 
             return new NextQuestionResult(views);
@@ -184,15 +178,58 @@ namespace QuizLive.Server.Application.Games
             var changed = await ActiveGame(gameId)
                 .ExecuteUpdateAsync(set => set
                     .SetProperty(g => g.Status, GameStatus.Finished)
-                    .SetProperty(g => g.EndedAtUtc, DateTime.UtcNow));
+                    .SetProperty(g => g.EndedAtUtc, clock.GetUtcNow().UtcDateTime));
 
             if (changed == 0)
             {
                 return false;
             }
 
+            await notifier.LeaderboardAsync(gameId, await live.LeaderboardAsync(gameId, final: true));
             await notifier.GameEndedAsync(gameId);
 
+            return true;
+        }
+
+        public async Task<QuestionTimingDto> AddTimeAsync(int gameId, string hostUserId, int seconds)
+        {
+            if (seconds is < 1 or > GameTiming.MaxAddedSeconds)
+                throw new DomainValidationException(GameMessages.InvalidAddedTime);
+            await using var transaction = await db.Database.BeginTransactionAsync();
+            await LoadActiveAsync(gameId, hostUserId);
+            var game = await ActiveGame(gameId).AsNoTracking().SingleAsync();
+            var now = clock.GetUtcNow().UtcDateTime;
+            if (game.Status != GameStatus.Question || game.CurrentQuestionEndsAtUtc is not { } ends || now >= ends)
+                throw new ConflictException(GameMessages.QuestionNotOpen);
+            var extended = ends.AddSeconds(seconds);
+            var changed = await ActiveGame(gameId)
+                .Where(g => g.Status == GameStatus.Question && g.CurrentQuestionOrder == game.CurrentQuestionOrder
+                    && g.CurrentQuestionEndsAtUtc == ends)
+                .ExecuteUpdateAsync(s => s.SetProperty(g => g.CurrentQuestionEndsAtUtc, extended));
+            if (changed == 0) throw new ConflictException(GameMessages.QuestionNotOpen);
+            await transaction.CommitAsync();
+            var timing = new QuestionTimingDto(game.CurrentQuestionStartedAtUtc!.Value, extended, now);
+            await notifier.TimeAddedAsync(gameId, new QuestionTimeAddedDto(game.CurrentQuestionOrder!.Value, timing));
+            return timing;
+        }
+
+        // The deadline is part of the CAS so an extension invalidates a timer that already woke up.
+        public async Task<bool> CloseExpiredAsync(int gameId, int number, DateTime deadline)
+        {
+            var now = clock.GetUtcNow().UtcDateTime;
+            if (now < deadline) return false;
+            return await CloseQuestionAsync(gameId, number, deadline);
+        }
+
+        private async Task<bool> CloseQuestionAsync(int gameId, int number, DateTime? expectedDeadline = null)
+        {
+            var changed = await ActiveGame(gameId)
+                .Where(g => g.Status == GameStatus.Question && g.CurrentQuestionOrder == number
+                    && (expectedDeadline == null || g.CurrentQuestionEndsAtUtc == expectedDeadline))
+                .ExecuteUpdateAsync(s => s.SetProperty(g => g.Status, GameStatus.Results));
+            if (changed == 0) return false;
+            await live.PublishResultsAsync(gameId, number);
+            await notifier.QuestionClosedAsync(gameId, number);
             return true;
         }
 

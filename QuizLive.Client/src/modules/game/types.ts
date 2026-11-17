@@ -6,14 +6,20 @@ import type {
 	GAME_CONNECTION_STATE
 } from '@modules/game/constants'
 import type {
+	answerProgressDtoSchema,
 	gamePlayerDtoSchema,
 	gameStatusSchema,
 	hostGameDtoSchema,
 	hostGameStateDtoSchema,
 	hostQuestionDtoSchema,
+	hostResultsDtoSchema,
+	leaderboardDtoSchema,
 	playerGameStateDtoSchema,
 	playerOptionDtoSchema,
+	playerPresenceDtoSchema,
 	playerQuestionDtoSchema,
+	playerResultsDtoSchema,
+	questionTimeAddedDtoSchema,
 	questionTimingDtoSchema
 } from '@modules/game/schemas'
 
@@ -145,8 +151,23 @@ export type PlayerGameResult = {
 	leave: () => void
 }
 
+export type SubmitAnswerRequest = {
+	questionNumber: number
+	optionId?: number
+	text?: string
+}
+
 // Every handler is optional: the host listens to some events, a player to others.
 export type GameEventHandlers = {
+	onAnswerProgress?: (payload: z.infer<typeof answerProgressDtoSchema>) => void
+	onHostResults?: (payload: z.infer<typeof hostResultsDtoSchema>) => void
+	onPlayerResults?: (payload: z.infer<typeof playerResultsDtoSchema>) => void
+	onLeaderboard?: (payload: z.infer<typeof leaderboardDtoSchema>) => void
+	onTimeAdded?: (payload: z.infer<typeof questionTimeAddedDtoSchema>) => void
+	onPlayerPresenceChanged?: (
+		payload: z.infer<typeof playerPresenceDtoSchema>
+	) => void
+	onPlayerLeft?: (payload: number) => void
 	onPlayerJoined?: (player: GamePlayerDto) => void
 	onQuestionShown?: (question: PlayerQuestionDto) => void
 	onHostQuestionShown?: (question: HostQuestionDto) => void

@@ -11,6 +11,48 @@ namespace QuizLive.Server.Tests.Support
         public IReadOnlyList<GameEvent> EventsFor(int gameId) =>
             _events.Where(e => e.GameId == gameId).ToList();
 
+        public Task AnswerProgressAsync(int gameId, AnswerProgressDto progress)
+        {
+            _events.Enqueue(new GameEvent("AnswerProgress", gameId, Payload: progress));
+            return Task.CompletedTask;
+        }
+
+        public Task HostResultsAsync(int gameId, HostQuestionResultsDto results)
+        {
+            _events.Enqueue(new GameEvent("HostResults", gameId, Payload: results));
+            return Task.CompletedTask;
+        }
+
+        public Task PlayerResultsAsync(int gameId, int playerId, PlayerQuestionResultsDto results)
+        {
+            _events.Enqueue(new GameEvent("PlayerResults", gameId, Payload: results));
+            return Task.CompletedTask;
+        }
+
+        public Task LeaderboardAsync(int gameId, LeaderboardDto leaderboard)
+        {
+            _events.Enqueue(new GameEvent("Leaderboard", gameId, Payload: leaderboard));
+            return Task.CompletedTask;
+        }
+
+        public Task TimeAddedAsync(int gameId, QuestionTimeAddedDto timing)
+        {
+            _events.Enqueue(new GameEvent("TimeAdded", gameId, Payload: timing));
+            return Task.CompletedTask;
+        }
+
+        public Task PlayerPresenceChangedAsync(int gameId, PlayerPresenceDto presence)
+        {
+            _events.Enqueue(new GameEvent("PlayerPresenceChanged", gameId, Payload: presence));
+            return Task.CompletedTask;
+        }
+
+        public Task PlayerLeftAsync(int gameId, int playerId)
+        {
+            _events.Enqueue(new GameEvent("PlayerLeft", gameId, Payload: playerId));
+            return Task.CompletedTask;
+        }
+
         public Task PlayerJoinedAsync(int gameId, GamePlayerDto player)
         {
             _events.Enqueue(new GameEvent(nameof(IGameClient.PlayerJoined), gameId, player));
@@ -41,5 +83,6 @@ namespace QuizLive.Server.Tests.Support
         int GameId,
         GamePlayerDto? Player = null,
         QuestionViews? Views = null,
-        int? Number = null);
+        int? Number = null,
+        object? Payload = null);
 }

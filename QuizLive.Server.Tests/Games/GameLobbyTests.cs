@@ -229,7 +229,7 @@ namespace QuizLive.Server.Tests.Games
             Assert.Equal(GameStatus.Finished, ended.Status);
             Assert.NotNull(ended.EndedAtUtc);
 
-            var gameEnded = Assert.Single(factory.Notifier.EventsFor(game.Id));
+            var gameEnded = Assert.Single(factory.Notifier.EventsFor(game.Id), e => e.Name == nameof(IGameClient.GameEnded));
             Assert.Equal(nameof(IGameClient.GameEnded), gameEnded.Name);
 
             var lookup = await GetByCodeAsync(factory.CreateClient(), game.Code);

@@ -12,6 +12,8 @@ namespace QuizLive.Server.Application.Abstractions
         // game; null in the lobby. It does not check who asks: call it only after an access check.
         Task<QuestionViews?> GetCurrentQuestionAsync(int gameId);
 
+        Task<QuestionTimingDto> AddTimeAsync(int gameId, string hostUserId, int seconds);
+
         // Lobby to the first question.
         Task<QuestionViews> StartAsync(int gameId, string hostUserId);
 
