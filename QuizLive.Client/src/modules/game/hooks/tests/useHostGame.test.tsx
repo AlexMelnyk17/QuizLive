@@ -89,6 +89,27 @@ async function renderConnected(gameId = GAME_ID) {
 }
 
 describe('useHostGame', () => {
+	it('extends the question and applies the broadcast timing on the host connection', async () => {
+		const { result } = await renderConnected()
+		act(() => {
+			fake.emit(GAME_HUB_EVENTS.hostQuestionShown, hostQuestion(1))
+		})
+		await act(async () => {
+			await result.current.commands.addTime(10)
+		})
+		expect(fake.invocations).toContainEqual({
+			method: GAME_HUB_METHODS.addTime,
+			args: [10]
+		})
+		const extended = {
+			...hostQuestion(1).timing,
+			endsAtUtc: '2026-11-17T10:01:00Z'
+		}
+		act(() => {
+			fake.emit(GAME_HUB_EVENTS.timeAdded, { number: 1, timing: extended })
+		})
+		expect(result.current.currentQuestion?.timing).toEqual(extended)
+	})
 	beforeEach(() => {
 		fake = new FakeHubConnection()
 		fake.respondWith(

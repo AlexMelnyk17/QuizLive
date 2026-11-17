@@ -165,7 +165,11 @@ export const QUIZ_LIST_COPY = {
 
 export const QUIZ_DETAILS_COPY = {
 	startGame: 'Start a game',
-	comingSoon: 'Coming soon',
+	startNeedsQuestions: 'Add questions before starting a game.',
+	startError: {
+		title: 'Could not start the game',
+		body: 'Something went wrong. Try again.'
+	},
 	archivedDeleteReason: 'Unarchive this quiz before deleting it.',
 	playedDeleteReason:
 		'This quiz has games and cannot be deleted. Archive it instead.',

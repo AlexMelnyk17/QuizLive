@@ -3,6 +3,11 @@ import type { GameState } from '@modules/game/types'
 // The path is relative to ENV.VITE_API_BASE_URL: with "/api" it is /api/hubs/game.
 export const GAME_HUB_PATH = '/hubs/game'
 
+// REST endpoints of the host side of a game, relative to ENV.VITE_API_BASE_URL.
+export const GAMES_API = {
+	create: '/games'
+} as const
+
 // SignalR puts the text of a HubException after this marker in the message of a failed call:
 // "An unexpected error occurred invoking 'X' on the server. HubException: <readable text>".
 export const HUB_EXCEPTION_MARKER = 'HubException: '
@@ -53,6 +58,47 @@ export const GameStatus = {
 	Finished: 3
 } as const
 
+export const HOST_GAME_COPY = {
+	pageTitle: 'Host a game',
+	connecting: 'Connecting to the game…',
+	invalidGame: 'This address does not lead to a game.',
+	backToQuizzes: 'Back to my quizzes'
+} as const
+
+export const HOST_LOBBY_COPY = {
+	codeLabel: 'Game code',
+	joinHint: 'Players enter this code on the home page to join.',
+	start: 'Start game'
+} as const
+
+export const HOST_QUESTION_COPY = {
+	showResults: 'Show results',
+	openText: 'Players type their own answer.',
+	correct: 'Correct'
+} as const
+
+export const HOST_RESULTS_COPY = {
+	heading: (number: number, total: number) =>
+		`Question ${number} of ${total}: closed`,
+	next: 'Next question',
+	finish: 'Finish game'
+} as const
+
+export const HOST_END_GAME_COPY = {
+	open: 'End game',
+	title: 'End the game?',
+	body: 'The game finishes for everyone and cannot be resumed. Its progress is kept in the statistics.',
+	cancel: 'Keep playing',
+	confirm: 'End the game'
+} as const
+
+export const HOST_FINISHED_COPY = {
+	title: 'Game finished',
+	body: 'The players have been told the game is over.',
+	viewStats: 'View game statistics',
+	back: 'Back to my quizzes'
+} as const
+
 export const PLAYER_PAGE_COPY = {
 	connecting: 'Connecting to the game…',
 	joined: (nickname: string) => `You joined as ${nickname}`,
@@ -70,6 +116,23 @@ export const PLAYER_QUESTION_COPY = {
 } as const
 
 export const MS_PER_SECOND = 1000
+
+export const OPEN_ANSWER_MAX_LENGTH = 200
+
+export const HOST_ADD_TIME_SECONDS = 10
+
+export const HOST_ADD_TIME_COPY = {
+	button: `Add ${HOST_ADD_TIME_SECONDS} seconds`
+} as const
+
+export const PLAYER_ANSWER_COPY = {
+	label: 'Your answer',
+	submit: 'Submit answer',
+	accepted: 'Answer saved. You can change it until the question closes.',
+	update: 'Update answer',
+	required: 'Enter an answer.',
+	tooLong: `The answer can be at most ${OPEN_ANSWER_MAX_LENGTH} characters.`
+} as const
 
 // How often the countdown of a question is refreshed.
 export const COUNTDOWN_TICK_MS = 1000
@@ -96,6 +159,7 @@ export const GAME_CONNECTION_STATE = {
 
 // What can happen to the state of a game on the client; see gameReducer.
 export const GAME_ACTION_TYPES = {
+	timeAdded: 'timeAdded',
 	snapshot: 'snapshot',
 	playerJoined: 'playerJoined',
 	questionShown: 'questionShown',

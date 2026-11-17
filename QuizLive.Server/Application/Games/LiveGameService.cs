@@ -34,14 +34,22 @@ public class LiveGameService(AppDbContext db, IGameNotifier notifier, TimeProvid
             .Single(q => q.Order == request.QuestionNumber);
         var elapsed = Math.Max(0, (now - game.CurrentQuestionStartedAtUtc!.Value).TotalMilliseconds);
         var points = 0;
+        var previousPoints = 0;
         switch (game.Kind)
         {
             case QuizKind.OpenText:
                 var text = request.Text?.Trim();
                 if (request.OptionId is not null || string.IsNullOrEmpty(text) || text.Length > 200)
                     throw new DomainValidationException("An open answer must contain 1 to 200 characters and no option id.");
-                db.OpenAnswers.Add(new OpenAnswer { OpenQuestionId = question.Id, PlayerId = playerId,
-                    Text = text, AnsweredAtUtc = now });
+                var openAnswer = await db.OpenAnswers.SingleOrDefaultAsync(a => a.OpenQuestionId == question.Id && a.PlayerId == playerId);
+                if (openAnswer is null)
+                    db.OpenAnswers.Add(new OpenAnswer { OpenQuestionId = question.Id, PlayerId = playerId,
+                        Text = text, AnsweredAtUtc = now });
+                else if (openAnswer.Text != text)
+                {
+                    openAnswer.Text = text;
+                    openAnswer.AnsweredAtUtc = now;
+                }
                 break;
             case QuizKind.PollChoice:
             case QuizKind.QuizChoice:
@@ -50,15 +58,37 @@ public class LiveGameService(AppDbContext db, IGameNotifier notifier, TimeProvid
                 var option = question.Options!.SingleOrDefault(o => o.Id == request.OptionId)
                     ?? throw new DomainValidationException("The option does not belong to the current question.");
                 if (game.Kind == QuizKind.PollChoice)
-                    db.PollAnswers.Add(new PollAnswer { PollQuestionId = question.Id, PlayerId = playerId,
-                        PollOptionId = option.Id, AnsweredAtUtc = now });
+                {
+                    var pollAnswer = await db.PollAnswers.SingleOrDefaultAsync(a => a.PollQuestionId == question.Id && a.PlayerId == playerId);
+                    if (pollAnswer is null)
+                        db.PollAnswers.Add(new PollAnswer { PollQuestionId = question.Id, PlayerId = playerId,
+                            PollOptionId = option.Id, AnsweredAtUtc = now });
+                    else if (pollAnswer.PollOptionId != option.Id)
+                    {
+                        pollAnswer.PollOptionId = option.Id;
+                        pollAnswer.AnsweredAtUtc = now;
+                    }
+                }
                 else
                 {
+                    var quizAnswer = await db.QuizAnswers.SingleOrDefaultAsync(a => a.QuizQuestionId == question.Id && a.PlayerId == playerId);
+                    previousPoints = quizAnswer?.Points ?? 0;
                     points = ScoreCalculator.Calculate(game.Kind, option.IsCorrect == true, question.BasePoints,
                         elapsed, (game.CurrentQuestionEndsAtUtc - game.CurrentQuestionStartedAtUtc)?.TotalMilliseconds);
-                    db.QuizAnswers.Add(new QuizAnswer { QuizQuestionId = question.Id, PlayerId = playerId,
-                        QuizOptionId = option.Id, IsCorrect = option.IsCorrect == true, Points = points,
-                        ElapsedMs = (int)Math.Min(int.MaxValue, elapsed), AnsweredAtUtc = now });
+                    if (quizAnswer is null)
+                        db.QuizAnswers.Add(new QuizAnswer { QuizQuestionId = question.Id, PlayerId = playerId,
+                            QuizOptionId = option.Id, IsCorrect = option.IsCorrect == true, Points = points,
+                            ElapsedMs = (int)Math.Min(int.MaxValue, elapsed), AnsweredAtUtc = now });
+                    else if (quizAnswer.QuizOptionId == option.Id)
+                        points = previousPoints; // Retrying the same answer preserves its time and speed bonus.
+                    else
+                    {
+                        quizAnswer.QuizOptionId = option.Id;
+                        quizAnswer.IsCorrect = option.IsCorrect == true;
+                        quizAnswer.Points = points;
+                        quizAnswer.ElapsedMs = (int)Math.Min(int.MaxValue, elapsed);
+                        quizAnswer.AnsweredAtUtc = now;
+                    }
                 }
                 break;
         }
@@ -70,10 +100,26 @@ public class LiveGameService(AppDbContext db, IGameNotifier notifier, TimeProvid
         {
             throw new ConflictException("You have already answered this question.");
         }
-        await db.Players.Where(p => p.Id == playerId).ExecuteUpdateAsync(s => s.SetProperty(p => p.TotalScore, p => p.TotalScore + points));
+        var scoreDelta = points - previousPoints;
+        await db.Players.Where(p => p.Id == playerId).ExecuteUpdateAsync(s => s.SetProperty(p => p.TotalScore, p => p.TotalScore + scoreDelta));
         var progress = await ProgressAsync(gameId, request.QuestionNumber);
         await transaction.CommitAsync();
         await notifier.AnswerProgressAsync(gameId, progress);
+    }
+
+    // Only the player's own answer is returned; correctness and scores stay private until results.
+    public async Task<SubmitAnswerRequest?> CurrentAnswerAsync(int gameId, int playerId, int? number)
+    {
+        if (number is null) return null;
+        return await db.OpenAnswers.AsNoTracking()
+            .Where(a => a.PlayerId == playerId && a.Player.GameSessionRecordId == gameId && a.Question.Order == number)
+            .Select(a => new SubmitAnswerRequest(number.Value, null, a.Text)).SingleOrDefaultAsync()
+            ?? await db.PollAnswers.AsNoTracking()
+            .Where(a => a.PlayerId == playerId && a.Player.GameSessionRecordId == gameId && a.Question.Order == number)
+            .Select(a => new SubmitAnswerRequest(number.Value, a.PollOptionId, null)).SingleOrDefaultAsync()
+            ?? await db.QuizAnswers.AsNoTracking()
+            .Where(a => a.PlayerId == playerId && a.Player.GameSessionRecordId == gameId && a.Question.Order == number)
+            .Select(a => new SubmitAnswerRequest(number.Value, a.QuizOptionId, null)).SingleOrDefaultAsync();
     }
 
     public async Task<bool> HasAnsweredAsync(int gameId, int playerId, int? number)

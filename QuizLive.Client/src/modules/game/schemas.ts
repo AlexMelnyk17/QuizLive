@@ -1,7 +1,19 @@
 import { z } from 'zod'
 
-import { GameStatus } from '@modules/game/constants'
+import {
+	GameStatus,
+	OPEN_ANSWER_MAX_LENGTH,
+	PLAYER_ANSWER_COPY
+} from '@modules/game/constants'
 import { questionDtoSchema, quizKindSchema } from '@modules/quizzes/schemas'
+
+export const openAnswerFormSchema = z.object({
+	text: z
+		.string()
+		.trim()
+		.min(1, PLAYER_ANSWER_COPY.required)
+		.max(OPEN_ANSWER_MAX_LENGTH, PLAYER_ANSWER_COPY.tooLong)
+})
 
 // What is kept in sessionStorage. Storage is an untrusted boundary, so it is parsed, not cast.
 export const playerTokenStorageSchema = z.object({
@@ -133,6 +145,14 @@ export const hostGameStateDtoSchema = z.object({
 
 // The answer to ConnectAsPlayer. currentQuestion is null in the lobby.
 export const playerGameStateDtoSchema = z.object({
+	currentAnswer: z
+		.object({
+			questionNumber: z.number(),
+			optionId: z.number().nullish(),
+			text: z.string().nullish()
+		})
+		.nullable()
+		.optional(),
 	gameId: z.number(),
 	code: z.string(),
 	quizTitle: z.string(),

@@ -14,6 +14,7 @@ import type {
 	hostQuestionDtoSchema,
 	hostResultsDtoSchema,
 	leaderboardDtoSchema,
+	openAnswerFormSchema,
 	playerGameStateDtoSchema,
 	playerOptionDtoSchema,
 	playerPresenceDtoSchema,
@@ -61,6 +62,12 @@ export type GameState<TQuestion extends { number: number }> = {
 
 export type GameAction<TQuestion extends { number: number }> =
 	| {
+			type: typeof GAME_ACTION_TYPES.timeAdded
+			number: number
+			timing: QuestionTimingDto
+			receivedAtMs: number
+	  }
+	| {
 			type: typeof GAME_ACTION_TYPES.snapshot
 			status: GameStatusValue
 			players: GamePlayerDto[]
@@ -105,6 +112,7 @@ export type HostGameInfo = Pick<
 // A host command gives back the readable error text, or null when the server accepted it. What the command
 // does arrives as an event, not as a result.
 export type HostGameCommands = {
+	addTime: (seconds: number) => Promise<string | null>
 	startGame: () => Promise<string | null>
 	showResults: () => Promise<string | null>
 	nextQuestion: () => Promise<string | null>
@@ -133,6 +141,10 @@ export type PlayerGameInfo = Pick<
 >
 
 export type PlayerGameResult = {
+	selectedAnswer: SubmitAnswerRequest | null
+	hasAnswered: boolean
+	isSubmitting: boolean
+	submitAnswer: (answer: SubmitAnswerRequest) => Promise<string | null>
 	// Without a player token nothing connects: the player has not joined a game in this tab.
 	hasToken: boolean
 	// Null until the player has joined the game on the hub.
@@ -156,6 +168,8 @@ export type SubmitAnswerRequest = {
 	optionId?: number
 	text?: string
 }
+
+export type OpenAnswerFormValues = z.infer<typeof openAnswerFormSchema>
 
 // Every handler is optional: the host listens to some events, a player to others.
 export type GameEventHandlers = {

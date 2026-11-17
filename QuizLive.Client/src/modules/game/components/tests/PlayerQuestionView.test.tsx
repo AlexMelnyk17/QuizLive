@@ -1,8 +1,12 @@
 import { cleanup, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { PlayerQuestionView } from '@modules/game/components/PlayerQuestionView'
-import { PLAYER_QUESTION_COPY } from '@modules/game/constants'
+import {
+	PLAYER_ANSWER_COPY,
+	PLAYER_QUESTION_COPY
+} from '@modules/game/constants'
 import { useQuestionCountdown } from '@modules/game/hooks/useQuestionCountdown'
 import type { PlayerQuestionDto } from '@modules/game/types'
 
@@ -38,6 +42,146 @@ function question(
 }
 
 describe('PlayerQuestionView', () => {
+	it('sends the chosen option with the current question number', async () => {
+		countdownMock.mockReturnValue(25)
+		const submit = vi.fn().mockResolvedValue(null)
+		renderWithTheme(
+			<PlayerQuestionView
+				question={question()}
+				receivedAtMs={0}
+				connected
+				onSubmitAnswer={submit}
+			/>
+		)
+		await userEvent.setup().click(screen.getByRole('button', { name: /4/ }))
+		expect(submit).toHaveBeenCalledWith({ questionNumber: 2, optionId: 21 })
+	})
+
+	it('validates and trims a free text answer before sending it', async () => {
+		countdownMock.mockReturnValue(null)
+		const submit = vi.fn().mockResolvedValue(null)
+		renderWithTheme(
+			<PlayerQuestionView
+				question={question({ options: null })}
+				receivedAtMs={0}
+				connected
+				onSubmitAnswer={submit}
+			/>
+		)
+		const user = userEvent.setup()
+		await user.click(
+			screen.getByRole('button', { name: PLAYER_ANSWER_COPY.submit })
+		)
+		expect(
+			await screen.findByText(PLAYER_ANSWER_COPY.required)
+		).toBeInTheDocument()
+		expect(submit).not.toHaveBeenCalled()
+		await user.type(
+			screen.getByLabelText(PLAYER_ANSWER_COPY.label),
+			'  Hello  '
+		)
+		await user.click(
+			screen.getByRole('button', { name: PLAYER_ANSWER_COPY.submit })
+		)
+		expect(submit).toHaveBeenCalledWith({ questionNumber: 2, text: 'Hello' })
+	})
+
+	it.each([{ isSubmitting: true }, { connected: false }])(
+		'locks choices when %j',
+		props => {
+			countdownMock.mockReturnValue(25)
+			renderWithTheme(
+				<PlayerQuestionView
+					question={question()}
+					receivedAtMs={0}
+					connected
+					onSubmitAnswer={vi.fn()}
+					{...props}
+				/>
+			)
+			expect(screen.getByRole('button', { name: /4/ })).toBeDisabled()
+		}
+	)
+
+	it('locks choices when the deadline passes', () => {
+		countdownMock.mockReturnValue(0)
+		renderWithTheme(
+			<PlayerQuestionView
+				question={question()}
+				receivedAtMs={0}
+				connected
+				onSubmitAnswer={vi.fn()}
+			/>
+		)
+		expect(screen.getByRole('button', { name: /4/ })).toBeDisabled()
+	})
+
+	it('highlights the saved choice and lets the player choose a different option', async () => {
+		countdownMock.mockReturnValue(25)
+		const submit = vi.fn().mockResolvedValue(null)
+		renderWithTheme(
+			<PlayerQuestionView
+				question={question()}
+				receivedAtMs={0}
+				connected
+				hasAnswered
+				selectedAnswer={{ questionNumber: 2, optionId: 21 }}
+				onSubmitAnswer={submit}
+			/>
+		)
+		expect(screen.getByRole('button', { name: /4/ })).toHaveAttribute(
+			'aria-pressed',
+			'true'
+		)
+		expect(screen.getByRole('button', { name: /5/ })).toHaveAttribute(
+			'aria-pressed',
+			'false'
+		)
+		await userEvent.setup().click(screen.getByRole('button', { name: /5/ }))
+		expect(submit).toHaveBeenCalledWith({ questionNumber: 2, optionId: 22 })
+	})
+
+	it('restores the saved open text and lets the player update it', async () => {
+		countdownMock.mockReturnValue(null)
+		const submit = vi.fn().mockResolvedValue(null)
+		renderWithTheme(
+			<PlayerQuestionView
+				question={question({ options: null })}
+				receivedAtMs={0}
+				connected
+				hasAnswered
+				selectedAnswer={{ questionNumber: 2, text: 'Kyiv' }}
+				onSubmitAnswer={submit}
+			/>
+		)
+		const user = userEvent.setup()
+		const field = screen.getByLabelText(PLAYER_ANSWER_COPY.label)
+		expect(field).toHaveValue('Kyiv')
+		await user.clear(field)
+		await user.type(field, 'Lviv')
+		await user.click(
+			screen.getByRole('button', { name: PLAYER_ANSWER_COPY.update })
+		)
+		expect(submit).toHaveBeenCalledWith({ questionNumber: 2, text: 'Lviv' })
+	})
+
+	it('shows a server rejection and permits another attempt', async () => {
+		countdownMock.mockReturnValue(25)
+		const submit = vi.fn().mockResolvedValue('The question is closed.')
+		renderWithTheme(
+			<PlayerQuestionView
+				question={question()}
+				receivedAtMs={0}
+				connected
+				onSubmitAnswer={submit}
+			/>
+		)
+		await userEvent.setup().click(screen.getByRole('button', { name: /4/ }))
+		expect(await screen.findByRole('alert')).toHaveTextContent(
+			'The question is closed.'
+		)
+		expect(screen.getByRole('button', { name: /4/ })).toBeEnabled()
+	})
 	afterEach(cleanup)
 
 	it('shows the number of the question, out of how many, and its text', () => {

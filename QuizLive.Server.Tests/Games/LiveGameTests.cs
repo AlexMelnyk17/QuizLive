@@ -55,11 +55,12 @@ public class LiveGameTests(LiveGameFactory factory) : IClassFixture<LiveGameFact
         await Start(setup);
         var request = Answer(setup, kind);
         await Submit(setup, request);
-        await Assert.ThrowsAsync<ConflictException>(() => Submit(setup, request));
+        await Submit(setup, request);
         await using var player = factory.CreateHubConnection();
         await player.StartAsync(Ct);
         var state = await player.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", setup.Player.Token, Ct);
         Assert.True(state.HasAnswered);
+        Assert.Equal(request, state.CurrentAnswer);
         Assert.Null(state.Results);
         Assert.Null(state.Leaderboard);
         Assert.DoesNotContain("isCorrect", System.Text.Json.JsonSerializer.Serialize(state, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web)));
@@ -130,8 +131,7 @@ public class LiveGameTests(LiveGameFactory factory) : IClassFixture<LiveGameFact
         var setup = await CreateAsync(QuizKind.QuizChoice);
         await Start(setup);
         var errors = await Race(() => Submit(setup, Answer(setup, QuizKind.QuizChoice)), () => Submit(setup, Answer(setup, QuizKind.QuizChoice)));
-        Assert.Single(errors, e => e is null);
-        Assert.Single(errors, e => e is ConflictException);
+        Assert.All(errors, error => Assert.Null(error));
         await InScope(async s =>
         {
             var db = s.GetRequiredService<AppDbContext>();
@@ -312,6 +312,81 @@ public class LiveGameTests(LiveGameFactory factory) : IClassFixture<LiveGameFact
             Assert.False(personal.Answered);
             Assert.Null(personal.IsCorrect);
             Assert.Equal(0, personal.Points);
+        });
+    }
+
+    [Theory]
+    [InlineData(QuizKind.OpenText)]
+    [InlineData(QuizKind.PollChoice)]
+    [InlineData(QuizKind.QuizChoice)]
+    public async Task AnAnswerCanBeReplacedUntilClosingAndReconnectRestoresTheLastChoice(QuizKind kind)
+    {
+        var setup = await CreateAsync(kind);
+        await Start(setup);
+        await Submit(setup, Answer(setup, kind));
+        factory.Clock.Advance(TimeSpan.FromSeconds(5));
+        var replacement = kind == QuizKind.OpenText
+            ? new SubmitAnswerRequest(1, Text: "Lviv")
+            : new SubmitAnswerRequest(1, setup.Question.Options![1].Id);
+        await Submit(setup, replacement);
+        await InScope(async s =>
+        {
+            var live = s.GetRequiredService<LiveGameService>();
+            Assert.Equal(replacement, await live.CurrentAnswerAsync(setup.Game.Id, setup.Player.PlayerId, 1));
+            Assert.Equal(1, (await live.ProgressAsync(setup.Game.Id, 1)).Answered);
+        });
+        await Flow(f => f.ShowResultsAsync(setup.Game.Id, setup.HostId));
+        await Assert.ThrowsAsync<ConflictException>(() => Submit(setup, Answer(setup, kind)));
+        await InScope(async s =>
+        {
+            var result = await s.GetRequiredService<LiveGameService>().HostResultsAsync(setup.Game.Id, 1);
+            Assert.Equal(1, result.Answered);
+            if (kind == QuizKind.OpenText) Assert.Equal("Lviv", Assert.Single(result.OpenAnswers!).Text);
+            else
+            {
+                Assert.Equal(0, result.Options![0].Count);
+                Assert.Equal(1, result.Options[1].Count);
+            }
+        });
+    }
+
+    [Fact]
+    public async Task ChangingBackToCorrectReplacesTheScoreAndRetryingPreservesIt()
+    {
+        var setup = await CreateAsync(QuizKind.QuizChoice);
+        await Start(setup);
+        await Submit(setup, Answer(setup, QuizKind.QuizChoice));
+        factory.Clock.Advance(TimeSpan.FromSeconds(5));
+        await Submit(setup, new(1, setup.Question.Options![1].Id));
+        factory.Clock.Advance(TimeSpan.FromSeconds(5));
+        await Submit(setup, Answer(setup, QuizKind.QuizChoice));
+        var expected = ScoreCalculator.Calculate(QuizKind.QuizChoice, true, setup.Question.BasePoints, 10000, 30000);
+        factory.Clock.Advance(TimeSpan.FromSeconds(5));
+        await Submit(setup, Answer(setup, QuizKind.QuizChoice));
+        await InScope(async s =>
+        {
+            var db = s.GetRequiredService<AppDbContext>();
+            var answer = await db.QuizAnswers.SingleAsync(a => a.PlayerId == setup.Player.PlayerId, Ct);
+            Assert.Equal(expected, answer.Points);
+            Assert.Equal(10000, answer.ElapsedMs);
+            Assert.Equal(expected, (await db.Players.SingleAsync(p => p.Id == setup.Player.PlayerId, Ct)).TotalScore);
+        });
+    }
+
+    [Fact]
+    public async Task ConcurrentRevisionsKeepOneRowAndTheMatchingTotalScore()
+    {
+        var setup = await CreateAsync(QuizKind.QuizChoice);
+        await Start(setup);
+        await Submit(setup, Answer(setup, QuizKind.QuizChoice));
+        var errors = await Race(() => Submit(setup, new(1, setup.Question.Options![1].Id)),
+            () => Submit(setup, Answer(setup, QuizKind.QuizChoice)));
+        Assert.All(errors, error => Assert.Null(error));
+        await InScope(async s =>
+        {
+            var db = s.GetRequiredService<AppDbContext>();
+            var answer = await db.QuizAnswers.SingleAsync(a => a.PlayerId == setup.Player.PlayerId, Ct);
+            Assert.Equal(answer.Points, (await db.Players.SingleAsync(p => p.Id == setup.Player.PlayerId, Ct)).TotalScore);
         });
     }
 

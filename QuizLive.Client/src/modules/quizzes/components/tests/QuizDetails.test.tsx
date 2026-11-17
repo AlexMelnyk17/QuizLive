@@ -1,8 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, screen, within } from '@testing-library/react'
+import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { createGame } from '@modules/game/api/gamesApi'
+import { GameStatus } from '@modules/game/constants'
+import type { HostGameDto } from '@modules/game/types'
 import {
 	deleteQuiz,
 	fetchQuiz,
@@ -33,6 +36,21 @@ vi.mock('@modules/quizzes/api/quizzesApi', () => ({
 	setQuizArchived: vi.fn(),
 	deleteQuiz: vi.fn()
 }))
+
+vi.mock('@modules/game/api/gamesApi', () => ({ createGame: vi.fn() }))
+
+const createGameMock = vi.mocked(createGame)
+const createdGame: HostGameDto = {
+	id: 41,
+	code: '283646',
+	quizId: 7,
+	quizTitle: 'Math',
+	quizKind: 2,
+	status: GameStatus.Lobby,
+	createdAtUtc: '2026-11-17T10:00:00Z',
+	endedAtUtc: null,
+	players: []
+}
 
 const fetchQuizMock = vi.mocked(fetchQuiz)
 const setQuizArchivedMock = vi.mocked(setQuizArchived)
@@ -125,6 +143,7 @@ describe('QuizDetails', () => {
 		fetchQuizMock.mockReset()
 		setQuizArchivedMock.mockReset()
 		deleteQuizMock.mockReset()
+		createGameMock.mockReset()
 		navigateMock.mockReset()
 	})
 
@@ -301,14 +320,80 @@ describe('QuizDetails', () => {
 		expect(setQuizArchivedMock).toHaveBeenCalledWith(7, false)
 	})
 
-	it('disables starting games with a coming soon description', async () => {
-		fetchQuizMock.mockResolvedValue(mathQuiz)
-		renderQuizDetails()
-		const start = await screen.findByRole('button', {
-			name: QUIZ_DETAILS_COPY.startGame
+	describe('starting a game', () => {
+		it('creates a game for the quiz and opens the host page', async () => {
+			const user = userEvent.setup()
+			fetchQuizMock.mockResolvedValue(mathQuiz)
+			createGameMock.mockResolvedValue(createdGame)
+			renderQuizDetails()
+
+			await user.click(
+				await screen.findByRole('button', { name: QUIZ_DETAILS_COPY.startGame })
+			)
+
+			expect(createGameMock).toHaveBeenCalledWith(7)
+			await waitFor(() =>
+				expect(navigateMock).toHaveBeenCalledWith({
+					to: PATHS.hostGame,
+					params: { gameId: '41' }
+				})
+			)
 		})
-		expect(start).toBeDisabled()
-		expect(start).toHaveAccessibleDescription(QUIZ_DETAILS_COPY.comingSoon)
+
+		it('explains that questions are needed, and does not create a game, for a quiz without questions', async () => {
+			const user = userEvent.setup()
+			fetchQuizMock.mockResolvedValue({ ...mathQuiz, questions: [] })
+			renderQuizDetails()
+
+			const start = await screen.findByRole('button', {
+				name: QUIZ_DETAILS_COPY.startGame
+			})
+			await user.click(start)
+
+			expect(start).toBeDisabled()
+			expect(start).toHaveAccessibleDescription(
+				QUIZ_DETAILS_COPY.startNeedsQuestions
+			)
+			expect(createGameMock).not.toHaveBeenCalled()
+		})
+
+		it('shows the text of the server when the game cannot be created, and stays on the page', async () => {
+			const user = userEvent.setup()
+			fetchQuizMock.mockResolvedValue(mathQuiz)
+			createGameMock.mockRejectedValue(
+				new ApiError(409, { detail: 'The quiz already has an active game.' })
+			)
+			renderQuizDetails()
+
+			await user.click(
+				await screen.findByRole('button', { name: QUIZ_DETAILS_COPY.startGame })
+			)
+
+			expect(
+				await screen.findByText('The quiz already has an active game.')
+			).toBeInTheDocument()
+			expect(
+				screen.getByText(QUIZ_DETAILS_COPY.startError.title)
+			).toBeInTheDocument()
+			expect(navigateMock).not.toHaveBeenCalled()
+		})
+
+		it('shows not found when the quiz is gone', async () => {
+			const user = userEvent.setup()
+			fetchQuizMock.mockResolvedValue(mathQuiz)
+			createGameMock.mockRejectedValue(
+				new ApiError(404, { detail: 'Quiz was deleted.' })
+			)
+			renderQuizDetails()
+
+			await user.click(
+				await screen.findByRole('button', { name: QUIZ_DETAILS_COPY.startGame })
+			)
+
+			expect(
+				await screen.findByText(QUIZ_DETAILS_COPY.notFound.title)
+			).toBeInTheDocument()
+		})
 	})
 
 	it('disables deletion for archived quizzes and explains how to enable it', async () => {

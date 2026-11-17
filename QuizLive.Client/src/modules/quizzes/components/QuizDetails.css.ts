@@ -48,12 +48,6 @@ export const quizDetailsActions = style({
 	gap: vars.spacing[2]
 })
 
-export const startGameButton = style({
-	':disabled': {
-		backgroundColor: vars.colors.success,
-		color: vars.colors.onPrimary
-	}
-})
 export const actionWithHint = style({
 	display: 'flex',
 	flexDirection: 'column',
