@@ -1,4 +1,4 @@
-# Separate from the CI workflow (#37): it only builds coverage reports and uploads them as artifacts.
+# Coverage reports plus client lint and typecheck.
 # The jobs run the same npm scripts as a local run (see "Test coverage" in the README).
 name: Coverage
 
@@ -66,6 +66,14 @@ jobs:
 
       - name: Install client dependencies
         run: npm ci
+        working-directory: QuizLive.Client
+
+      - name: Lint
+        run: npm run lint
+        working-directory: QuizLive.Client
+
+      - name: Typecheck
+        run: npm run typecheck
         working-directory: QuizLive.Client
 
       - name: Run client tests with coverage
