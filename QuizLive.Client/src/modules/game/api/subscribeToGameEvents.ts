@@ -1,11 +1,18 @@
 import type { HubConnection } from '@microsoft/signalr'
+import { z } from 'zod'
 
 import { GAME_HUB_EVENTS } from '@modules/game/constants'
 import {
+	answerProgressDtoSchema,
 	closedQuestionNumberSchema,
 	gamePlayerDtoSchema,
 	hostQuestionDtoSchema,
-	playerQuestionDtoSchema
+	hostResultsDtoSchema,
+	leaderboardDtoSchema,
+	playerPresenceDtoSchema,
+	playerQuestionDtoSchema,
+	playerResultsDtoSchema,
+	questionTimeAddedDtoSchema
 } from '@modules/game/schemas'
 import type { GameEventHandlers } from '@modules/game/types'
 
@@ -17,6 +24,40 @@ export function subscribeToGameEvents(
 	handlers: GameEventHandlers
 ): () => void {
 	const subscriptions: [string, (payload: unknown) => void][] = [
+		[
+			GAME_HUB_EVENTS.answerProgress,
+			payload =>
+				handlers.onAnswerProgress?.(answerProgressDtoSchema.parse(payload))
+		],
+		[
+			GAME_HUB_EVENTS.hostResults,
+			payload => handlers.onHostResults?.(hostResultsDtoSchema.parse(payload))
+		],
+		[
+			GAME_HUB_EVENTS.playerResults,
+			payload =>
+				handlers.onPlayerResults?.(playerResultsDtoSchema.parse(payload))
+		],
+		[
+			GAME_HUB_EVENTS.leaderboard,
+			payload => handlers.onLeaderboard?.(leaderboardDtoSchema.parse(payload))
+		],
+		[
+			GAME_HUB_EVENTS.timeAdded,
+			payload =>
+				handlers.onTimeAdded?.(questionTimeAddedDtoSchema.parse(payload))
+		],
+		[
+			GAME_HUB_EVENTS.playerPresenceChanged,
+			payload =>
+				handlers.onPlayerPresenceChanged?.(
+					playerPresenceDtoSchema.parse(payload)
+				)
+		],
+		[
+			GAME_HUB_EVENTS.playerLeft,
+			payload => handlers.onPlayerLeft?.(z.number().parse(payload))
+		],
 		[
 			GAME_HUB_EVENTS.playerJoined,
 			payload => handlers.onPlayerJoined?.(gamePlayerDtoSchema.parse(payload))

@@ -19,11 +19,20 @@ export const GAME_HUB_METHODS = {
 	startGame: 'StartGame',
 	showResults: 'ShowResults',
 	nextQuestion: 'NextQuestion',
-	endGame: 'EndGame'
+	endGame: 'EndGame',
+	submitAnswer: 'SubmitAnswer',
+	addTime: 'AddTime'
 } as const
 
 // Names of the events the server sends to the client.
 export const GAME_HUB_EVENTS = {
+	answerProgress: 'AnswerProgress',
+	hostResults: 'HostResults',
+	playerResults: 'PlayerResults',
+	leaderboard: 'Leaderboard',
+	timeAdded: 'TimeAdded',
+	playerPresenceChanged: 'PlayerPresenceChanged',
+	playerLeft: 'PlayerLeft',
 	playerJoined: 'PlayerJoined',
 	questionShown: 'QuestionShown',
 	hostQuestionShown: 'HostQuestionShown',
