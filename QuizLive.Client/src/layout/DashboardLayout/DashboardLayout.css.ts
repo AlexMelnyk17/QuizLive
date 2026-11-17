@@ -58,5 +58,5 @@ export const dashboardMain = style({
 	flex: 1,
 	borderBottom: `1px solid ${vars.colors.border}`,
 	overflowWrap: 'anywhere',
-  minWidth: 0
+	minWidth: 0
 })
