@@ -34,14 +34,17 @@ export default defineConfig({
 		}
 	},
 	server: {
-    port: 53653,
-    strictPort: true,
+		port: 53653,
+		strictPort: true,
 		proxy: {
 			'/api': {
 				target: 'https://localhost:7118',
 				changeOrigin: true,
 				secure: false,
-			},
+				// SignalR connects to /api/hubs/game over WebSocket; without this the dev server
+				// cannot upgrade the connection and the client falls back to long polling.
+				ws: true
+			}
 		}
-  },
+	}
 })
