@@ -10,12 +10,10 @@ export const dashboardRoot = style({
 	boxSizing: 'border-box',
 	gap: vars.spacing[8]
 })
-
 export const dashboardHeader = style({
-	display: 'flex',
-	flexWrap: 'wrap',
+	display: 'grid',
+	gridTemplateColumns: 'minmax(0, 1fr) auto',
 	alignItems: 'center',
-	justifyContent: 'space-between',
 	gap: vars.spacing[4],
 	paddingBottom: vars.spacing[4],
 	borderBottom: `1px solid ${vars.colors.border}`
@@ -57,5 +55,8 @@ export const dashboardNavLink = style({
 })
 
 export const dashboardMain = style({
-	flex: 1
+	flex: 1,
+	borderBottom: `1px solid ${vars.colors.border}`,
+	overflowWrap: 'anywhere',
+  minWidth: 0
 })
