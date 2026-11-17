@@ -56,6 +56,12 @@ export const HOST_GAME_COPY = {
 	backToQuizzes: 'Back to my quizzes'
 } as const
 
+export const HOST_LOBBY_COPY = {
+	codeLabel: 'Game code',
+	joinHint: 'Players enter this code on the home page to join.',
+	start: 'Start game'
+} as const
+
 export const PLAYER_PAGE_COPY = {
 	connecting: 'Connecting to the game…',
 	joined: (nickname: string) => `You joined as ${nickname}`,

@@ -4,7 +4,11 @@ import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { HostGamePage } from '@modules/game/components/HostGamePage'
-import { GameStatus, HOST_GAME_COPY } from '@modules/game/constants'
+import {
+	GameStatus,
+	HOST_GAME_COPY,
+	HOST_LOBBY_COPY
+} from '@modules/game/constants'
 import { useHostGame } from '@modules/game/hooks/useHostGame'
 import type { HostGameResult } from '@modules/game/types'
 
@@ -99,6 +103,37 @@ describe('the host page', () => {
 		expect(
 			screen.queryByText(HOST_GAME_COPY.connecting)
 		).not.toBeInTheDocument()
+	})
+
+	it('shows the lobby with the code and the players, and starts the game from it', async () => {
+		const startGame = vi.fn().mockResolvedValue(null)
+		hostGameMock.mockReturnValue(
+			hostGame({
+				game: {
+					id: 7,
+					code: '283646',
+					quizId: 3,
+					quizTitle: 'STEM basics',
+					quizKind: 0
+				},
+				status: GameStatus.Lobby,
+				players: [
+					{ id: 1, nickname: 'Ann', joinedAtUtc: '2026-11-17T10:00:00Z' }
+				],
+				connectionState: 'connected',
+				commands: { ...hostGame().commands, startGame }
+			})
+		)
+		renderWithTheme(<HostGamePage />)
+
+		expect(screen.getByText('283646')).toBeInTheDocument()
+		expect(screen.getByText('Ann')).toBeInTheDocument()
+
+		await userEvent
+			.setup()
+			.click(screen.getByRole('button', { name: HOST_LOBBY_COPY.start }))
+
+		expect(startGame).toHaveBeenCalledOnce()
 	})
 
 	it('shows the text of the server when the host cannot be connected, and lets the host go back', async () => {
