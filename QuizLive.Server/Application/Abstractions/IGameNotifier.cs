@@ -9,6 +9,7 @@ namespace QuizLive.Server.Application.Abstractions
         // The players get the question without IsCorrect, the host gets the author version.
         Task QuestionShownAsync(int gameId, QuestionViews views);
         Task QuestionClosedAsync(int gameId, int number);
+        Task QuestionTimeExtendedAsync(int gameId, QuestionTimingDto timing);
         Task GameEndedAsync(int gameId);
     }
 }

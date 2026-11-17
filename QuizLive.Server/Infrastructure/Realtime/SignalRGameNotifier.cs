@@ -23,6 +23,9 @@ namespace QuizLive.Server.Infrastructure.Realtime
         public Task QuestionClosedAsync(int gameId, int number) =>
             SendAsync(gameId, nameof(IGameClient.QuestionClosed), clients => Everyone(clients, gameId).QuestionClosed(number));
 
+        public Task QuestionTimeExtendedAsync(int gameId, QuestionTimingDto timing) =>
+            SendAsync(gameId, nameof(IGameClient.QuestionTimeExtended), clients => Everyone(clients, gameId).QuestionTimeExtended(timing));
+
         public Task GameEndedAsync(int gameId) =>
             SendAsync(gameId, nameof(IGameClient.GameEnded), clients => Everyone(clients, gameId).GameEnded());
 

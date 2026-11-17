@@ -29,6 +29,12 @@ namespace QuizLive.Server.Tests.Support
             return Task.CompletedTask;
         }
 
+        public Task QuestionTimeExtendedAsync(int gameId, QuestionTimingDto timing)
+        {
+            _events.Enqueue(new GameEvent(nameof(IGameClient.QuestionTimeExtended), gameId, Timing: timing));
+            return Task.CompletedTask;
+        }
+
         public Task GameEndedAsync(int gameId)
         {
             _events.Enqueue(new GameEvent(nameof(IGameClient.GameEnded), gameId));
@@ -41,5 +47,6 @@ namespace QuizLive.Server.Tests.Support
         int GameId,
         GamePlayerDto? Player = null,
         QuestionViews? Views = null,
-        int? Number = null);
+        int? Number = null,
+        QuestionTimingDto? Timing = null);
 }

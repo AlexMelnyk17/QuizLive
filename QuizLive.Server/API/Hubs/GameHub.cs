@@ -93,7 +93,8 @@ namespace QuizLive.Server.API.Hubs
 
         // The host's commands. A command has no game id: it always acts on the game this connection joined, so
         // the client cannot aim it at another game. The result reaches everyone as an event (QuestionShown,
-        // QuestionClosed, GameEnded), including the host's other tabs, so the commands return nothing.
+        // QuestionClosed, QuestionTimeExtended, GameEnded), including the host's other tabs, so the commands
+        // return nothing.
         [Authorize]
         public Task StartGame()
         {
@@ -120,6 +121,13 @@ namespace QuizLive.Server.API.Hubs
         {
             var (gameId, userId) = HostCommandContext();
             return gameFlow.EndAsync(gameId, userId);
+        }
+
+        [Authorize]
+        public Task AddTime(int seconds)
+        {
+            var (gameId, userId) = HostCommandContext();
+            return gameFlow.AddTimeAsync(gameId, userId, seconds);
         }
 
         // Only a connection that joined as the host passes: the role is set by ConnectAsHost after its access check.

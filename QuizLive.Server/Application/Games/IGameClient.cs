@@ -15,6 +15,9 @@ namespace QuizLive.Server.Application.Games
         // The question with this number was closed: the game is now showing its results.
         Task QuestionClosed(int number);
 
+        // The open question now ends later. Clients restart the countdown from this server clock.
+        Task QuestionTimeExtended(QuestionTimingDto timing);
+
         Task GameEnded();
     }
 }

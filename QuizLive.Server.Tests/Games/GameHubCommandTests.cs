@@ -109,6 +109,24 @@ namespace QuizLive.Server.Tests.Games
             Assert.Equal(GameStatus.Lobby, (await GetGameAsync(setup)).Status);
         }
 
+        [Fact]
+        public async Task ALoggedInUserWhoJoinedAsAPlayer_CannotAddTime()
+        {
+            var setup = await CreateGameAsync(questionCount: 1);
+
+            await using var host = await ConnectHostAsync(setup);
+            await host.InvokeAsync("StartGame", Ct);
+
+            await using var connection = factory.CreateHubConnection(setup.Host.BearerToken());
+            await connection.StartAsync(Ct);
+            await connection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", setup.PlayerToken, Ct);
+
+            var error = await Assert.ThrowsAsync<HubException>(() => connection.InvokeAsync("AddTime", 30, Ct));
+
+            Assert.Contains(GameMessages.HostOnly, error.Message);
+            Assert.Equal(GameStatus.Question, (await GetGameAsync(setup)).Status);
+        }
+
         [Theory]
         [InlineData("StartGame")]
         [InlineData("EndGame")]
