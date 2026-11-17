@@ -3,6 +3,11 @@ import { z } from 'zod'
 import { GameStatus } from '@modules/game/constants'
 import { questionDtoSchema, quizKindSchema } from '@modules/quizzes/schemas'
 
+// What is kept in sessionStorage. Storage is an untrusted boundary, so it is parsed, not cast.
+export const playerTokenStorageSchema = z.object({
+	playerToken: z.string().min(1).nullable()
+})
+
 export const gameStatusSchema = z.union([
 	z.literal(GameStatus.Lobby),
 	z.literal(GameStatus.Question),

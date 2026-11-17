@@ -20,6 +20,8 @@ export const GAME_HUB_EVENTS = {
 	gameEnded: 'GameEnded'
 } as const
 
+export const PLAYER_TOKEN_STORAGE_KEY = 'quizlive-player-token'
+
 // The server sends enums as numbers.
 export const GameStatus = {
 	Lobby: 0,
