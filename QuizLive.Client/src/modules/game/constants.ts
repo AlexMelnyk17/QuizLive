@@ -3,6 +3,11 @@ import type { GameState } from '@modules/game/types'
 // The path is relative to ENV.VITE_API_BASE_URL: with "/api" it is /api/hubs/game.
 export const GAME_HUB_PATH = '/hubs/game'
 
+// REST endpoints of the host side of a game, relative to ENV.VITE_API_BASE_URL.
+export const GAMES_API = {
+	create: '/games'
+} as const
+
 // SignalR puts the text of a HubException after this marker in the message of a failed call:
 // "An unexpected error occurred invoking 'X' on the server. HubException: <readable text>".
 export const HUB_EXCEPTION_MARKER = 'HubException: '
