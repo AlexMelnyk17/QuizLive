@@ -3,11 +3,12 @@ import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { PATHS } from '@config/routes'
-
 import { DASHBOARD_LAYOUT_COPY } from '@layout/constants'
+
 import { DashboardPage } from '@modules/dashboard/components/DashboardPage'
 import type { QuizListProps } from '@modules/quizzes/components/QuizList'
+
+import { PATHS } from '@config/routes'
 
 import { renderWithTheme } from '@src/test/testUtils'
 
@@ -48,7 +49,7 @@ describe('DashboardPage', () => {
 		cleanup()
 	})
 
-	it('shows the quiz list inside the host layout', () => {
+	it('shows the quiz list inside the host layout', async () => {
 		renderWithTheme(<DashboardPage />)
 
 		expect(
@@ -58,25 +59,33 @@ describe('DashboardPage', () => {
 			screen.getByRole('button', { name: 'Open quiz 7' })
 		).toBeInTheDocument()
 		expect(
-			screen.getByRole('button', { name: DASHBOARD_LAYOUT_COPY.createQuiz })
+			screen.getByRole('button', { name: DASHBOARD_LAYOUT_COPY.openMenu })
 		).toBeEnabled()
+		await userEvent
+			.setup()
+			.click(
+				screen.getByRole('button', { name: DASHBOARD_LAYOUT_COPY.openMenu })
+			)
+		expect(
+			screen.queryByRole('link', { name: DASHBOARD_LAYOUT_COPY.createQuiz })
+		).not.toBeInTheDocument()
 		expect(screen.getByRole('link', { name: /Statistics/i })).toHaveAttribute(
 			'href',
 			PATHS.statistics
 		)
 	})
 
-	it.each([
-		['the header button', DASHBOARD_LAYOUT_COPY.createQuiz],
-		['the empty list', 'Create from the empty list']
-	])('opens the creation page from %s', async (_, buttonName) => {
-		const user = userEvent.setup()
-		renderWithTheme(<DashboardPage />)
+	it.each([['the empty list', 'Create from the empty list']])(
+		'opens the creation page from %s',
+		async (_, buttonName) => {
+			const user = userEvent.setup()
+			renderWithTheme(<DashboardPage />)
 
-		await user.click(screen.getByRole('button', { name: buttonName }))
+			await user.click(screen.getByRole('button', { name: buttonName }))
 
-		expect(navigateMock).toHaveBeenCalledWith({ to: PATHS.quizCreate })
-	})
+			expect(navigateMock).toHaveBeenCalledWith({ to: PATHS.quizCreate })
+		}
+	)
 
 	it('opens the details of a quiz', async () => {
 		const user = userEvent.setup()

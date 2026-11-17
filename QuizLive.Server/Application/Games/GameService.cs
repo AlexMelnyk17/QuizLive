@@ -8,7 +8,11 @@ using QuizLive.Server.Infrastructure.Data;
 
 namespace QuizLive.Server.Application.Games
 {
-    public class GameService(AppDbContext db, ICurrentUser currentUser, IGameNotifier notifier) : IGameService
+    public class GameService(
+        AppDbContext db,
+        ICurrentUser currentUser,
+        IGameNotifier notifier,
+        IGameFlowService gameFlow) : IGameService
     {
         private const int MaxCodeAttempts = 5;
         private const string ActiveGameExists = "The quiz already has an active game.";
@@ -163,9 +167,11 @@ namespace QuizLive.Server.Application.Games
                     p.GameSession.Players
                         .OrderBy(x => x.JoinedAtUtc)
                         .Select(x => new GamePlayerDto(x.Id, x.Nickname, x.JoinedAtUtc))
-                        .ToList()))
+                        .ToList(),
+                    null))
                 .FirstOrDefaultAsync();
 
+            // The running question is not part of this query: it lives in three tables, and the hub adds it.
             return state ?? throw PlayerNotFound();
         }
 
@@ -189,29 +195,15 @@ namespace QuizLive.Server.Application.Games
             }
         }
 
-        private static NotFoundException GameNotFound(int gameId) => new($"Game {gameId} was not found.");
+        private static NotFoundException GameNotFound(int gameId) => new(GameMessages.NotFound(gameId));
 
         private static NotFoundException PlayerNotFound() => new("Player was not found.");
 
         public async Task EndAsync(int id)
         {
-            var userId = currentUser.UserId;
-
-            var game = await db.GameSessionRecords.FirstOrDefaultAsync(g => g.Id == id && g.HostUserId == userId)
-                ?? throw GameNotFound(id);
-
-            // Ending an already ended game is a no-op.
-            if (game.EndedAtUtc is not null)
-            {
-                return;
-            }
-
-            // Setting EndedAtUtc frees the code for new games.
-            game.Status = GameStatus.Finished;
-            game.EndedAtUtc = DateTime.UtcNow;
-
-            await db.SaveChangesAsync();
-            await notifier.GameEndedAsync(id);
+            // The same implementation as the host's EndGame command; it also sends GameEnded.
+            // Ending an already ended game is a no-op, and then nothing is sent.
+            await gameFlow.EndAsync(id, currentUser.UserId);
         }
 
         public async Task<GameLookupDto> GetByCodeAsync(string code)
@@ -249,7 +241,7 @@ namespace QuizLive.Server.Application.Games
 
             if (game.Status != GameStatus.Lobby)
             {
-                throw new ConflictException("The game has already started.");
+                throw new ConflictException(GameMessages.AlreadyStarted);
             }
 
             // Compared in memory: SQLite lower() only handles ASCII, so it would miss Cyrillic nicknames.

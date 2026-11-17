@@ -1,3 +1,4 @@
+import { QUIZZES_API } from '@modules/quizzes/constants'
 import {
 	quizDetailsDtoSchema,
 	quizDtoListSchema,
@@ -9,7 +10,6 @@ import type {
 	QuizDto,
 	UpdateQuizRequest
 } from '@modules/quizzes/types'
-import { QUIZZES_API } from '@modules/quizzes/constants'
 
 import { apiRequest } from '@api/client'
 

@@ -1,7 +1,6 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
-import type { CSSProperties } from 'react'
-
 import cn from 'clsx'
+import type { CSSProperties } from 'react'
 
 import { skeleton } from '@components/ui/Skeleton/Skeleton.css'
 

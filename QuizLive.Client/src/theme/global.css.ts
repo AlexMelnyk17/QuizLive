@@ -3,11 +3,11 @@ import { globalStyle } from '@vanilla-extract/css'
 import { vars } from '@theme/contract.css'
 
 globalStyle('*, *::before, *::after', {
-	boxSizing: 'border-box',
+	boxSizing: 'border-box'
 })
 
 globalStyle('html', {
-	scrollbarGutter: 'stable',
+	scrollbarGutter: 'stable'
 })
 
 globalStyle('body', {
@@ -20,7 +20,7 @@ globalStyle('body', {
 	fontSynthesis: 'none',
 	textRendering: 'optimizeLegibility',
 	WebkitFontSmoothing: 'antialiased',
-	MozOsxFontSmoothing: 'grayscale',
+	MozOsxFontSmoothing: 'grayscale'
 })
 
 globalStyle('#root', {
@@ -28,23 +28,26 @@ globalStyle('#root', {
 	width: '100%',
 	maxWidth: '1126px',
 	margin: '0 auto',
-	boxSizing: 'border-box',
+	boxSizing: 'border-box'
 })
 
 globalStyle('button, input, textarea, select', {
-	font: 'inherit',
+	font: 'inherit'
 })
 
 globalStyle(':focus-visible', {
 	outline: `2px solid ${vars.colors.focusRing}`,
-	outlineOffset: '2px',
+	outlineOffset: '2px'
 })
 
-globalStyle('input:focus-visible, textarea:focus-visible, select:focus-visible', {
-	outline: 'none',
-})
+globalStyle(
+	'input:focus-visible, textarea:focus-visible, select:focus-visible',
+	{
+		outline: 'none'
+	}
+)
 
 globalStyle('select option', {
 	color: vars.colors.textHeading,
-	backgroundColor: vars.colors.surfaceRaised,
+	backgroundColor: vars.colors.surfaceRaised
 })

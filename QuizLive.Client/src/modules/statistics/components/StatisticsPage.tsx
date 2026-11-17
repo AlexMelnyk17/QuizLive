@@ -1,25 +1,26 @@
+import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
+
 import { Text } from '@components/ui/Text'
 
-import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
-import { GamesByKindChart } from '@modules/statistics/components/charts/GamesByKindChart'
-import { GamesOverTimeChart } from '@modules/statistics/components/charts/GamesOverTimeChart'
-import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
-import { StatsLoadError } from '@modules/statistics/components/StatsLoadError'
-import { StatsPageSkeleton } from '@modules/statistics/components/StatsPageSkeleton'
+import { HostStatValue } from '@modules/statistics/components/HostStatValue'
 import {
 	statsChartGrid,
 	statsEmptyBanner,
 	statsKpiGrid,
-	statsPage,
+	statsPage
 } from '@modules/statistics/components/StatisticsPage.css'
+import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
+import { StatsLoadError } from '@modules/statistics/components/StatsLoadError'
+import { StatsPageSkeleton } from '@modules/statistics/components/StatsPageSkeleton'
+import { GamesByKindChart } from '@modules/statistics/components/charts/GamesByKindChart'
+import { GamesOverTimeChart } from '@modules/statistics/components/charts/GamesOverTimeChart'
 import {
+	HOST_STAT_FORMAT,
 	STATISTICS_KPI_LABELS,
-	STATISTICS_PAGE_COPY,
+	STATISTICS_PAGE_COPY
 } from '@modules/statistics/constants'
 import { useHostStats } from '@modules/statistics/hooks/useHostStats'
 import type { HostStats } from '@modules/statistics/types'
-import { formatStatDecimal } from '@modules/statistics/utils/formatStatDecimal'
-import { formatStatInteger } from '@modules/statistics/utils/formatStatInteger'
 import { isHostStatsEmpty } from '@modules/statistics/utils/isHostStatsEmpty'
 
 export function StatisticsPage() {
@@ -59,19 +60,39 @@ function renderReady(data: HostStats) {
 			<div className={statsKpiGrid}>
 				<StatsKpiCard
 					label={STATISTICS_KPI_LABELS.quizzes}
-					value={formatStatInteger(data.quizzes.total)}
+					value={
+						<HostStatValue
+							value={data.quizzes.total}
+							format={HOST_STAT_FORMAT.integer}
+						/>
+					}
 				/>
 				<StatsKpiCard
 					label={STATISTICS_KPI_LABELS.games}
-					value={formatStatInteger(data.games.total)}
+					value={
+						<HostStatValue
+							value={data.games.total}
+							format={HOST_STAT_FORMAT.integer}
+						/>
+					}
 				/>
 				<StatsKpiCard
 					label={STATISTICS_KPI_LABELS.playerJoins}
-					value={formatStatInteger(data.players.totalJoins)}
+					value={
+						<HostStatValue
+							value={data.players.totalJoins}
+							format={HOST_STAT_FORMAT.integer}
+						/>
+					}
 				/>
 				<StatsKpiCard
 					label={STATISTICS_KPI_LABELS.averagePlayersPerGame}
-					value={formatStatDecimal(data.players.averagePerGame)}
+					value={
+						<HostStatValue
+							value={data.players.averagePerGame}
+							format={HOST_STAT_FORMAT.decimal}
+						/>
+					}
 				/>
 			</div>
 			<div className={statsChartGrid}>
@@ -89,7 +110,7 @@ function renderEmptyBanner(data: HostStats) {
 
 	return (
 		<div className={statsEmptyBanner}>
-			<Text tone="muted">{STATISTICS_PAGE_COPY.noActivity}</Text>
+			<Text tone='muted'>{STATISTICS_PAGE_COPY.noActivity}</Text>
 		</div>
 	)
 }

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { ApiError } from '@api/apiError'
 import { getLoginRootErrorMessage } from '@modules/auth/utils/loginErrorMessage'
+
+import { ApiError } from '@api/apiError'
 
 describe('getLoginRootErrorMessage', () => {
 	it('returns a generic message for non-ApiError', () => {
@@ -13,7 +14,7 @@ describe('getLoginRootErrorMessage', () => {
 	it('appends remaining attempts on 401', () => {
 		const error = new ApiError(401, {
 			detail: 'Invalid user name or password.',
-			remainingAttempts: 2,
+			remainingAttempts: 2
 		})
 		expect(getLoginRootErrorMessage(error)).toBe(
 			'Invalid user name or password. Remaining attempts: 2.'

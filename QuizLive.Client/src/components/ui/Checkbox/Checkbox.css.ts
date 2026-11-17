@@ -8,7 +8,7 @@ export const checkboxRoot = style({
 	alignItems: 'center',
 	gap: vars.spacing[2],
 	cursor: 'pointer',
-	userSelect: 'none',
+	userSelect: 'none'
 })
 
 export const checkboxControl = recipe({
@@ -21,36 +21,42 @@ export const checkboxControl = recipe({
 		display: 'inline-flex',
 		alignItems: 'center',
 		justifyContent: 'center',
-		transition: `border-color ${vars.durations.fast}, background-color ${vars.durations.fast}`,
+		selectors: {
+			[`${checkboxRoot}:focus-within &`]: {
+				outline: `2px solid ${vars.colors.focusRing}`,
+				outlineOffset: '2px'
+			}
+		},
+		transition: `border-color ${vars.durations.fast}, background-color ${vars.durations.fast}`
 	},
 	variants: {
 		checked: {
 			true: {
 				backgroundColor: vars.colors.primary,
 				borderColor: vars.colors.primary,
-				color: vars.colors.onPrimary,
+				color: vars.colors.onPrimary
 			},
-			false: {},
+			false: {}
 		},
 		disabled: {
 			true: { opacity: 0.5, cursor: 'not-allowed' },
-			false: {},
-		},
+			false: {}
+		}
 	},
 	defaultVariants: {
 		checked: false,
-		disabled: false,
-	},
+		disabled: false
+	}
 })
 
 export const checkboxInput = style({
 	position: 'absolute',
 	opacity: 0,
 	width: 0,
-	height: 0,
+	height: 0
 })
 
 export const checkboxLabel = style({
 	color: vars.colors.textHeading,
-	fontSize: vars.fontSizes.sm,
+	fontSize: vars.fontSizes.sm
 })

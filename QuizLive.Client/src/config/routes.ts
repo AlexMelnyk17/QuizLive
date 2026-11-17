@@ -16,5 +16,5 @@ export const pathTo = {
 	quizDetails: (quizId: number) => `/quizzes/${quizId}`,
 	quizStats: (quizId: number) => `/quizzes/${quizId}/stats`,
 	gameStats: (quizId: number, gameId: number) =>
-		`/quizzes/${quizId}/games/${gameId}/stats`,
+		`/quizzes/${quizId}/games/${gameId}/stats`
 }

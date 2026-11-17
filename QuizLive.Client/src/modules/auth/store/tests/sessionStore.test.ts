@@ -5,13 +5,13 @@ import { authResponseSchema } from '@modules/auth/schemas'
 import {
 	readSession,
 	signOut,
-	useAuthStore,
+	useAuthStore
 } from '@modules/auth/store/sessionStore'
 
 const validAuth = {
 	token: 'jwt-token',
 	expiresAtUtc: new Date(Date.now() + 60_000).toISOString(),
-	user: { id: '1', userName: 'quizzer' },
+	user: { id: '1', userName: 'quizzer' }
 }
 
 describe('sessionStore', () => {
@@ -29,7 +29,7 @@ describe('sessionStore', () => {
 	it('clears expired session on read', () => {
 		useAuthStore.getState().setSessionFromAuthResponse({
 			...validAuth,
-			expiresAtUtc: new Date(Date.now() - 1_000).toISOString(),
+			expiresAtUtc: new Date(Date.now() - 1_000).toISOString()
 		})
 		expect(readSession()).toBeNull()
 	})

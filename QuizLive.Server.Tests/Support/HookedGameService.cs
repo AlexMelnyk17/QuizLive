@@ -9,7 +9,15 @@ namespace QuizLive.Server.Tests.Support
     // which is the window in which a player can join and be missing from both the snapshot and the event.
     public class GameServiceHooks
     {
+        public Func<Task>? BeforeStateRead { get; set; }
         public Func<Task>? AfterStateRead { get; set; }
+
+        internal async Task RunBeforeStateReadAsync()
+        {
+            var hook = BeforeStateRead;
+            BeforeStateRead = null;
+            if (hook is not null) await hook();
+        }
 
         internal async Task RunAfterStateReadAsync()
         {
@@ -35,6 +43,7 @@ namespace QuizLive.Server.Tests.Support
 
         public async Task<GameDto> GetActiveHostGameAsync(int gameId, string hostUserId)
         {
+            await hooks.RunBeforeStateReadAsync();
             var game = await inner.GetActiveHostGameAsync(gameId, hostUserId);
             await hooks.RunAfterStateReadAsync();
             return game;
@@ -42,6 +51,7 @@ namespace QuizLive.Server.Tests.Support
 
         public async Task<PlayerGameStateDto> GetPlayerStateAsync(string playerToken)
         {
+            await hooks.RunBeforeStateReadAsync();
             var state = await inner.GetPlayerStateAsync(playerToken);
             await hooks.RunAfterStateReadAsync();
             return state;

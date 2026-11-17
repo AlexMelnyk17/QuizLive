@@ -1,13 +1,12 @@
-import type { ComponentPropsWithoutRef } from 'react'
-
 import cn from 'clsx'
+import type { ComponentPropsWithoutRef } from 'react'
 
 import {
 	switchInput,
 	switchLabel,
 	switchRoot,
 	switchThumb,
-	switchTrack,
+	switchTrack
 } from '@components/ui/Switch/Switch.css'
 
 export type SwitchProps = Omit<
@@ -29,8 +28,8 @@ export function Switch({
 		<label className={cn(switchRoot, className)} htmlFor={id}>
 			<input
 				id={id}
-				type="checkbox"
-				role="switch"
+				type='checkbox'
+				role='switch'
 				className={switchInput}
 				checked={checked}
 				disabled={disabled}
@@ -39,7 +38,7 @@ export function Switch({
 			<span
 				className={switchTrack({
 					checked: Boolean(checked),
-					disabled: Boolean(disabled),
+					disabled: Boolean(disabled)
 				})}
 				aria-hidden
 			>

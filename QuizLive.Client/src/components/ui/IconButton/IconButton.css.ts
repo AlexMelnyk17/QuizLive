@@ -6,15 +6,15 @@ export const iconButtonSize = recipe({
 		size: {
 			sm: { width: '32px', minHeight: '32px', padding: 0 },
 			md: { width: '40px', minHeight: '40px', padding: 0 },
-			lg: { width: '48px', minHeight: '48px', padding: 0 },
-		},
+			lg: { width: '48px', minHeight: '48px', padding: 0 }
+		}
 	},
 	defaultVariants: {
-		size: 'md',
-	},
+		size: 'md'
+	}
 })
 
 export const iconButtonBase = style({
 	aspectRatio: '1',
-	flexShrink: 0,
+	flexShrink: 0
 })

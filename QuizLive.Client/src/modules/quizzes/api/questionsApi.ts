@@ -1,9 +1,9 @@
+import { QUIZZES_API } from '@modules/quizzes/constants'
 import {
 	questionDtoListSchema,
 	questionDtoSchema
 } from '@modules/quizzes/schemas'
 import type { QuestionDto, QuestionRequest } from '@modules/quizzes/types'
-import { QUIZZES_API } from '@modules/quizzes/constants'
 
 import { apiRequest } from '@api/client'
 

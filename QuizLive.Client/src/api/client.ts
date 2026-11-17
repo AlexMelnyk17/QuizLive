@@ -49,7 +49,7 @@ export async function apiRequest<T>(
 	const response = await fetch(buildUrl(path), {
 		method,
 		headers,
-		body: body !== undefined ? JSON.stringify(body) : undefined,
+		body: body !== undefined ? JSON.stringify(body) : undefined
 	})
 
 	if (response.ok) {
@@ -63,7 +63,11 @@ export async function apiRequest<T>(
 		return JSON.parse(text) as T
 	}
 
-	if (response.status === HTTP_STATUS.UNAUTHORIZED && sentBearer && clientConfig) {
+	if (
+		response.status === HTTP_STATUS.UNAUTHORIZED &&
+		sentBearer &&
+		clientConfig
+	) {
 		clientConfig.onUnauthorized()
 	}
 

@@ -1,8 +1,11 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
-
 import cn from 'clsx'
 
-import { avatarImage, avatarRoot, statusDot } from '@components/ui/Avatar/Avatar.css'
+import {
+	avatarImage,
+	avatarRoot,
+	statusDot
+} from '@components/ui/Avatar/Avatar.css'
 
 type AvatarVariants = NonNullable<RecipeVariants<typeof avatarImage>>
 type StatusVariants = NonNullable<RecipeVariants<typeof statusDot>>
@@ -29,14 +32,19 @@ export function Avatar({
 	src,
 	alt,
 	name,
-	status,
+	status
 }: AvatarProps) {
 	const initials = getInitials(name ?? alt)
 	return (
 		<span className={cn(avatarRoot, className)}>
 			<span className={avatarImage({ size })}>
 				{src ? (
-					<img src={src} alt={alt ?? name ?? 'Avatar'} width="100%" height="100%" />
+					<img
+						src={src}
+						alt={alt ?? name ?? 'Avatar'}
+						width='100%'
+						height='100%'
+					/>
 				) : (
 					initials
 				)}

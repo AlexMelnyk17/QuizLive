@@ -13,48 +13,54 @@ export const inputWrapper = recipe({
 		backgroundColor: vars.colors.surface,
 		color: vars.colors.textHeading,
 		transition: `border-color ${vars.durations.normal}, box-shadow ${vars.durations.normal}`,
+		selectors: {
+			'&:has(input:disabled)': {
+				backgroundColor: vars.colors.disabledBg,
+				borderColor: vars.colors.disabledBorder
+			}
+		},
 		':focus-within': {
 			borderColor: vars.colors.primaryBorder,
-			boxShadow: `0 0 0 3px ${vars.colors.primaryMuted}`,
-		},
+			boxShadow: `0 0 0 3px ${vars.colors.primaryMuted}`
+		}
 	},
 	variants: {
 		size: {
 			sm: {
 				minHeight: '32px',
 				paddingInline: vars.spacing[3],
-				fontSize: vars.fontSizes.sm,
+				fontSize: vars.fontSizes.sm
 			},
 			md: {
 				minHeight: '40px',
 				paddingInline: vars.spacing[3],
-				fontSize: vars.fontSizes.md,
+				fontSize: vars.fontSizes.md
 			},
 			lg: {
 				minHeight: '48px',
 				paddingInline: vars.spacing[4],
-				fontSize: vars.fontSizes.lg,
-			},
+				fontSize: vars.fontSizes.lg
+			}
 		},
 		invalid: {
 			true: {
 				borderColor: vars.colors.danger,
 				':focus-within': {
-					boxShadow: `0 0 0 3px ${vars.colors.dangerMuted}`,
-				},
+					boxShadow: `0 0 0 3px ${vars.colors.dangerMuted}`
+				}
 			},
-			false: {},
+			false: {}
 		},
 		fullWidth: {
 			true: { width: '100%' },
-			false: {},
-		},
+			false: {}
+		}
 	},
 	defaultVariants: {
 		size: 'md',
 		invalid: false,
-		fullWidth: false,
-	},
+		fullWidth: false
+	}
 })
 
 export const inputField = style({
@@ -66,23 +72,24 @@ export const inputField = style({
 	padding: 0,
 	outline: 'none',
 	boxShadow: 'none',
+	':disabled': { color: vars.colors.disabledText, cursor: 'not-allowed' },
 	selectors: {
 		'&:focus': {
 			outline: 'none',
-			boxShadow: 'none',
+			boxShadow: 'none'
 		},
 		'&:focus-visible': {
 			outline: 'none',
-			boxShadow: 'none',
-		},
+			boxShadow: 'none'
+		}
 	},
 	'::placeholder': {
-		color: vars.colors.textMuted,
-	},
+		color: vars.colors.textMuted
+	}
 })
 
 export const inputIcon = style({
 	display: 'inline-flex',
 	color: vars.colors.textMuted,
-	flexShrink: 0,
+	flexShrink: 0
 })

@@ -4,6 +4,6 @@ export function formatDate(isoDate: string): string {
 	return parsed.toLocaleDateString(undefined, {
 		month: 'short',
 		day: 'numeric',
-		timeZone: 'UTC',
+		timeZone: 'UTC'
 	})
 }

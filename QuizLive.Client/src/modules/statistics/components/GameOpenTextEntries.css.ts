@@ -7,5 +7,5 @@ export const openTextEntriesList = style({
 	flexDirection: 'column',
 	gap: vars.spacing[2],
 	marginTop: vars.spacing[3],
-	paddingLeft: vars.spacing[4],
+	paddingLeft: vars.spacing[4]
 })

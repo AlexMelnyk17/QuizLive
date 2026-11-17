@@ -8,23 +8,23 @@ export const heading = recipe({
 		fontFamily: vars.fonts.heading,
 		fontWeight: vars.fontWeights.medium,
 		color: vars.colors.textHeading,
-		lineHeight: vars.lineHeights.tight,
+		lineHeight: vars.lineHeights.tight
 	},
 	variants: {
 		level: {
 			1: { fontSize: vars.fontSizes['4xl'], letterSpacing: '-0.03em' },
 			2: { fontSize: vars.fontSizes['3xl'], letterSpacing: '-0.02em' },
 			3: { fontSize: vars.fontSizes['2xl'] },
-			4: { fontSize: vars.fontSizes.xl },
+			4: { fontSize: vars.fontSizes.xl }
 		},
 		align: {
 			left: { textAlign: 'left' },
 			center: { textAlign: 'center' },
-			right: { textAlign: 'right' },
-		},
+			right: { textAlign: 'right' }
+		}
 	},
 	defaultVariants: {
 		level: 2,
-		align: 'left',
-	},
+		align: 'left'
+	}
 })

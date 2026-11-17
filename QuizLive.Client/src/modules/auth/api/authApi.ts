@@ -1,21 +1,18 @@
-import { apiRequest } from '@api/client'
-
-import {
-	authResponseSchema,
-	userDtoSchema,
-} from '@modules/auth/schemas'
+import { authResponseSchema, userDtoSchema } from '@modules/auth/schemas'
 import type {
 	AuthResponse,
 	LoginRequest,
 	RegisterRequest,
-	UserDto,
+	UserDto
 } from '@modules/auth/types'
+
+import { apiRequest } from '@api/client'
 
 export async function loginApi(request: LoginRequest): Promise<AuthResponse> {
 	const data = await apiRequest<AuthResponse>('/auth/login', {
 		method: 'POST',
 		body: request,
-		skipAuth: true,
+		skipAuth: true
 	})
 	return authResponseSchema.parse(data)
 }
@@ -26,7 +23,7 @@ export async function registerApi(
 	const data = await apiRequest<AuthResponse>('/auth/register', {
 		method: 'POST',
 		body: request,
-		skipAuth: true,
+		skipAuth: true
 	})
 	return authResponseSchema.parse(data)
 }

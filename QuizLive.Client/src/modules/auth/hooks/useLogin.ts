@@ -6,13 +6,13 @@ import type { LoginRequest } from '@modules/auth/types'
 
 export function useLogin() {
 	const setSessionFromAuthResponse = useAuthStore(
-		(state) => state.setSessionFromAuthResponse
+		state => state.setSessionFromAuthResponse
 	)
 
 	return useMutation({
 		mutationFn: async (request: LoginRequest) => {
 			const auth = await loginApi(request)
 			return setSessionFromAuthResponse(auth)
-		},
+		}
 	})
 }

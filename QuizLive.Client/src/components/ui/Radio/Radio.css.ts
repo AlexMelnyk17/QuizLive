@@ -8,7 +8,7 @@ export const radioRoot = style({
 	alignItems: 'center',
 	gap: vars.spacing[2],
 	cursor: 'pointer',
-	userSelect: 'none',
+	userSelect: 'none'
 })
 
 export const radioControl = recipe({
@@ -21,40 +21,46 @@ export const radioControl = recipe({
 		display: 'inline-flex',
 		alignItems: 'center',
 		justifyContent: 'center',
+		selectors: {
+			[`${radioRoot}:focus-within &`]: {
+				outline: `2px solid ${vars.colors.focusRing}`,
+				outlineOffset: '2px'
+			}
+		}
 	},
 	variants: {
 		checked: {
 			true: {
-				borderColor: vars.colors.primary,
+				borderColor: vars.colors.primary
 			},
-			false: {},
+			false: {}
 		},
 		disabled: {
 			true: { opacity: 0.5, cursor: 'not-allowed' },
-			false: {},
-		},
+			false: {}
+		}
 	},
 	defaultVariants: {
 		checked: false,
-		disabled: false,
-	},
+		disabled: false
+	}
 })
 
 export const radioDot = style({
 	width: '8px',
 	height: '8px',
 	borderRadius: vars.radii.full,
-	backgroundColor: vars.colors.primary,
+	backgroundColor: vars.colors.primary
 })
 
 export const radioInput = style({
 	position: 'absolute',
 	opacity: 0,
 	width: 0,
-	height: 0,
+	height: 0
 })
 
 export const radioLabel = style({
 	color: vars.colors.textHeading,
-	fontSize: vars.fontSizes.sm,
+	fontSize: vars.fontSizes.sm
 })

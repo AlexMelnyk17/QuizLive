@@ -22,7 +22,6 @@ Run `npm run typecheck` (`tsc -b`) before pushing.
 ```ts
 // Good
 import type { QuizDto } from '@modules/quizzes/types'
-
 // Bad — may emit invalid runtime imports
 import { QuizDto } from '@modules/quizzes/types'
 ```
@@ -60,11 +59,15 @@ Each feature module **MUST** keep shared type aliases in `types.ts`:
 **Component files** (`PascalCase.tsx`) **MAY** export only the matching `XxxProps` type (same file as the component — see [07-solid.md](./07-solid.md)). **MUST NOT** export non-props types from components, hooks, or utils — put them in `types.ts`.
 
 ```ts
-// types.ts
-export type QuestionCorrectPoint = { key: string; label: string; correctPercent: number }
-
 // QuestionCorrectPercentChart.tsx
 import type { QuestionCorrectPoint } from '@modules/statistics/types'
+
+// types.ts
+export type QuestionCorrectPoint = {
+	key: string
+	label: string
+	correctPercent: number
+}
 
 export type QuestionCorrectPercentChartProps = {
 	points: QuestionCorrectPoint[]

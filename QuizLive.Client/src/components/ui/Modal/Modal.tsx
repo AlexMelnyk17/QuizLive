@@ -4,14 +4,13 @@ import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
-import { IconButton } from '@components/ui/IconButton'
 import { Icon } from '@components/ui/Icon'
-
+import { IconButton } from '@components/ui/IconButton'
 import {
 	modalHeader,
 	modalOverlay,
 	modalPanel,
-	modalTitle,
+	modalTitle
 } from '@components/ui/Modal/Modal.css'
 
 type ModalVariants = NonNullable<RecipeVariants<typeof modalPanel>>
@@ -23,13 +22,7 @@ export type ModalProps = ModalVariants & {
 	children: ReactNode
 }
 
-export function Modal({
-	open,
-	onClose,
-	title,
-	children,
-	size,
-}: ModalProps) {
+export function Modal({ open, onClose, title, children, size }: ModalProps) {
 	useEffect(() => {
 		if (!open) return
 		const onKeyDown = (event: KeyboardEvent) => {
@@ -44,26 +37,26 @@ export function Modal({
 	return createPortal(
 		<div
 			className={modalOverlay}
-			role="presentation"
-			onMouseDown={(event) => {
+			role='presentation'
+			onMouseDown={event => {
 				if (event.target === event.currentTarget) onClose()
 			}}
 		>
 			<div
 				className={modalPanel({ size })}
-				role="dialog"
-				aria-modal="true"
+				role='dialog'
+				aria-modal='true'
 				aria-label={title}
 			>
 				<div className={modalHeader}>
-						{title ? <h2 className={modalTitle}>{title}</h2> : <span />}
-						<IconButton
-							variant="ghost"
-							size="sm"
-							aria-label="Close dialog"
-							onClick={onClose}
-							icon={<Icon icon={X} size="sm" />}
-						/>
+					{title ? <h2 className={modalTitle}>{title}</h2> : <span />}
+					<IconButton
+						variant='ghost'
+						size='sm'
+						aria-label='Close dialog'
+						onClick={onClose}
+						icon={<Icon icon={X} size='sm' />}
+					/>
 				</div>
 				{children}
 			</div>

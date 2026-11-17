@@ -11,33 +11,33 @@ export const playerListItem = recipe({
 		padding: vars.spacing[3],
 		borderRadius: vars.radii.md,
 		border: `1px solid ${vars.colors.border}`,
-		backgroundColor: vars.colors.surfaceRaised,
+		backgroundColor: vars.colors.surfaceRaised
 	},
 	variants: {
 		isHost: {
 			true: {
 				borderColor: vars.colors.primaryBorder,
-				backgroundColor: vars.colors.primaryMuted,
+				backgroundColor: vars.colors.primaryMuted
 			},
-			false: {},
+			false: {}
 		},
 		isSelf: {
 			true: {
-				boxShadow: `inset 0 0 0 1px ${vars.colors.primary}`,
+				boxShadow: `inset 0 0 0 1px ${vars.colors.primary}`
 			},
-			false: {},
-		},
+			false: {}
+		}
 	},
 	defaultVariants: {
 		isHost: false,
-		isSelf: false,
-	},
+		isSelf: false
+	}
 })
 
 export const playerMeta = style({
 	flex: 1,
 	minWidth: 0,
-	textAlign: 'left',
+	textAlign: 'left'
 })
 
 export const playerName = style({
@@ -47,12 +47,12 @@ export const playerName = style({
 	color: vars.colors.textHeading,
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
-	whiteSpace: 'nowrap',
+	whiteSpace: 'nowrap'
 })
 
 export const playerScore = style({
 	fontFamily: vars.fonts.mono,
 	fontSize: vars.fontSizes.lg,
 	fontWeight: vars.fontWeights.semibold,
-	color: vars.colors.primary,
+	color: vars.colors.primary
 })

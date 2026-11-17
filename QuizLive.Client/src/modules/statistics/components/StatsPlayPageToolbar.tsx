@@ -6,7 +6,7 @@ import {
 	statsBackButton,
 	statsPlayPageToolbar,
 	statsPlayPageToolbarTitle,
-	statsPlayPageToolbarTitleSkeleton,
+	statsPlayPageToolbarTitleSkeleton
 } from '@modules/statistics/components/StatsPlayPageToolbar.css'
 
 export type StatsPlayPageToolbarProps = {
@@ -20,13 +20,13 @@ export function StatsPlayPageToolbar({
 	backLabel,
 	onBack,
 	quizTitle,
-	showTitleSkeleton,
+	showTitleSkeleton
 }: StatsPlayPageToolbarProps) {
 	const renderTitle = () => {
 		if (showTitleSkeleton) {
 			return (
 				<Skeleton
-					variant="text"
+					variant='text'
 					className={statsPlayPageToolbarTitleSkeleton}
 				/>
 			)
@@ -37,7 +37,7 @@ export function StatsPlayPageToolbar({
 		}
 
 		return (
-			<Text size="lg" weight="medium" className={statsPlayPageToolbarTitle}>
+			<Text size='lg' weight='medium' className={statsPlayPageToolbarTitle}>
 				{quizTitle}
 			</Text>
 		)
@@ -46,8 +46,8 @@ export function StatsPlayPageToolbar({
 	return (
 		<div className={statsPlayPageToolbar}>
 			<Button
-				variant="outline"
-				size="sm"
+				variant='outline'
+				size='sm'
 				className={statsBackButton}
 				onClick={onBack}
 			>

@@ -5,19 +5,23 @@ import {
 	Cell,
 	Tooltip,
 	XAxis,
-	YAxis,
+	YAxis
 } from 'recharts'
 
-import { statsChartColors, statsChartSeries } from '@modules/statistics/chartColors'
+import {
+	statsChartColors,
+	statsChartSeries
+} from '@modules/statistics/chartColors'
 import { StatsChartCard } from '@modules/statistics/components/charts/StatsChartCard'
 import {
 	statsBarChartMargin,
 	statsCartesianGridProps,
 	statsChartTooltipProps,
 	statsXAxisTickDefault,
-	statsYAxisProps,
+	statsYAxisProps
 } from '@modules/statistics/components/charts/statsChartLayout'
 import { STATISTICS_CHART_MIN_TICK_GAP } from '@modules/statistics/constants'
+import { useStatsChartAnimation } from '@modules/statistics/hooks/useStatsChartAnimation'
 import type { StatsBarRow } from '@modules/statistics/types'
 
 export type StatsBarChartProps = {
@@ -41,8 +45,10 @@ export function StatsBarChart({
 	colorByIndex,
 	tick = statsXAxisTickDefault,
 	xAxisInterval,
-	minTickGap = STATISTICS_CHART_MIN_TICK_GAP,
+	minTickGap = STATISTICS_CHART_MIN_TICK_GAP
 }: StatsBarChartProps) {
+	const chartAnimation = useStatsChartAnimation()
+
 	const resolveFill = () => {
 		if (colorByIndex) {
 			return null
@@ -66,40 +72,26 @@ export function StatsBarChart({
 		))
 	}
 
-	const renderBar = () => {
-		if (fill === null) {
-			return (
-				<Bar dataKey={dataKey} name={name} isAnimationActive={false}>
-					{renderCells()}
-				</Bar>
-			)
-		}
-
-		return (
-			<Bar
-				dataKey={dataKey}
-				name={name}
-				fill={fill}
-				isAnimationActive={false}
-			>
-				{renderCells()}
-			</Bar>
-		)
-	}
-
 	return (
 		<StatsChartCard title={title}>
 			<BarChart data={data} margin={statsBarChartMargin}>
 				<CartesianGrid {...statsCartesianGridProps} />
 				<XAxis
-					dataKey="label"
+					dataKey='label'
 					tick={tick}
 					interval={xAxisInterval}
 					minTickGap={minTickGap}
 				/>
 				<YAxis {...statsYAxisProps} />
 				<Tooltip {...statsChartTooltipProps} />
-				{renderBar()}
+				<Bar
+					dataKey={dataKey}
+					name={name}
+					fill={fill ?? undefined}
+					{...chartAnimation}
+				>
+					{renderCells()}
+				</Bar>
 			</BarChart>
 		</StatsChartCard>
 	)

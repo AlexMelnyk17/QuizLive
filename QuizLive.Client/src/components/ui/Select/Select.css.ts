@@ -14,29 +14,35 @@ export const select = recipe({
 		fontFamily: vars.fonts.sans,
 		fontSize: vars.fontSizes.md,
 		accentColor: vars.colors.primary,
+		':disabled': {
+			backgroundColor: vars.colors.disabledBg,
+			color: vars.colors.disabledText,
+			borderColor: vars.colors.disabledBorder,
+			cursor: 'not-allowed'
+		},
 		transition: `border-color ${vars.durations.normal}, box-shadow ${vars.durations.normal}`,
 		selectors: {
 			'&:focus': {
 				outline: 'none',
 				borderColor: vars.colors.primaryBorder,
-				boxShadow: `0 0 0 3px ${vars.colors.primaryMuted}`,
+				boxShadow: `0 0 0 3px ${vars.colors.primaryMuted}`
 			},
 			'&:focus-visible': {
 				outline: 'none',
 				borderColor: vars.colors.primaryBorder,
-				boxShadow: `0 0 0 3px ${vars.colors.primaryMuted}`,
-			},
-		},
+				boxShadow: `0 0 0 3px ${vars.colors.primaryMuted}`
+			}
+		}
 	},
 	variants: {
 		invalid: {
 			true: {
-				borderColor: vars.colors.danger,
+				borderColor: vars.colors.danger
 			},
-			false: {},
-		},
+			false: {}
+		}
 	},
 	defaultVariants: {
-		invalid: false,
-	},
+		invalid: false
+	}
 })

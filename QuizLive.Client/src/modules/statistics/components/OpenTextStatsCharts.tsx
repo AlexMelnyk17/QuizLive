@@ -1,9 +1,9 @@
-import { OpenTextFrequencyChart } from '@modules/statistics/components/charts/OpenTextFrequencyChart'
-import { OpenTextFrequencyChartFooter } from '@modules/statistics/components/charts/OpenTextFrequencyChartFooter'
 import {
 	openTextStatsChartItem,
-	openTextStatsCharts,
+	openTextStatsCharts
 } from '@modules/statistics/components/OpenTextStatsCharts.css'
+import { OpenTextFrequencyChart } from '@modules/statistics/components/charts/OpenTextFrequencyChart'
+import { OpenTextFrequencyChartFooter } from '@modules/statistics/components/charts/OpenTextFrequencyChartFooter'
 import type { OpenQuestionStats } from '@modules/statistics/types'
 
 export type OpenTextStatsChartsProps = {
@@ -13,13 +13,13 @@ export type OpenTextStatsChartsProps = {
 export function OpenTextStatsCharts({ questions }: OpenTextStatsChartsProps) {
 	return (
 		<div className={openTextStatsCharts}>
-			{questions.map((question) => (
+			{questions.map(question => (
 				<div key={question.questionId} className={openTextStatsChartItem}>
 					<OpenTextFrequencyChart
 						title={question.text}
-						points={question.answers.map((answer) => ({
+						points={question.answers.map(answer => ({
 							name: answer.text,
-							size: answer.count,
+							size: answer.count
 						}))}
 					/>
 					<OpenTextFrequencyChartFooter otherCount={question.otherCount} />

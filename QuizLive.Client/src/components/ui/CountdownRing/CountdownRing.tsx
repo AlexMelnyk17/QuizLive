@@ -1,16 +1,20 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
-
-import { vars } from '@theme/contract.css'
 import cn from 'clsx'
 
-import { countdownLabel, countdownRoot, countdownSvg } from '@components/ui/CountdownRing/CountdownRing.css'
+import { vars } from '@theme/contract.css'
+
+import {
+	countdownLabel,
+	countdownRoot,
+	countdownSvg
+} from '@components/ui/CountdownRing/CountdownRing.css'
 
 type CountdownVariants = NonNullable<RecipeVariants<typeof countdownRoot>>
 
 const sizeMap = {
 	sm: 56,
 	md: 80,
-	lg: 112,
+	lg: 112
 } as const
 
 export type CountdownRingProps = CountdownVariants & {
@@ -23,7 +27,7 @@ export function CountdownRing({
 	className,
 	size = 'md',
 	value,
-	total,
+	total
 }: CountdownRingProps) {
 	const dimension = sizeMap[size ?? 'md']
 	const stroke = size === 'lg' ? 8 : size === 'sm' ? 5 : 6
@@ -46,7 +50,7 @@ export function CountdownRing({
 					cx={dimension / 2}
 					cy={dimension / 2}
 					r={radius}
-					fill="none"
+					fill='none'
 					stroke={vars.colors.border}
 					strokeWidth={stroke}
 				/>
@@ -54,10 +58,10 @@ export function CountdownRing({
 					cx={dimension / 2}
 					cy={dimension / 2}
 					r={radius}
-					fill="none"
+					fill='none'
 					stroke={vars.colors.primary}
 					strokeWidth={stroke}
-					strokeLinecap="round"
+					strokeLinecap='round'
 					strokeDasharray={circumference}
 					strokeDashoffset={offset}
 				/>

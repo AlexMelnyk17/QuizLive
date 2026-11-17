@@ -1,42 +1,44 @@
 import { useNavigate, useParams } from '@tanstack/react-router'
 
+import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
+
 import { Alert } from '@components/ui/Alert'
 import { Button } from '@components/ui/Button'
 import { Heading } from '@components/ui/Heading'
 import { Stack } from '@components/ui/Stack'
 import { Text } from '@components/ui/Text'
 
-import { PATHS } from '@config/routes'
-
-import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
 import { QuizKind } from '@modules/quizzes/constants'
 import { formatQuizDate } from '@modules/quizzes/utils/formatQuizDate'
-import { PlayerScoresChart } from '@modules/statistics/components/charts/PlayerScoresChart'
 import { GameOpenTextEntries } from '@modules/statistics/components/GameOpenTextEntries'
+import { HostStatValue } from '@modules/statistics/components/HostStatValue'
+import {
+	statsKpiGrid,
+	statsPage
+} from '@modules/statistics/components/StatisticsPage.css'
 import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
 import { StatsLoadError } from '@modules/statistics/components/StatsLoadError'
 import { StatsPageSkeleton } from '@modules/statistics/components/StatsPageSkeleton'
 import { StatsPlayPageToolbar } from '@modules/statistics/components/StatsPlayPageToolbar'
-import {
-	statsKpiGrid,
-	statsPage,
-} from '@modules/statistics/components/StatisticsPage.css'
+import { PlayerScoresChart } from '@modules/statistics/components/charts/PlayerScoresChart'
 import {
 	GAME_STATS_KPI_LABELS,
 	GAME_STATS_PAGE_COPY,
+	HOST_STAT_FORMAT
 } from '@modules/statistics/constants'
 import { useGameStats } from '@modules/statistics/hooks/useGameStats'
 import type { GamePlayStats } from '@modules/statistics/types'
 import { formatGamePlayerLine } from '@modules/statistics/utils/formatGamePlayerLine'
 import { formatStatDuration } from '@modules/statistics/utils/formatStatDuration'
-import { formatStatInteger } from '@modules/statistics/utils/formatStatInteger'
 import { getGameStatsView } from '@modules/statistics/utils/getGameStatsView'
 import { renderKindStatsCharts } from '@modules/statistics/utils/renderKindStatsCharts'
+
+import { PATHS } from '@config/routes'
 
 export function GamePlayStatsPage() {
 	const navigate = useNavigate()
 	const { quizId: quizIdParam, gameId: gameIdParam } = useParams({
-		from: PATHS.gameStats,
+		from: PATHS.gameStats
 	})
 	const quizId = Number(quizIdParam)
 	const gameId = Number(gameIdParam)
@@ -51,13 +53,13 @@ export function GamePlayStatsPage() {
 		isPending: stats.isPending,
 		isError: stats.isError,
 		hasData: Boolean(stats.data),
-		error: stats.error,
+		error: stats.error
 	})
 
 	const backToQuizStats = () => {
 		void navigate({
 			to: PATHS.quizStats,
-			params: { quizId: String(quizId) },
+			params: { quizId: String(quizId) }
 		})
 	}
 
@@ -79,7 +81,7 @@ export function GamePlayStatsPage() {
 	const renderMain = () => {
 		if (view === 'invalid' || view === 'not-found') {
 			return (
-				<Alert variant="danger" title={GAME_STATS_PAGE_COPY.loadError.title}>
+				<Alert variant='danger' title={GAME_STATS_PAGE_COPY.loadError.title}>
 					{GAME_STATS_PAGE_COPY.loadError.body}
 				</Alert>
 			)
@@ -91,14 +93,11 @@ export function GamePlayStatsPage() {
 
 		if (view === 'not-finished') {
 			return (
-				<Stack direction="column" align="stretch">
-					<Alert
-						variant="info"
-						title={GAME_STATS_PAGE_COPY.notFinished.title}
-					>
+				<Stack direction='column' align='stretch'>
+					<Alert variant='info' title={GAME_STATS_PAGE_COPY.notFinished.title}>
 						{GAME_STATS_PAGE_COPY.notFinished.body}
 					</Alert>
-					<Button variant="primary" size="sm" onClick={backToQuizStats}>
+					<Button variant='primary' size='sm' onClick={backToQuizStats}>
 						{GAME_STATS_PAGE_COPY.backToQuizStats}
 					</Button>
 				</Stack>
@@ -126,7 +125,7 @@ export function GamePlayStatsPage() {
 
 	return (
 		<DashboardLayout title={GAME_STATS_PAGE_COPY.title}>
-			<Stack direction="column" align="stretch">
+			<Stack direction='column' align='stretch'>
 				{renderToolbar()}
 				{renderMain()}
 			</Stack>
@@ -140,19 +139,39 @@ function renderReady(data: GamePlayStats) {
 			<div className={statsKpiGrid}>
 				<StatsKpiCard
 					label={GAME_STATS_KPI_LABELS.players}
-					value={formatStatInteger(data.playerCount)}
+					value={
+						<HostStatValue
+							value={data.playerCount}
+							format={HOST_STAT_FORMAT.integer}
+						/>
+					}
 				/>
 				<StatsKpiCard
 					label={GAME_STATS_KPI_LABELS.duration}
-					value={formatStatDuration(data.durationSeconds)}
+					value={
+						<HostStatValue
+							value={formatStatDuration(data.durationSeconds)}
+							format={HOST_STAT_FORMAT.text}
+						/>
+					}
 				/>
 				<StatsKpiCard
 					label={GAME_STATS_KPI_LABELS.joinedAt}
-					value={formatQuizDate(data.createdAtUtc)}
+					value={
+						<HostStatValue
+							value={formatQuizDate(data.createdAtUtc)}
+							format={HOST_STAT_FORMAT.text}
+						/>
+					}
 				/>
 				<StatsKpiCard
 					label={GAME_STATS_KPI_LABELS.endedAt}
-					value={formatQuizDate(data.endedAtUtc)}
+					value={
+						<HostStatValue
+							value={formatQuizDate(data.endedAtUtc)}
+							format={HOST_STAT_FORMAT.text}
+						/>
+					}
 				/>
 			</div>
 			{renderScoresChart(data)}
@@ -161,9 +180,9 @@ function renderReady(data: GamePlayStats) {
 			<section>
 				<Heading level={3}>{GAME_STATS_PAGE_COPY.playersTitle}</Heading>
 				<ul>
-					{data.players.map((player) => (
+					{data.players.map(player => (
 						<li key={player.playerId}>
-							<Text size="sm">{formatGamePlayerLine(player)}</Text>
+							<Text size='sm'>{formatGamePlayerLine(player)}</Text>
 						</li>
 					))}
 				</ul>

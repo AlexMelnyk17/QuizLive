@@ -6,7 +6,7 @@ import {
 	Line,
 	Tooltip,
 	XAxis,
-	YAxis,
+	YAxis
 } from 'recharts'
 
 import { statsChartColors } from '@modules/statistics/chartColors'
@@ -17,7 +17,7 @@ import {
 	statsLineChartMargin,
 	statsLineXAxisPadding,
 	statsXAxisTickDefault,
-	statsYAxisProps,
+	statsYAxisProps
 } from '@modules/statistics/components/charts/statsChartLayout'
 import {
 	STATISTICS_AREA_FILL_OPACITY,
@@ -27,8 +27,9 @@ import {
 	STATISTICS_LINE_LABEL_OFFSET,
 	STATISTICS_LINE_STROKE_WIDTH,
 	STATISTICS_LINE_Y_AXIS_WIDTH,
-	STATISTICS_PERCENT_SCALE,
+	STATISTICS_PERCENT_SCALE
 } from '@modules/statistics/constants'
+import { useStatsChartAnimation } from '@modules/statistics/hooks/useStatsChartAnimation'
 import type { QuestionCorrectPoint } from '@modules/statistics/types'
 import { formatStatPercent } from '@modules/statistics/utils/formatStatPercent'
 
@@ -37,14 +38,16 @@ export type QuestionCorrectPercentChartProps = {
 }
 
 export function QuestionCorrectPercentChart({
-	points,
+	points
 }: QuestionCorrectPercentChartProps) {
+	const chartAnimation = useStatsChartAnimation()
+
 	return (
 		<StatsChartCard title={STATISTICS_CHART_COPY.questionCorrectPercent}>
 			<ComposedChart data={points} margin={statsLineChartMargin}>
 				<CartesianGrid {...statsCartesianGridProps} />
 				<XAxis
-					dataKey="label"
+					dataKey='label'
 					tick={statsXAxisTickDefault}
 					interval={0}
 					padding={statsLineXAxisPadding}
@@ -56,30 +59,30 @@ export function QuestionCorrectPercentChart({
 				/>
 				<Tooltip {...statsChartTooltipProps} />
 				<Area
-					type="linear"
-					dataKey="correctPercent"
+					type='linear'
+					dataKey='correctPercent'
 					fill={statsChartColors.success}
 					fillOpacity={STATISTICS_AREA_FILL_OPACITY}
-					stroke="none"
-					tooltipType="none"
-					legendType="none"
-					isAnimationActive={false}
+					stroke='none'
+					tooltipType='none'
+					legendType='none'
+					{...chartAnimation}
 				/>
 				<Line
-					type="linear"
-					dataKey="correctPercent"
+					type='linear'
+					dataKey='correctPercent'
 					name={STATISTICS_CHART_COPY.seriesPercent}
 					stroke={statsChartColors.success}
 					strokeWidth={STATISTICS_LINE_STROKE_WIDTH}
 					dot={{
 						fill: statsChartColors.success,
-						r: STATISTICS_LINE_DOT_RADIUS,
+						r: STATISTICS_LINE_DOT_RADIUS
 					}}
-					isAnimationActive={false}
+					{...chartAnimation}
 				>
 					<LabelList
-						dataKey="correctPercent"
-						position="top"
+						dataKey='correctPercent'
+						position='top'
 						offset={STATISTICS_LINE_LABEL_OFFSET}
 						formatter={formatStatPercent}
 						fill={statsChartColors.textMuted}

@@ -4,13 +4,15 @@ import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { StatisticsPage } from '@modules/statistics/components/StatisticsPage'
 import {
+	PREFERS_REDUCED_MOTION_QUERY,
 	STATISTICS_CHART_COPY,
 	STATISTICS_KPI_LABELS,
-	STATISTICS_PAGE_COPY,
+	STATISTICS_PAGE_COPY
 } from '@modules/statistics/constants'
-import { StatisticsPage } from '@modules/statistics/components/StatisticsPage'
 import type { HostStats } from '@modules/statistics/types'
+
 import { renderWithTheme } from '@src/test/testUtils'
 
 type HostStatsQuery = Pick<
@@ -22,14 +24,14 @@ const emptyStats: HostStats = {
 	quizzes: {
 		total: 0,
 		archived: 0,
-		byKind: { openText: 0, pollChoice: 0, quizChoice: 0 },
+		byKind: { openText: 0, pollChoice: 0, quizChoice: 0 }
 	},
 	questions: { total: 0, averagePerQuiz: 0 },
 	games: {
 		total: 0,
 		finished: 0,
 		byStatus: { lobby: 0, question: 0, results: 0, finished: 0 },
-		byKind: { openText: 0, pollChoice: 0, quizChoice: 0 },
+		byKind: { openText: 0, pollChoice: 0, quizChoice: 0 }
 	},
 	players: { totalJoins: 0, averagePerGame: 0, maxInOneGame: 0 },
 	activity: {
@@ -37,9 +39,9 @@ const emptyStats: HostStats = {
 		gamesLast30Days: 0,
 		gamesPerDay: Array.from({ length: 30 }, (_, offset) => ({
 			date: `2026-10-${String(offset + 1).padStart(2, '0')}`,
-			count: 0,
-		})),
-	},
+			count: 0
+		}))
+	}
 }
 
 const sampleStats: HostStats = {
@@ -49,9 +51,9 @@ const sampleStats: HostStats = {
 		total: 4,
 		finished: 2,
 		byStatus: { lobby: 1, question: 0, results: 1, finished: 2 },
-		byKind: { openText: 2, pollChoice: 1, quizChoice: 1 },
+		byKind: { openText: 2, pollChoice: 1, quizChoice: 1 }
 	},
-	players: { totalJoins: 10, averagePerGame: 2.5, maxInOneGame: 5 },
+	players: { totalJoins: 10, averagePerGame: 2.5, maxInOneGame: 5 }
 }
 
 const useHostStatsMock = vi.fn<() => HostStatsQuery>()
@@ -60,20 +62,20 @@ vi.mock('@tanstack/react-router', () => ({
 	Link: ({ children, to }: { children: ReactNode; to: string }) => (
 		<a href={to}>{children}</a>
 	),
-	useNavigate: () => vi.fn(),
+	useNavigate: () => vi.fn()
 }))
 
 vi.mock('@modules/auth/store/sessionStore', () => ({
 	useSession: () => ({
 		token: 't',
 		expiresAtUtc: new Date(Date.now() + 60_000).toISOString(),
-		user: { id: '1', userName: 'quizzer' },
+		user: { id: '1', userName: 'quizzer' }
 	}),
-	signOut: vi.fn(),
+	signOut: vi.fn()
 }))
 
 vi.mock('@modules/statistics/hooks/useHostStats', () => ({
-	useHostStats: (): HostStatsQuery => useHostStatsMock(),
+	useHostStats: (): HostStatsQuery => useHostStatsMock()
 }))
 
 describe('StatisticsPage', () => {
@@ -91,7 +93,7 @@ describe('StatisticsPage', () => {
 			isError: false,
 			data: undefined,
 			refetch: vi.fn(),
-			isFetching: false,
+			isFetching: false
 		})
 
 		renderWithTheme(<StatisticsPage />)
@@ -99,9 +101,9 @@ describe('StatisticsPage', () => {
 		expect(
 			screen.getByRole('heading', { name: STATISTICS_PAGE_COPY.title })
 		).toBeInTheDocument()
-		expect(document.querySelectorAll('[aria-hidden="true"]').length).toBeGreaterThan(
-			0
-		)
+		expect(
+			document.querySelectorAll('[aria-hidden="true"]').length
+		).toBeGreaterThan(0)
 	})
 
 	it('shows error with retry', async () => {
@@ -114,21 +116,21 @@ describe('StatisticsPage', () => {
 				isError: true,
 				data: undefined,
 				refetch,
-				isFetching: false,
+				isFetching: false
 			})
 			.mockReturnValueOnce({
 				isPending: false,
 				isError: true,
 				data: undefined,
 				refetch,
-				isFetching: true,
+				isFetching: true
 			})
 			.mockReturnValue({
 				isPending: false,
 				isError: false,
 				data: sampleStats,
 				refetch,
-				isFetching: false,
+				isFetching: false
 			})
 
 		renderWithTheme(<StatisticsPage />)
@@ -152,34 +154,89 @@ describe('StatisticsPage', () => {
 			isError: false,
 			data: emptyStats,
 			refetch: vi.fn(),
-			isFetching: false,
+			isFetching: false
 		})
 
 		renderWithTheme(<StatisticsPage />)
 
-		expect(screen.getByText(STATISTICS_PAGE_COPY.noActivity)).toBeInTheDocument()
+		expect(
+			screen.getByText(STATISTICS_PAGE_COPY.noActivity)
+		).toBeInTheDocument()
 		expect(screen.getByText(STATISTICS_KPI_LABELS.quizzes)).toBeInTheDocument()
 		expect(screen.getAllByText('0').length).toBeGreaterThan(0)
-		expect(screen.getByText(STATISTICS_CHART_COPY.gamesOverTime)).toBeInTheDocument()
+		expect(
+			screen.getByText(STATISTICS_CHART_COPY.gamesOverTime)
+		).toBeInTheDocument()
 	})
 
-	it('renders headline KPIs without quiz list copy in main area', () => {
+	it('renders headline KPIs without quiz list copy in main area', async () => {
 		useHostStatsMock.mockReturnValue({
 			isPending: false,
 			isError: false,
 			data: sampleStats,
 			refetch: vi.fn(),
-			isFetching: false,
+			isFetching: false
 		})
 
 		renderWithTheme(<StatisticsPage />)
 
+		expect(
+			await screen.findByRole('heading', { name: '10' })
+		).toBeInTheDocument()
 		expect(screen.getByRole('heading', { name: '2' })).toBeInTheDocument()
 		expect(screen.getByRole('heading', { name: '4' })).toBeInTheDocument()
-		expect(screen.getByRole('heading', { name: '10' })).toBeInTheDocument()
-		expect(screen.getByRole('heading', { name: /^2[.,]5$/ })).toBeInTheDocument()
-		expect(screen.getByText(STATISTICS_CHART_COPY.gamesByKind)).toBeInTheDocument()
+		expect(
+			screen.getByRole('heading', { name: /^2[.,]5$/ })
+		).toBeInTheDocument()
+		expect(
+			screen.getByText(STATISTICS_CHART_COPY.gamesByKind)
+		).toBeInTheDocument()
 		expect(screen.queryByText('Games by status')).not.toBeInTheDocument()
-		expect(screen.queryByText(/Your quizzes will be listed/i)).not.toBeInTheDocument()
+		expect(
+			screen.queryByText(/Your quizzes will be listed/i)
+		).not.toBeInTheDocument()
+	})
+
+	it('shows final headline numbers immediately when motion is reduced', () => {
+		window.matchMedia = (query: string) => ({
+			matches: query === PREFERS_REDUCED_MOTION_QUERY,
+			media: query,
+			onchange: null,
+			addEventListener: () => undefined,
+			removeEventListener: () => undefined,
+			addListener: () => undefined,
+			removeListener: () => undefined,
+			dispatchEvent: () => false
+		})
+
+		useHostStatsMock.mockReturnValue({
+			isPending: false,
+			isError: false,
+			data: sampleStats,
+			refetch: vi.fn(),
+			isFetching: false
+		})
+
+		try {
+			renderWithTheme(<StatisticsPage />)
+
+			expect(screen.getByRole('heading', { name: '2' })).toBeInTheDocument()
+			expect(screen.getByRole('heading', { name: '4' })).toBeInTheDocument()
+			expect(screen.getByRole('heading', { name: '10' })).toBeInTheDocument()
+			expect(
+				screen.getByRole('heading', { name: /^2[.,]5$/ })
+			).toBeInTheDocument()
+		} finally {
+			window.matchMedia = (query: string) => ({
+				matches: false,
+				media: query,
+				onchange: null,
+				addEventListener: () => undefined,
+				removeEventListener: () => undefined,
+				addListener: () => undefined,
+				removeListener: () => undefined,
+				dispatchEvent: () => false
+			})
+		}
 	})
 })

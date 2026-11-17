@@ -1,8 +1,8 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
+import cn from 'clsx'
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { card } from '@components/ui/Card/Card.css'
-import cn from 'clsx'
 
 type CardVariants = NonNullable<RecipeVariants<typeof card>>
 
@@ -17,7 +17,10 @@ export const Card = ({
 	...props
 }: CardProps) => (
 	<div
-		className={cn(card({ variant, padding, interactive, fullWidth }), className)}
+		className={cn(
+			card({ variant, padding, interactive, fullWidth }),
+			className
+		)}
 		{...props}
 	/>
 )

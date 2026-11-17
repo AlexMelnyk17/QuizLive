@@ -6,13 +6,13 @@ import type { RegisterRequest } from '@modules/auth/types'
 
 export function useRegister() {
 	const setSessionFromAuthResponse = useAuthStore(
-		(state) => state.setSessionFromAuthResponse
+		state => state.setSessionFromAuthResponse
 	)
 
 	return useMutation({
 		mutationFn: async (request: RegisterRequest) => {
 			const auth = await registerApi(request)
 			return setSessionFromAuthResponse(auth)
-		},
+		}
 	})
 }

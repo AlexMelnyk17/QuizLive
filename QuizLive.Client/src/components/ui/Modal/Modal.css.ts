@@ -11,7 +11,7 @@ export const modalOverlay = style({
 	alignItems: 'center',
 	justifyContent: 'center',
 	padding: vars.spacing[4],
-	zIndex: vars.zIndices.modal,
+	zIndex: vars.zIndices.modal
 })
 
 export const modalPanel = recipe({
@@ -23,18 +23,18 @@ export const modalPanel = recipe({
 		backgroundColor: vars.colors.surfaceRaised,
 		border: `1px solid ${vars.colors.border}`,
 		boxShadow: vars.shadows.lg,
-		padding: vars.spacing[5],
+		padding: vars.spacing[5]
 	},
 	variants: {
 		size: {
 			sm: { maxWidth: '360px' },
 			md: { maxWidth: '520px' },
-			lg: { maxWidth: '720px' },
-		},
+			lg: { maxWidth: '720px' }
+		}
 	},
 	defaultVariants: {
-		size: 'md',
-	},
+		size: 'md'
+	}
 })
 
 export const modalHeader = style({
@@ -42,12 +42,12 @@ export const modalHeader = style({
 	alignItems: 'center',
 	justifyContent: 'space-between',
 	gap: vars.spacing[3],
-	marginBottom: vars.spacing[4],
+	marginBottom: vars.spacing[4]
 })
 
 export const modalTitle = style({
 	margin: 0,
 	fontSize: vars.fontSizes.xl,
 	fontWeight: vars.fontWeights.semibold,
-	color: vars.colors.textHeading,
+	color: vars.colors.textHeading
 })
