@@ -54,6 +54,7 @@ function hostGame(overrides: Partial<HostGameResult> = {}): HostGameResult {
 		connectionState: 'connecting',
 		error: null,
 		commands: {
+			addTime: vi.fn().mockResolvedValue(null),
 			startGame: vi.fn(),
 			showResults: vi.fn(),
 			nextQuestion: vi.fn(),

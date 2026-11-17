@@ -64,7 +64,7 @@ public class LiveGameHubTests(LiveGameFactory factory) : IClassFixture<LiveGameF
     }
 
     [Fact]
-    public async Task HubChecksConnectionRolesAndDuplicateAnswers()
+    public async Task HubChecksConnectionRolesAndAllowsAnswerRevisionsWhileOpen()
     {
         var client = await factory.CreateAuthorizedClientAsync();
         var quiz = await client.CreatePlayableQuizAsync(QuizKind.OpenText);
@@ -85,8 +85,13 @@ public class LiveGameHubTests(LiveGameFactory factory) : IClassFixture<LiveGameF
         await Assert.ThrowsAsync<HubException>(() => unjoined.InvokeAsync("AddTime", 10, Ct));
         await host.InvokeAsync("StartGame", Ct);
         await player.InvokeAsync("SubmitAnswer", answer, Ct);
-        var error = await Assert.ThrowsAsync<HubException>(() => player.InvokeAsync("SubmitAnswer", answer, Ct));
-        Assert.Contains("already answered", error.Message);
+        await player.InvokeAsync("SubmitAnswer", new SubmitAnswerRequest(1, Text: "Lviv"), Ct);
+        await using var reconnect = factory.CreateHubConnection();
+        await reconnect.StartAsync(Ct);
+        var snapshot = await reconnect.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", ann.Token, Ct);
+        Assert.Equal("Lviv", snapshot.CurrentAnswer?.Text);
+        await host.InvokeAsync("ShowResults", Ct);
+        await Assert.ThrowsAsync<HubException>(() => player.InvokeAsync("SubmitAnswer", answer, Ct));
     }
 
     [Fact]

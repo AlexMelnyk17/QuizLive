@@ -10,6 +10,7 @@ import { Text } from '@components/ui/Text'
 import { PlayerLobby } from '@modules/game/components/PlayerLobby'
 import { PlayerQuestionView } from '@modules/game/components/PlayerQuestionView'
 import {
+	GAME_CONNECTION_STATE,
 	GameStatus,
 	PLAYER_PAGE_COPY,
 	PLAYER_QUESTION_COPY
@@ -31,7 +32,11 @@ export function PlayerGamePage() {
 		questionReceivedAtMs,
 		connectionState,
 		error,
-		leave
+		leave,
+		hasAnswered,
+		selectedAnswer,
+		isSubmitting,
+		submitAnswer
 	} = usePlayerGame()
 
 	// The token is gone, e.g. the player left the game: there is nothing to show here any more.
@@ -66,6 +71,12 @@ export function PlayerGamePage() {
 
 			{player && status === GameStatus.Question && currentQuestion ? (
 				<PlayerQuestionView
+					key={currentQuestion.number}
+					hasAnswered={hasAnswered}
+					selectedAnswer={selectedAnswer}
+					isSubmitting={isSubmitting}
+					connected={connectionState === GAME_CONNECTION_STATE.connected}
+					onSubmitAnswer={submitAnswer}
 					question={currentQuestion}
 					receivedAtMs={questionReceivedAtMs}
 				/>

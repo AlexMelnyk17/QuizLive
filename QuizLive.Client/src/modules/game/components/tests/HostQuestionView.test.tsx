@@ -4,6 +4,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { HostQuestionView } from '@modules/game/components/HostQuestionView'
 import {
+	HOST_ADD_TIME_COPY,
+	HOST_ADD_TIME_SECONDS,
 	HOST_QUESTION_COPY,
 	PLAYER_QUESTION_COPY
 } from '@modules/game/constants'
@@ -62,6 +64,53 @@ function renderView(
 }
 
 describe('HostQuestionView', () => {
+	it('lets the host add time repeatedly while the timed question is open', async () => {
+		const addTime = vi.fn().mockResolvedValue(null)
+		renderView({ onAddTime: addTime })
+		const user = userEvent.setup()
+		await user.click(
+			screen.getByRole('button', { name: HOST_ADD_TIME_COPY.button })
+		)
+		await user.click(
+			screen.getByRole('button', { name: HOST_ADD_TIME_COPY.button })
+		)
+		expect(addTime).toHaveBeenCalledTimes(2)
+		expect(addTime).toHaveBeenCalledWith(HOST_ADD_TIME_SECONDS)
+	})
+
+	it('hides add time for untimed questions and disables it while disconnected', () => {
+		const addTime = vi.fn().mockResolvedValue(null)
+		const { unmount } = renderView({
+			question: {
+				...question({ timeLimitSeconds: null }),
+				timing: { ...question().timing, endsAtUtc: null }
+			},
+			onAddTime: addTime
+		})
+		expect(
+			screen.queryByRole('button', { name: HOST_ADD_TIME_COPY.button })
+		).not.toBeInTheDocument()
+		unmount()
+		renderView({ connected: false, onAddTime: addTime })
+		expect(
+			screen.getByRole('button', { name: HOST_ADD_TIME_COPY.button })
+		).toBeDisabled()
+	})
+
+	it('shows an add-time rejection without disabling later attempts', async () => {
+		renderView({
+			onAddTime: vi.fn().mockResolvedValue('The question is closed.')
+		})
+		await userEvent
+			.setup()
+			.click(screen.getByRole('button', { name: HOST_ADD_TIME_COPY.button }))
+		expect(await screen.findByRole('alert')).toHaveTextContent(
+			'The question is closed.'
+		)
+		expect(
+			screen.getByRole('button', { name: HOST_ADD_TIME_COPY.button })
+		).toBeEnabled()
+	})
 	afterEach(cleanup)
 
 	it('shows the number of the question, out of how many, and its text', () => {

@@ -4,6 +4,7 @@ import { CountdownRing } from '@components/ui/CountdownRing'
 import { Heading } from '@components/ui/Heading'
 import { Text } from '@components/ui/Text'
 
+import { HostAddTimeButton } from '@modules/game/components/HostAddTimeButton'
 import { HostQuestionOptions } from '@modules/game/components/HostQuestionOptions'
 import {
 	countdown,
@@ -23,6 +24,8 @@ export type HostQuestionViewProps = {
 	receivedAtMs: number | null
 	// Gives the readable error text, or null when the server accepted the command.
 	onShowResults: () => Promise<string | null>
+	onAddTime?: (seconds: number) => Promise<string | null>
+	connected?: boolean
 }
 
 // The running question as the host sees it: like the player's, but the correct option is marked, and the
@@ -30,7 +33,9 @@ export type HostQuestionViewProps = {
 export function HostQuestionView({
 	question,
 	receivedAtMs,
-	onShowResults
+	onShowResults,
+	onAddTime,
+	connected = true
 }: HostQuestionViewProps) {
 	const { question: content } = question
 	const secondsLeft = useQuestionCountdown(question.timing, receivedAtMs)
@@ -66,6 +71,14 @@ export function HostQuestionView({
 			<HostQuestionOptions options={content.options} />
 
 			{error ? <Alert variant='danger'>{error}</Alert> : null}
+			{onAddTime && question.timing.endsAtUtc !== null ? (
+				<HostAddTimeButton
+					disabled={
+						!connected || isRunning || secondsLeft === 0 || secondsLeft === null
+					}
+					onAddTime={onAddTime}
+				/>
+			) : null}
 
 			<Button
 				variant='primary'

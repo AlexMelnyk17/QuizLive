@@ -19,6 +19,17 @@ export function gameReducer<TQuestion extends { number: number }>(
 	action: GameAction<TQuestion>
 ): GameState<TQuestion> {
 	switch (action.type) {
+		case GAME_ACTION_TYPES.timeAdded:
+			if (
+				state.status !== GameStatus.Question ||
+				state.currentQuestion?.number !== action.number
+			)
+				return state
+			return {
+				...state,
+				currentQuestion: { ...state.currentQuestion, timing: action.timing },
+				questionReceivedAtMs: action.receivedAtMs
+			}
 		case GAME_ACTION_TYPES.snapshot: {
 			const players = mergePlayers(state.players, action.players)
 			const snapshot: GameProgress = {

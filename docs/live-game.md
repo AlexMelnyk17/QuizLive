@@ -13,13 +13,17 @@ the server clock must be strictly before its deadline, and the option must belon
 that question. Untimed questions accept answers until the host closes them.
 
 An answer and its score commit in one transaction. Each existing answer table has a
-unique `(PlayerId, QuestionId)` index: repeated or concurrent submissions produce a
-`ConflictException` rather than changing the first answer. The question number keeps
+unique `(PlayerId, QuestionId)` index. While the question is open, a new submission replaces
+the player's previous answer in that row. Concurrent submissions are serialized, and the last
+accepted revision wins. A revision recalculates the speed bonus at its acceptance time and
+adjusts the player's total by the difference; retrying an identical answer preserves its time
+and score. Closed or expired questions reject revisions. The question number keeps
 an old queued submission from answering a subsequent question.
 
 The host receives `AnswerProgress({ number, answered, players })`. `players` counts
 all registered players, including offline players. Reconnect snapshots include
-`hasAnswered`; they never expose other players' individual answers.
+`hasAnswered` and `currentAnswer` (`questionNumber`, `optionId`, `text`, nullable) so the
+client restores the player's own saved selection. They never expose other players' individual answers.
 
 ## Scoring and results
 

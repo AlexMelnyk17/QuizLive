@@ -8,7 +8,11 @@ import { buttonRow, hostScreen } from '@modules/game/components/HostGame.css'
 import { HostLobby } from '@modules/game/components/HostLobby'
 import { HostQuestionView } from '@modules/game/components/HostQuestionView'
 import { HostResultsView } from '@modules/game/components/HostResultsView'
-import { GameStatus, HOST_GAME_COPY } from '@modules/game/constants'
+import {
+	GAME_CONNECTION_STATE,
+	GameStatus,
+	HOST_GAME_COPY
+} from '@modules/game/constants'
 import { useHostGame } from '@modules/game/hooks/useHostGame'
 
 export type HostGameScreenProps = {
@@ -74,6 +78,8 @@ export function HostGameScreen({ gameId, onBack }: HostGameScreenProps) {
 					question={currentQuestion}
 					receivedAtMs={questionReceivedAtMs}
 					onShowResults={commands.showResults}
+					onAddTime={commands.addTime}
+					connected={connectionState === GAME_CONNECTION_STATE.connected}
 				/>
 			) : null}
 

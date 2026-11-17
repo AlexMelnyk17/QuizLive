@@ -3,6 +3,7 @@ import { useCallback, useMemo, useReducer, useState } from 'react'
 
 import { readSession } from '@modules/auth/store/sessionStore'
 import {
+	addTime,
 	connectAsHost,
 	endGame,
 	nextQuestion,
@@ -11,6 +12,7 @@ import {
 } from '@modules/game/api/gameHubApi'
 import {
 	GAME_ACTION_TYPES,
+	GAME_CONNECTION_STATE,
 	GAME_ERROR_COPY,
 	INITIAL_GAME_STATE
 } from '@modules/game/constants'
@@ -39,6 +41,12 @@ export function useHostGame(gameId: number): HostGameResult {
 		enabled: Number.isInteger(gameId) && gameId > 0,
 		accessTokenFactory: () => readSession()?.token ?? '',
 		handlers: {
+			onTimeAdded: payload =>
+				dispatch({
+					type: GAME_ACTION_TYPES.timeAdded,
+					...payload,
+					receivedAtMs: Date.now()
+				}),
 			onPlayerJoined: player =>
 				dispatch({ type: GAME_ACTION_TYPES.playerJoined, player }),
 			onHostQuestionShown: question =>
@@ -75,7 +83,8 @@ export function useHostGame(gameId: number): HostGameResult {
 
 	const send = useCallback(
 		async (command: (hub: HubConnection) => Promise<void>) => {
-			if (!connection) return GAME_ERROR_COPY.notConnected
+			if (!connection || connectionState !== GAME_CONNECTION_STATE.connected)
+				return GAME_ERROR_COPY.notConnected
 
 			try {
 				await command(connection)
@@ -85,11 +94,12 @@ export function useHostGame(gameId: number): HostGameResult {
 
 			return null
 		},
-		[connection]
+		[connection, connectionState]
 	)
 
 	const commands = useMemo<HostGameCommands>(
 		() => ({
+			addTime: seconds => send(hub => addTime(hub, seconds)),
 			startGame: () => send(startGame),
 			showResults: () => send(showResults),
 			nextQuestion: () => send(nextQuestion),

@@ -117,6 +117,23 @@ export const PLAYER_QUESTION_COPY = {
 
 export const MS_PER_SECOND = 1000
 
+export const OPEN_ANSWER_MAX_LENGTH = 200
+
+export const HOST_ADD_TIME_SECONDS = 10
+
+export const HOST_ADD_TIME_COPY = {
+	button: `Add ${HOST_ADD_TIME_SECONDS} seconds`
+} as const
+
+export const PLAYER_ANSWER_COPY = {
+	label: 'Your answer',
+	submit: 'Submit answer',
+	accepted: 'Answer saved. You can change it until the question closes.',
+	update: 'Update answer',
+	required: 'Enter an answer.',
+	tooLong: `The answer can be at most ${OPEN_ANSWER_MAX_LENGTH} characters.`
+} as const
+
 // How often the countdown of a question is refreshed.
 export const COUNTDOWN_TICK_MS = 1000
 
@@ -142,6 +159,7 @@ export const GAME_CONNECTION_STATE = {
 
 // What can happen to the state of a game on the client; see gameReducer.
 export const GAME_ACTION_TYPES = {
+	timeAdded: 'timeAdded',
 	snapshot: 'snapshot',
 	playerJoined: 'playerJoined',
 	questionShown: 'questionShown',

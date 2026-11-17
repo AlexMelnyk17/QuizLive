@@ -41,6 +41,7 @@ export function useGameHubConnection(
 
 		// Subscribed before the connection starts, so no event can arrive before its handler exists.
 		const unsubscribe = subscribeToGameEvents(hub, {
+			onTimeAdded: payload => latest.current.handlers.onTimeAdded?.(payload),
 			onPlayerJoined: player =>
 				latest.current.handlers.onPlayerJoined?.(player),
 			onQuestionShown: question =>

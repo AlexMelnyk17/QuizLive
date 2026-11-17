@@ -51,6 +51,7 @@ namespace QuizLive.Server.API.Hubs
                 state = state with {
                     CurrentQuestion = current?.ForPlayers,
                     HasAnswered = await live.HasAnsweredAsync(gameId, state.PlayerId, current?.ForPlayers.Number),
+                    CurrentAnswer = await live.CurrentAnswerAsync(gameId, state.PlayerId, current?.ForPlayers.Number),
                     Leaderboard = leaderboard,
                     Results = leaderboard is null ? null : await live.PlayerResultsAsync(gameId, state.PlayerId, current!.ForPlayers.Number, leaderboard)
                 };

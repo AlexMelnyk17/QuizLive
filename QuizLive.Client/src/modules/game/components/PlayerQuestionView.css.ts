@@ -15,3 +15,9 @@ export const questionImage = style({
 export const optionsList = style({
 	gap: vars.spacing[3]
 })
+
+export const answerForm = style({
+	display: 'flex',
+	flexDirection: 'column',
+	gap: vars.spacing[3]
+})

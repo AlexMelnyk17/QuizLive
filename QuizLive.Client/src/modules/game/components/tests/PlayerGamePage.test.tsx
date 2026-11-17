@@ -56,6 +56,10 @@ function playerGame(
 ): PlayerGameResult {
 	return {
 		hasToken: true,
+		hasAnswered: false,
+		selectedAnswer: null,
+		isSubmitting: false,
+		submitAnswer: vi.fn().mockResolvedValue(null),
 		player: null,
 		status: null,
 		players: [],
