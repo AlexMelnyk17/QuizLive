@@ -9,6 +9,27 @@ namespace QuizLive.Server.Infrastructure.Realtime
         IHubContext<GameHub, IGameClient> hub,
         ILogger<SignalRGameNotifier> logger) : IGameNotifier
     {
+        public Task AnswerProgressAsync(int gameId, AnswerProgressDto progress) =>
+            SendAsync(gameId, nameof(IGameClient.AnswerProgress), clients => clients.Group(GameGroups.Host(gameId)).AnswerProgress(progress));
+
+        public Task HostResultsAsync(int gameId, HostQuestionResultsDto results) =>
+            SendAsync(gameId, nameof(IGameClient.HostResults), clients => clients.Group(GameGroups.Host(gameId)).HostResults(results));
+
+        public Task PlayerResultsAsync(int gameId, int playerId, PlayerQuestionResultsDto results) =>
+            SendAsync(gameId, nameof(IGameClient.PlayerResults), clients => clients.Group(GameGroups.Player(gameId, playerId)).PlayerResults(results));
+
+        public Task LeaderboardAsync(int gameId, LeaderboardDto leaderboard) =>
+            SendAsync(gameId, nameof(IGameClient.Leaderboard), clients => Everyone(clients, gameId).Leaderboard(leaderboard));
+
+        public Task TimeAddedAsync(int gameId, QuestionTimeAddedDto timing) =>
+            SendAsync(gameId, nameof(IGameClient.TimeAdded), clients => Everyone(clients, gameId).TimeAdded(timing));
+
+        public Task PlayerPresenceChangedAsync(int gameId, PlayerPresenceDto presence) =>
+            SendAsync(gameId, nameof(IGameClient.PlayerPresenceChanged), clients => Everyone(clients, gameId).PlayerPresenceChanged(presence));
+
+        public Task PlayerLeftAsync(int gameId, int playerId) =>
+            SendAsync(gameId, nameof(IGameClient.PlayerLeft), clients => Everyone(clients, gameId).PlayerLeft(playerId));
+
         public Task PlayerJoinedAsync(int gameId, GamePlayerDto player) =>
             SendAsync(gameId, nameof(IGameClient.PlayerJoined), clients => Everyone(clients, gameId).PlayerJoined(player));
 

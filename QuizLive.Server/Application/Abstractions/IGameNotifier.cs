@@ -4,6 +4,14 @@ namespace QuizLive.Server.Application.Abstractions
 {
     public interface IGameNotifier
     {
+        Task AnswerProgressAsync(int gameId, AnswerProgressDto progress);
+        Task HostResultsAsync(int gameId, HostQuestionResultsDto results);
+        Task PlayerResultsAsync(int gameId, int playerId, PlayerQuestionResultsDto results);
+        Task LeaderboardAsync(int gameId, LeaderboardDto leaderboard);
+        Task TimeAddedAsync(int gameId, QuestionTimeAddedDto timing);
+        Task PlayerPresenceChangedAsync(int gameId, PlayerPresenceDto presence);
+        Task PlayerLeftAsync(int gameId, int playerId);
+
         Task PlayerJoinedAsync(int gameId, GamePlayerDto player);
 
         // The players get the question without IsCorrect, the host gets the author version.

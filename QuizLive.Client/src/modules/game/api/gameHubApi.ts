@@ -5,7 +5,11 @@ import {
 	hostGameStateDtoSchema,
 	playerGameStateDtoSchema
 } from '@modules/game/schemas'
-import type { HostGameStateDto, PlayerGameStateDto } from '@modules/game/types'
+import type {
+	HostGameStateDto,
+	PlayerGameStateDto,
+	SubmitAnswerRequest
+} from '@modules/game/types'
 
 // The hub methods, one function each, like the endpoints in a *Api.ts file. A hub error is not caught here:
 // it is a HubException whose message is the readable text from the server.
@@ -50,4 +54,17 @@ export async function nextQuestion(connection: HubConnection): Promise<void> {
 
 export async function endGame(connection: HubConnection): Promise<void> {
 	await connection.invoke(GAME_HUB_METHODS.endGame)
+}
+
+export async function submitAnswer(
+	connection: HubConnection,
+	answer: SubmitAnswerRequest
+): Promise<void> {
+	await connection.invoke(GAME_HUB_METHODS.submitAnswer, answer)
+}
+export async function addTime(
+	connection: HubConnection,
+	seconds: number
+): Promise<void> {
+	await connection.invoke(GAME_HUB_METHODS.addTime, seconds)
 }

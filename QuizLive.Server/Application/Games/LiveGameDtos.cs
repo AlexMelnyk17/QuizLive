@@ -39,7 +39,11 @@ namespace QuizLive.Server.Application.Games
     // shown, that question, so a new tab or a reloaded page shows the same screen as the others.
     public record HostGameStateDto(
         GameDto Game,
-        HostQuestionDto? CurrentQuestion);
+        HostQuestionDto? CurrentQuestion,
+        HostQuestionResultsDto? Results = null,
+        LeaderboardDto? Leaderboard = null,
+        AnswerProgressDto? AnswerProgress = null,
+        List<PlayerPresenceDto>? Presence = null);
 
     // The next question, or none when the last one was already shown and the game is finished.
     public record NextQuestionResult(QuestionViews? Question)
