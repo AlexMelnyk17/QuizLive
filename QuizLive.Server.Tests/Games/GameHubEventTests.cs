@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;
 using QuizLive.Server.Application.Games;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
+using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Core.Enums;
 using QuizLive.Server.Tests.Support;
 
@@ -12,6 +15,41 @@ namespace QuizLive.Server.Tests.Games
     public class GameHubEventTests(RealtimeQuizLiveFactory factory) : IClassFixture<RealtimeQuizLiveFactory>
     {
         private static CancellationToken Ct => TestContext.Current.CancellationToken;
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task FailedConnectionToEndingGame_LeavesOldGroupAndAllowsRetry(bool asHost)
+        {
+            var hooks = new GameServiceHooks();
+            using var app = WithHooks(hooks);
+            using var host = await app.CreateAuthorizedClientAsync();
+            var firstQuiz = await host.CreatePlayableQuizAsync(QuizKind.OpenText);
+            var secondQuiz = await host.CreatePlayableQuizAsync(QuizKind.OpenText);
+            var first = await host.CreateGameAsync(firstQuiz.Id);
+            var second = await host.CreateGameAsync(secondQuiz.Id);
+            var firstPlayer = await host.JoinAsync(first.Code, "First");
+            var secondPlayer = await host.JoinAsync(second.Code, "Second");
+            await using var connection = app.CreateHubConnection(asHost ? host.BearerToken() : null);
+            var joined = connection.Subscribe<GamePlayerDto>(nameof(IGameClient.PlayerJoined));
+            await connection.StartAsync(Ct);
+            hooks.BeforeStateRead = async () => Assert.Equal(HttpStatusCode.NoContent, (await host.PostAsync($"/api/games/{first.Id}/end", null, Ct)).StatusCode);
+            if (asHost)
+            {
+                await Assert.ThrowsAsync<HubException>(() => connection.InvokeAsync<GameDto>("ConnectAsHost", first.Id, Ct));
+                await connection.InvokeAsync<GameDto>("ConnectAsHost", second.Id, Ct);
+            }
+            else
+            {
+                await Assert.ThrowsAsync<HubException>(() => connection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", firstPlayer.Token, Ct));
+                await connection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", secondPlayer.Token, Ct);
+            }
+            await app.Services.GetRequiredService<IGameNotifier>().PlayerJoinedAsync(first.Id, new GamePlayerDto(99999, "Old group", DateTime.UtcNow));
+            var newcomer = await host.JoinAsync(second.Code, "New group");
+            var delivered = await joined.NextAsync();
+            Assert.Equal(newcomer.PlayerId, delivered.Id);
+            Assert.Equal("New group", delivered.Nickname);
+        }
 
         [Fact]
         public async Task PlayerJoinedThroughRest_IsDeliveredToTheConnectedHost()
