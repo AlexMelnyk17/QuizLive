@@ -1,17 +1,17 @@
+import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
 
 import { Text } from '@components/ui/Text'
 
 import { HostStatValue } from '@modules/statistics/components/HostStatValue'
-import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
 import { HostStatsCharts } from '@modules/statistics/components/HostStatsCharts'
-import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
-import { StatsLoadError } from '@modules/statistics/components/StatsLoadError'
-import { StatsPageSkeleton } from '@modules/statistics/components/StatsPageSkeleton'
 import {
 	statsEmptyBanner,
 	statsKpiGrid,
 	statsPage
 } from '@modules/statistics/components/StatisticsPage.css'
+import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
+import { StatsLoadError } from '@modules/statistics/components/StatsLoadError'
+import { StatsPageSkeleton } from '@modules/statistics/components/StatsPageSkeleton'
 import {
 	HOST_STAT_FORMAT,
 	STATISTICS_KPI_LABELS,

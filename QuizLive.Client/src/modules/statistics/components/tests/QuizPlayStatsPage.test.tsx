@@ -11,6 +11,7 @@ import {
 	STATISTICS_CHART_COPY
 } from '@modules/statistics/constants'
 import type { QuizPlayStats } from '@modules/statistics/types'
+
 import { LAZY_UI_TIMEOUT_MS, renderWithTheme } from '@src/test/testUtils'
 
 type QuizStatsQuery = Pick<
@@ -113,8 +114,8 @@ describe('QuizPlayStatsPage', () => {
 			await screen.findByText(
 				STATISTICS_CHART_COPY.questionCorrectPercent,
 				undefined,
-				{ timeout: LAZY_UI_TIMEOUT_MS },
-			),
+				{ timeout: LAZY_UI_TIMEOUT_MS }
+			)
 		).toBeInTheDocument()
 	})
 

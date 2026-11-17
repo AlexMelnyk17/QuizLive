@@ -12,11 +12,11 @@ import { QuizKind } from '@modules/quizzes/constants'
 import { formatQuizDate } from '@modules/quizzes/utils/formatQuizDate'
 import { GameOpenTextEntries } from '@modules/statistics/components/GameOpenTextEntries'
 import { HostStatValue } from '@modules/statistics/components/HostStatValue'
+import { KindStatsCharts } from '@modules/statistics/components/KindStatsCharts'
 import {
 	statsKpiGrid,
 	statsPage
 } from '@modules/statistics/components/StatisticsPage.css'
-import { KindStatsCharts } from '@modules/statistics/components/KindStatsCharts'
 import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
 import { StatsLoadError } from '@modules/statistics/components/StatsLoadError'
 import { StatsPageSkeleton } from '@modules/statistics/components/StatsPageSkeleton'

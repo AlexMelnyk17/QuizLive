@@ -1,6 +1,6 @@
+import { statsChartGrid } from '@modules/statistics/components/StatisticsPage.css'
 import { GamesByKindChart } from '@modules/statistics/components/charts/GamesByKindChart'
 import { GamesOverTimeChart } from '@modules/statistics/components/charts/GamesOverTimeChart'
-import { statsChartGrid } from '@modules/statistics/components/StatisticsPage.css'
 import type { GamesPerDay, KindCounts } from '@modules/statistics/types'
 
 export type HostStatsChartsProps = {

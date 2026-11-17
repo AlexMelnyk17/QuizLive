@@ -7,7 +7,6 @@ import { Text } from '@components/ui/Text'
 import { QuizNotFound } from '@modules/quizzes/components/QuizNotFound'
 import { formatQuizDate } from '@modules/quizzes/utils/formatQuizDate'
 import { HostStatValue } from '@modules/statistics/components/HostStatValue'
-import { GamesOverTimeChart } from '@modules/statistics/components/charts/GamesOverTimeChart'
 import { KindStatsCharts } from '@modules/statistics/components/KindStatsCharts'
 import { QuizRunsList } from '@modules/statistics/components/QuizRunsList'
 import {
@@ -19,6 +18,7 @@ import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
 import { StatsLoadError } from '@modules/statistics/components/StatsLoadError'
 import { StatsPageSkeleton } from '@modules/statistics/components/StatsPageSkeleton'
 import { StatsPlayPageToolbar } from '@modules/statistics/components/StatsPlayPageToolbar'
+import { GamesOverTimeChart } from '@modules/statistics/components/charts/GamesOverTimeChart'
 import {
 	HOST_STAT_FORMAT,
 	QUIZ_STATS_KPI_LABELS,

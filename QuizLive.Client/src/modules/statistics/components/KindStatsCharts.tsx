@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { Suspense, lazy } from 'react'
 
 import { QuizKind } from '@modules/quizzes/constants'
 import type { QuizKindValue } from '@modules/quizzes/types'
@@ -8,26 +8,24 @@ import type {
 	PollQuestionStats,
 	QuizChoiceQuestionStats
 } from '@modules/statistics/types'
+
 import { assertNever } from '@utils/assertNever'
 
 const QuizChoiceStatsCharts = lazy(async () => {
-	const module = await import(
-		'@modules/statistics/components/QuizChoiceStatsCharts'
-	)
+	const module =
+		await import('@modules/statistics/components/QuizChoiceStatsCharts')
 	return { default: module.QuizChoiceStatsCharts }
 })
 
 const PollChoiceStatsCharts = lazy(async () => {
-	const module = await import(
-		'@modules/statistics/components/PollChoiceStatsCharts'
-	)
+	const module =
+		await import('@modules/statistics/components/PollChoiceStatsCharts')
 	return { default: module.PollChoiceStatsCharts }
 })
 
 const OpenTextStatsCharts = lazy(async () => {
-	const module = await import(
-		'@modules/statistics/components/OpenTextStatsCharts'
-	)
+	const module =
+		await import('@modules/statistics/components/OpenTextStatsCharts')
 	return { default: module.OpenTextStatsCharts }
 })
 
@@ -64,9 +62,7 @@ function renderKind(
 			if (!data.quizChoiceQuestions) {
 				return null
 			}
-			return (
-				<QuizChoiceStatsCharts questions={data.quizChoiceQuestions} />
-			)
+			return <QuizChoiceStatsCharts questions={data.quizChoiceQuestions} />
 		case QuizKind.PollChoice:
 			if (!data.pollQuestions) {
 				return null
