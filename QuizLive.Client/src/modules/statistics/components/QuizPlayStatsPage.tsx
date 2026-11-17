@@ -7,6 +7,8 @@ import { Text } from '@components/ui/Text'
 import { QuizNotFound } from '@modules/quizzes/components/QuizNotFound'
 import { formatQuizDate } from '@modules/quizzes/utils/formatQuizDate'
 import { HostStatValue } from '@modules/statistics/components/HostStatValue'
+import { GamesOverTimeChart } from '@modules/statistics/components/charts/GamesOverTimeChart'
+import { KindStatsCharts } from '@modules/statistics/components/KindStatsCharts'
 import { QuizRunsList } from '@modules/statistics/components/QuizRunsList'
 import {
 	statsEmptyBanner,
@@ -17,7 +19,6 @@ import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
 import { StatsLoadError } from '@modules/statistics/components/StatsLoadError'
 import { StatsPageSkeleton } from '@modules/statistics/components/StatsPageSkeleton'
 import { StatsPlayPageToolbar } from '@modules/statistics/components/StatsPlayPageToolbar'
-import { GamesOverTimeChart } from '@modules/statistics/components/charts/GamesOverTimeChart'
 import {
 	HOST_STAT_FORMAT,
 	QUIZ_STATS_KPI_LABELS,
@@ -28,7 +29,6 @@ import { useQuizStats } from '@modules/statistics/hooks/useQuizStats'
 import type { QuizPlayStats } from '@modules/statistics/types'
 import { formatStatDuration } from '@modules/statistics/utils/formatStatDuration'
 import { getQuizStatsView } from '@modules/statistics/utils/getQuizStatsView'
-import { renderKindStatsCharts } from '@modules/statistics/utils/renderKindStatsCharts'
 
 import { PATHS } from '@config/routes'
 
@@ -164,7 +164,12 @@ function renderReady(data: QuizPlayStats, quizId: number) {
 				points={data.activity.gamesPerDay}
 				title={QUIZ_STATS_PAGE_COPY.activityChart}
 			/>
-			{renderKindStatsCharts(data.kind, data)}
+			<KindStatsCharts
+				kind={data.kind}
+				quizChoiceQuestions={data.quizChoiceQuestions}
+				pollQuestions={data.pollQuestions}
+				openQuestions={data.openQuestions}
+			/>
 			<QuizRunsList quizId={quizId} kind={data.kind} runs={data.runs} />
 		</div>
 	)

@@ -16,6 +16,7 @@ import {
 	statsKpiGrid,
 	statsPage
 } from '@modules/statistics/components/StatisticsPage.css'
+import { KindStatsCharts } from '@modules/statistics/components/KindStatsCharts'
 import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
 import { StatsLoadError } from '@modules/statistics/components/StatsLoadError'
 import { StatsPageSkeleton } from '@modules/statistics/components/StatsPageSkeleton'
@@ -31,7 +32,6 @@ import type { GamePlayStats } from '@modules/statistics/types'
 import { formatGamePlayerLine } from '@modules/statistics/utils/formatGamePlayerLine'
 import { formatStatDuration } from '@modules/statistics/utils/formatStatDuration'
 import { getGameStatsView } from '@modules/statistics/utils/getGameStatsView'
-import { renderKindStatsCharts } from '@modules/statistics/utils/renderKindStatsCharts'
 
 import { PATHS } from '@config/routes'
 
@@ -174,8 +174,15 @@ function renderReady(data: GamePlayStats) {
 					}
 				/>
 			</div>
-			{renderScoresChart(data)}
-			{renderKindStatsCharts(data.kind, data)}
+			{data.kind === QuizKind.QuizChoice ? (
+				<PlayerScoresChart players={data.players} />
+			) : null}
+			<KindStatsCharts
+				kind={data.kind}
+				quizChoiceQuestions={data.quizChoiceQuestions}
+				pollQuestions={data.pollQuestions}
+				openQuestions={data.openQuestions}
+			/>
 			{renderOpenTextEntries(data)}
 			<section>
 				<Heading level={3}>{GAME_STATS_PAGE_COPY.playersTitle}</Heading>
@@ -189,14 +196,6 @@ function renderReady(data: GamePlayStats) {
 			</section>
 		</div>
 	)
-}
-
-function renderScoresChart(data: GamePlayStats) {
-	if (data.kind !== QuizKind.QuizChoice) {
-		return null
-	}
-
-	return <PlayerScoresChart players={data.players} />
 }
 
 function renderOpenTextEntries(data: GamePlayStats) {

@@ -1,19 +1,17 @@
-import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
 
 import { Text } from '@components/ui/Text'
 
 import { HostStatValue } from '@modules/statistics/components/HostStatValue'
+import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
+import { HostStatsCharts } from '@modules/statistics/components/HostStatsCharts'
+import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
+import { StatsLoadError } from '@modules/statistics/components/StatsLoadError'
+import { StatsPageSkeleton } from '@modules/statistics/components/StatsPageSkeleton'
 import {
-	statsChartGrid,
 	statsEmptyBanner,
 	statsKpiGrid,
 	statsPage
 } from '@modules/statistics/components/StatisticsPage.css'
-import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
-import { StatsLoadError } from '@modules/statistics/components/StatsLoadError'
-import { StatsPageSkeleton } from '@modules/statistics/components/StatsPageSkeleton'
-import { GamesByKindChart } from '@modules/statistics/components/charts/GamesByKindChart'
-import { GamesOverTimeChart } from '@modules/statistics/components/charts/GamesOverTimeChart'
 import {
 	HOST_STAT_FORMAT,
 	STATISTICS_KPI_LABELS,
@@ -95,10 +93,10 @@ function renderReady(data: HostStats) {
 					}
 				/>
 			</div>
-			<div className={statsChartGrid}>
-				<GamesOverTimeChart points={data.activity.gamesPerDay} />
-				<GamesByKindChart counts={data.games.byKind} />
-			</div>
+			<HostStatsCharts
+				gamesPerDay={data.activity.gamesPerDay}
+				byKind={data.games.byKind}
+			/>
 		</div>
 	)
 }
