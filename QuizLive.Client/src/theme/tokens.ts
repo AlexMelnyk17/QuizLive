@@ -4,20 +4,40 @@ export const palette = {
 	gray50: '#f9fafb',
 	gray100: '#f3f4f6',
 	gray200: '#e5e4e7',
+	gray300: '#d1d5db',
 	gray400: '#9ca3af',
 	gray500: '#6b6375',
+	gray600: '#4b5563',
 	gray700: '#2e303a',
 	gray800: '#1f2028',
 	gray900: '#16171d',
 	purple500: '#aa3bff',
 	purple400: '#c084fc',
+	purple300: '#d8b4fe',
 	purple600: '#9333ea',
+	purple700: '#7e22ce',
+	purple800: '#6b21a8',
+	green400: '#4ade80',
 	green500: '#22c55e',
 	green600: '#16a34a',
+	green700: '#15803d',
+	green800: '#166534',
+	red400: '#f87171',
 	red500: '#ef4444',
 	red600: '#dc2626',
+	red700: '#b91c1c',
+	amber400: '#fbbf24',
 	amber500: '#f59e0b',
+	amber800: '#92400e',
+	blue400: '#60a5fa',
 	blue500: '#3b82f6',
+	blue700: '#1d4ed8',
+	indigo400: '#a5b4fc',
+	indigo600: '#4f46e5',
+	pink300: '#f0abfc',
+	pink700: '#a21caf',
+	teal300: '#5eead4',
+	teal700: '#0f766e'
 } as const
 
 export const spacing = {
@@ -31,7 +51,7 @@ export const spacing = {
 	8: '2rem',
 	10: '2.5rem',
 	12: '3rem',
-	16: '4rem',
+	16: '4rem'
 } as const
 
 export const radii = {
@@ -40,7 +60,7 @@ export const radii = {
 	md: '0.5rem',
 	lg: '0.75rem',
 	xl: '1rem',
-	full: '9999px',
+	full: '9999px'
 } as const
 
 export const fontSizes = {
@@ -51,27 +71,27 @@ export const fontSizes = {
 	xl: '1.25rem',
 	'2xl': '1.5rem',
 	'3xl': '1.875rem',
-	'4xl': '2.25rem',
+	'4xl': '2.25rem'
 } as const
 
 export const fontWeights = {
 	normal: '400',
 	medium: '500',
 	semibold: '600',
-	bold: '700',
+	bold: '700'
 } as const
 
 export const lineHeights = {
 	tight: '1.2',
 	normal: '1.45',
-	relaxed: '1.6',
+	relaxed: '1.6'
 } as const
 
 export const shadows = {
 	none: 'none',
 	sm: '0 1px 2px rgba(0, 0, 0, 0.05)',
 	md: '0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-	lg: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
+	lg: '0 10px 25px -5px rgba(0, 0, 0, 0.15)'
 } as const
 
 export const zIndices = {
@@ -80,17 +100,17 @@ export const zIndices = {
 	sticky: '200',
 	overlay: '300',
 	modal: '400',
-	toast: '500',
+	toast: '500'
 } as const
 
 export const durations = {
 	fast: '120ms',
 	normal: '200ms',
-	slow: '320ms',
+	slow: '320ms'
 } as const
 
 export const fonts = {
 	sans: "system-ui, 'Segoe UI', Roboto, sans-serif",
 	heading: "system-ui, 'Segoe UI', Roboto, sans-serif",
-	mono: 'ui-monospace, Consolas, monospace',
+	mono: 'ui-monospace, Consolas, monospace'
 } as const

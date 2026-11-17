@@ -88,6 +88,14 @@ Path aliases are defined in `tsconfig.app.json` and resolved by Vite `tsconfigPa
 - **MUST NOT** add global CSS files outside the theme setup except `index.html` / build assets.
 - Use `@components/ui` primitives before inventing new controls.
 
+## Theme preferences
+
+- The shared Theme selector is available on the home page, authentication pages and dashboard header. It offers Light, Dark and System; System is the default.
+- Preferences are stored under `quizlive-theme` in local storage and synchronized between tabs. System mode follows changes to the operating system preference. Blocked storage does not prevent switching themes for the current visit.
+- `initializeTheme` applies the preference before React renders. `ThemeProvider` keeps the root theme class and native `color-scheme` synchronized, including dialogs rendered in portals.
+- Semantic colors and chart palettes live in `src/theme/themeColors.ts` and are exposed through the vanilla-extract contract. Components and charts must use these variables instead of fixed colors.
+- Theme tests cover persistence, system updates, unavailable storage and contrast for normal, selected, status, disabled and chart text in both themes.
+
 ## Environment and build
 
 - `.env` in `QuizLive.Client/` with `VITE_API_BASE_URL` (see project [README](../README.md)).

@@ -8,22 +8,30 @@ export const homePage = style({
 	boxSizing: 'border-box',
 	display: 'flex',
 	flexDirection: 'column',
-	gap: vars.spacing[8],
+	gap: vars.spacing[8]
 })
 
 export const section = style({
 	display: 'flex',
 	flexDirection: 'column',
-	gap: vars.spacing[4],
+	gap: vars.spacing[4]
+})
+
+export const homeHeader = style({
+	display: 'flex',
+	flexWrap: 'wrap',
+	justifyContent: 'space-between',
+	alignItems: 'center',
+	gap: vars.spacing[4]
 })
 
 export const hostSection = style({
 	paddingTop: vars.spacing[6],
-	borderTop: `1px solid ${vars.colors.border}`,
+	borderTop: `1px solid ${vars.colors.border}`
 })
 
 export const inlineLink = style({
 	color: vars.colors.primary,
 	textDecoration: 'underline',
-	fontWeight: vars.fontWeights.medium,
+	fontWeight: vars.fontWeights.medium
 })

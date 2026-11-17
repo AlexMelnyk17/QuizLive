@@ -8,7 +8,7 @@ export const switchRoot = style({
 	alignItems: 'center',
 	gap: vars.spacing[2],
 	cursor: 'pointer',
-	userSelect: 'none',
+	userSelect: 'none'
 })
 
 export const switchTrack = recipe({
@@ -20,21 +20,27 @@ export const switchTrack = recipe({
 		display: 'inline-flex',
 		alignItems: 'center',
 		transition: `background-color ${vars.durations.normal}`,
+		selectors: {
+			[`${switchRoot}:focus-within &`]: {
+				outline: `2px solid ${vars.colors.focusRing}`,
+				outlineOffset: '2px'
+			}
+		}
 	},
 	variants: {
 		checked: {
 			true: { backgroundColor: vars.colors.primary },
-			false: { backgroundColor: vars.colors.borderStrong },
+			false: { backgroundColor: vars.colors.borderStrong }
 		},
 		disabled: {
 			true: { opacity: 0.5, cursor: 'not-allowed' },
-			false: {},
-		},
+			false: {}
+		}
 	},
 	defaultVariants: {
 		checked: false,
-		disabled: false,
-	},
+		disabled: false
+	}
 })
 
 export const switchThumb = recipe({
@@ -43,27 +49,27 @@ export const switchThumb = recipe({
 		height: '20px',
 		borderRadius: vars.radii.full,
 		backgroundColor: vars.colors.surfaceRaised,
-		transition: `transform ${vars.durations.normal}`,
+		transition: `transform ${vars.durations.normal}`
 	},
 	variants: {
 		checked: {
 			true: { transform: 'translateX(18px)' },
-			false: { transform: 'translateX(0)' },
-		},
+			false: { transform: 'translateX(0)' }
+		}
 	},
 	defaultVariants: {
-		checked: false,
-	},
+		checked: false
+	}
 })
 
 export const switchInput = style({
 	position: 'absolute',
 	opacity: 0,
 	width: 0,
-	height: 0,
+	height: 0
 })
 
 export const switchLabel = style({
 	color: vars.colors.textHeading,
-	fontSize: vars.fontSizes.sm,
+	fontSize: vars.fontSizes.sm
 })
