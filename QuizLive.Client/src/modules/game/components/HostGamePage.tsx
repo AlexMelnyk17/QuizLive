@@ -4,8 +4,8 @@ import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
 
 import { Alert } from '@components/ui/Alert'
 import { Button } from '@components/ui/Button'
-import { Stack } from '@components/ui/Stack'
 
+import { buttonRow, hostScreen } from '@modules/game/components/HostGame.css'
 import { HostGameScreen } from '@modules/game/components/HostGameScreen'
 import { HOST_GAME_COPY } from '@modules/game/constants'
 
@@ -26,14 +26,14 @@ export function HostGamePage() {
 			{Number.isInteger(gameId) && gameId > 0 ? (
 				<HostGameScreen key={gameId} gameId={gameId} onBack={backToQuizzes} />
 			) : (
-				<Stack direction='column' align='stretch'>
+				<div className={hostScreen}>
 					<Alert variant='danger'>{HOST_GAME_COPY.invalidGame}</Alert>
-					<div>
+					<div className={buttonRow}>
 						<Button variant='secondary' onClick={backToQuizzes}>
 							{HOST_GAME_COPY.backToQuizzes}
 						</Button>
 					</div>
-				</Stack>
+				</div>
 			)}
 		</DashboardLayout>
 	)

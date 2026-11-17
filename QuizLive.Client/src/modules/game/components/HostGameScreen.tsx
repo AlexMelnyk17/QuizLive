@@ -1,11 +1,13 @@
 import { Alert } from '@components/ui/Alert'
 import { Button } from '@components/ui/Button'
-import { Heading } from '@components/ui/Heading'
-import { Stack } from '@components/ui/Stack'
 import { Text } from '@components/ui/Text'
 
+import { HostEndGameButton } from '@modules/game/components/HostEndGameButton'
+import { HostFinishedView } from '@modules/game/components/HostFinishedView'
+import { buttonRow, hostScreen } from '@modules/game/components/HostGame.css'
 import { HostLobby } from '@modules/game/components/HostLobby'
 import { HostQuestionView } from '@modules/game/components/HostQuestionView'
+import { HostResultsView } from '@modules/game/components/HostResultsView'
 import { GameStatus, HOST_GAME_COPY } from '@modules/game/constants'
 import { useHostGame } from '@modules/game/hooks/useHostGame'
 
@@ -30,40 +32,59 @@ export function HostGameScreen({ gameId, onBack }: HostGameScreenProps) {
 	// The host could not be connected (the game has ended, or is not the host's): the only way on is back.
 	if (error) {
 		return (
-			<Stack direction='column' align='stretch'>
+			<div className={hostScreen}>
 				<Alert variant='danger'>{error}</Alert>
-				<div>
+				<div className={buttonRow}>
 					<Button variant='secondary' onClick={onBack}>
 						{HOST_GAME_COPY.backToQuizzes}
 					</Button>
 				</div>
-			</Stack>
+			</div>
 		)
 	}
 
 	if (!game) return <Text tone='muted'>{HOST_GAME_COPY.connecting}</Text>
 
-	if (status === GameStatus.Lobby) {
+	if (status === GameStatus.Finished) {
 		return (
-			<HostLobby
-				quizTitle={game.quizTitle}
-				code={game.code}
-				players={players}
-				connectionState={connectionState}
-				onStart={commands.startGame}
-			/>
+			<div className={hostScreen}>
+				<HostFinishedView
+					quizId={game.quizId}
+					gameId={game.id}
+					onBack={onBack}
+				/>
+			</div>
 		)
 	}
 
-	if (status === GameStatus.Question && currentQuestion) {
-		return (
-			<HostQuestionView
-				question={currentQuestion}
-				receivedAtMs={questionReceivedAtMs}
-				onShowResults={commands.showResults}
-			/>
-		)
-	}
+	return (
+		<div className={hostScreen}>
+			{status === GameStatus.Lobby ? (
+				<HostLobby
+					quizTitle={game.quizTitle}
+					code={game.code}
+					players={players}
+					connectionState={connectionState}
+					onStart={commands.startGame}
+				/>
+			) : null}
 
-	return <Heading level={2}>{game.quizTitle}</Heading>
+			{status === GameStatus.Question && currentQuestion ? (
+				<HostQuestionView
+					question={currentQuestion}
+					receivedAtMs={questionReceivedAtMs}
+					onShowResults={commands.showResults}
+				/>
+			) : null}
+
+			{status === GameStatus.Results && currentQuestion ? (
+				<HostResultsView
+					question={currentQuestion}
+					onNextQuestion={commands.nextQuestion}
+				/>
+			) : null}
+
+			<HostEndGameButton onEndGame={commands.endGame} />
+		</div>
+	)
 }

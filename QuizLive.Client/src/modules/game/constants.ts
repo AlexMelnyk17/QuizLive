@@ -68,6 +68,28 @@ export const HOST_QUESTION_COPY = {
 	correct: 'Correct'
 } as const
 
+export const HOST_RESULTS_COPY = {
+	heading: (number: number, total: number) =>
+		`Question ${number} of ${total}: closed`,
+	next: 'Next question',
+	finish: 'Finish game'
+} as const
+
+export const HOST_END_GAME_COPY = {
+	open: 'End game',
+	title: 'End the game?',
+	body: 'The game finishes for everyone and cannot be resumed. Its progress is kept in the statistics.',
+	cancel: 'Keep playing',
+	confirm: 'End the game'
+} as const
+
+export const HOST_FINISHED_COPY = {
+	title: 'Game finished',
+	body: 'The players have been told the game is over.',
+	viewStats: 'View game statistics',
+	back: 'Back to my quizzes'
+} as const
+
 export const PLAYER_PAGE_COPY = {
 	connecting: 'Connecting to the game…',
 	joined: (nickname: string) => `You joined as ${nickname}`,

@@ -1,15 +1,12 @@
 import { Alert } from '@components/ui/Alert'
-import { AnswerOption } from '@components/ui/AnswerOption'
-import { Badge } from '@components/ui/Badge'
 import { Button } from '@components/ui/Button'
 import { CountdownRing } from '@components/ui/CountdownRing'
 import { Heading } from '@components/ui/Heading'
-import { Stack } from '@components/ui/Stack'
 import { Text } from '@components/ui/Text'
 
+import { HostQuestionOptions } from '@modules/game/components/HostQuestionOptions'
 import {
 	countdown,
-	optionsList,
 	questionImage
 } from '@modules/game/components/PlayerQuestionView.css'
 import {
@@ -66,33 +63,7 @@ export function HostQuestionView({
 				/>
 			) : null}
 
-			{content.options ? (
-				<Stack direction='column' role='list' className={optionsList}>
-					{content.options.map((option, index) => (
-						<div role='listitem' key={option.id}>
-							<AnswerOption
-								index={index}
-								state={option.isCorrect ? 'correct' : 'idle'}
-								disabled
-							>
-								{option.text}
-								{option.isCorrect ? (
-									<>
-										{' '}
-										<Badge variant='success'>
-											{HOST_QUESTION_COPY.correct}
-										</Badge>
-									</>
-								) : null}
-							</AnswerOption>
-						</div>
-					))}
-				</Stack>
-			) : (
-				<Text size='sm' tone='muted'>
-					{HOST_QUESTION_COPY.openText}
-				</Text>
-			)}
+			<HostQuestionOptions options={content.options} />
 
 			{error ? <Alert variant='danger'>{error}</Alert> : null}
 

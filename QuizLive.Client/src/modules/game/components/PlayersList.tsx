@@ -2,6 +2,7 @@ import { PlayerListItem } from '@components/ui/PlayerListItem'
 import { Stack } from '@components/ui/Stack'
 import { Text } from '@components/ui/Text'
 
+import { playersList } from '@modules/game/components/PlayersList.css'
 import { PLAYER_LOBBY_COPY } from '@modules/game/constants'
 import type { GamePlayerDto } from '@modules/game/types'
 
@@ -21,7 +22,7 @@ export function PlayersList({ players, selfPlayerId }: PlayersListProps) {
 	}
 
 	return (
-		<Stack direction='column' role='list'>
+		<Stack direction='column' role='list' className={playersList}>
 			{players.map(player => {
 				const isSelf = player.id === selfPlayerId
 

@@ -6,12 +6,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { HostGamePage } from '@modules/game/components/HostGamePage'
 import {
 	GameStatus,
+	HOST_END_GAME_COPY,
+	HOST_FINISHED_COPY,
 	HOST_GAME_COPY,
 	HOST_LOBBY_COPY,
-	HOST_QUESTION_COPY
+	HOST_QUESTION_COPY,
+	HOST_RESULTS_COPY
 } from '@modules/game/constants'
 import { useHostGame } from '@modules/game/hooks/useHostGame'
-import type { HostGameResult } from '@modules/game/types'
+import type { HostGameResult, HostQuestionDto } from '@modules/game/types'
 
 import { PATHS } from '@config/routes'
 
@@ -57,6 +60,36 @@ function hostGame(overrides: Partial<HostGameResult> = {}): HostGameResult {
 			endGame: vi.fn()
 		},
 		...overrides
+	}
+}
+
+const joinedGame = {
+	id: 7,
+	code: '283646',
+	quizId: 3,
+	quizTitle: 'STEM basics',
+	quizKind: 2
+} as const
+
+const closableQuestion: HostQuestionDto = {
+	number: 1,
+	total: 3,
+	question: {
+		id: 12,
+		order: 1,
+		text: 'What is 2 + 2?',
+		timeLimitSeconds: null,
+		basePoints: null,
+		imageUrl: null,
+		options: [
+			{ id: 21, order: 1, text: '4', isCorrect: true },
+			{ id: 22, order: 2, text: '5', isCorrect: false }
+		]
+	},
+	timing: {
+		startedAtUtc: '2026-11-17T10:00:00Z',
+		endsAtUtc: null,
+		serverNowUtc: '2026-11-17T10:00:05Z'
 	}
 }
 
@@ -141,35 +174,9 @@ describe('the host page', () => {
 		const showResults = vi.fn().mockResolvedValue(null)
 		hostGameMock.mockReturnValue(
 			hostGame({
-				game: {
-					id: 7,
-					code: '283646',
-					quizId: 3,
-					quizTitle: 'STEM basics',
-					quizKind: 2
-				},
+				game: joinedGame,
 				status: GameStatus.Question,
-				currentQuestion: {
-					number: 1,
-					total: 3,
-					question: {
-						id: 12,
-						order: 1,
-						text: 'What is 2 + 2?',
-						timeLimitSeconds: null,
-						basePoints: null,
-						imageUrl: null,
-						options: [
-							{ id: 21, order: 1, text: '4', isCorrect: true },
-							{ id: 22, order: 2, text: '5', isCorrect: false }
-						]
-					},
-					timing: {
-						startedAtUtc: '2026-11-17T10:00:00Z',
-						endsAtUtc: null,
-						serverNowUtc: '2026-11-17T10:00:05Z'
-					}
-				},
+				currentQuestion: closableQuestion,
 				questionReceivedAtMs: 1000,
 				commands: { ...hostGame().commands, showResults }
 			})
@@ -186,6 +193,66 @@ describe('the host page', () => {
 			)
 
 		expect(showResults).toHaveBeenCalledOnce()
+	})
+
+	it('shows the closed question, and moves on to the next one from it', async () => {
+		const nextQuestion = vi.fn().mockResolvedValue(null)
+		hostGameMock.mockReturnValue(
+			hostGame({
+				game: joinedGame,
+				status: GameStatus.Results,
+				currentQuestion: closableQuestion,
+				closedQuestionNumber: 1,
+				commands: { ...hostGame().commands, nextQuestion }
+			})
+		)
+		renderWithTheme(<HostGamePage />)
+
+		expect(
+			screen.getByRole('heading', { name: HOST_RESULTS_COPY.heading(1, 3) })
+		).toBeInTheDocument()
+
+		await userEvent
+			.setup()
+			.click(screen.getByRole('button', { name: HOST_RESULTS_COPY.next }))
+
+		expect(nextQuestion).toHaveBeenCalledOnce()
+	})
+
+	it('lets the host end the game from the lobby', async () => {
+		const user = userEvent.setup()
+		const endGame = vi.fn().mockResolvedValue(null)
+		hostGameMock.mockReturnValue(
+			hostGame({
+				game: joinedGame,
+				status: GameStatus.Lobby,
+				commands: { ...hostGame().commands, endGame }
+			})
+		)
+		renderWithTheme(<HostGamePage />)
+
+		await user.click(
+			screen.getByRole('button', { name: HOST_END_GAME_COPY.open })
+		)
+		await user.click(
+			screen.getByRole('button', { name: HOST_END_GAME_COPY.confirm })
+		)
+
+		expect(endGame).toHaveBeenCalledOnce()
+	})
+
+	it('shows the end of the game, without the end button', () => {
+		hostGameMock.mockReturnValue(
+			hostGame({ game: joinedGame, status: GameStatus.Finished })
+		)
+		renderWithTheme(<HostGamePage />)
+
+		expect(
+			screen.getByRole('heading', { name: HOST_FINISHED_COPY.title })
+		).toBeInTheDocument()
+		expect(
+			screen.queryByRole('button', { name: HOST_END_GAME_COPY.open })
+		).not.toBeInTheDocument()
 	})
 
 	it('shows the text of the server when the host cannot be connected, and lets the host go back', async () => {
