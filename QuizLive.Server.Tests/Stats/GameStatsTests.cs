@@ -47,7 +47,7 @@ namespace QuizLive.Server.Tests.Stats
         public async Task GetGameStats_ForFinishedQuizChoice_IncludesScoresAndOptionCounts()
         {
             var host = await factory.CreateAuthorizedClientAsync();
-            var quiz = await host.CreatePlayableQuizAsync(QuizKind.QuizChoice);
+            var quiz = await host.CreateQuizAsync(QuizKind.QuizChoice);
             var question = await host.AddQuestionAsync(quiz.Id, QuizKind.QuizChoice);
             var game = await host.CreateGameAsync(quiz.Id);
             var winner = await factory.CreateClient().JoinAsync(game.Code, "Ace");
