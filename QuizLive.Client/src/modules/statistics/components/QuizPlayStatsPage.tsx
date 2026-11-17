@@ -1,35 +1,36 @@
 import { useNavigate, useParams } from '@tanstack/react-router'
 
+import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
+
 import { Text } from '@components/ui/Text'
 
-import { PATHS } from '@config/routes'
-
-import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
 import { QuizNotFound } from '@modules/quizzes/components/QuizNotFound'
 import { formatQuizDate } from '@modules/quizzes/utils/formatQuizDate'
-import { GamesOverTimeChart } from '@modules/statistics/components/charts/GamesOverTimeChart'
+import { HostStatValue } from '@modules/statistics/components/HostStatValue'
 import { QuizRunsList } from '@modules/statistics/components/QuizRunsList'
+import {
+	statsEmptyBanner,
+	statsKpiGrid,
+	statsPage
+} from '@modules/statistics/components/StatisticsPage.css'
 import { StatsKpiCard } from '@modules/statistics/components/StatsKpiCard'
 import { StatsLoadError } from '@modules/statistics/components/StatsLoadError'
 import { StatsPageSkeleton } from '@modules/statistics/components/StatsPageSkeleton'
 import { StatsPlayPageToolbar } from '@modules/statistics/components/StatsPlayPageToolbar'
+import { GamesOverTimeChart } from '@modules/statistics/components/charts/GamesOverTimeChart'
 import {
-	statsEmptyBanner,
-	statsKpiGrid,
-	statsPage,
-} from '@modules/statistics/components/StatisticsPage.css'
-import {
+	HOST_STAT_FORMAT,
 	QUIZ_STATS_KPI_LABELS,
 	QUIZ_STATS_PAGE_COPY,
-	STATISTICS_EMPTY_VALUE,
+	STATISTICS_EMPTY_VALUE
 } from '@modules/statistics/constants'
 import { useQuizStats } from '@modules/statistics/hooks/useQuizStats'
 import type { QuizPlayStats } from '@modules/statistics/types'
-import { formatStatDecimal } from '@modules/statistics/utils/formatStatDecimal'
 import { formatStatDuration } from '@modules/statistics/utils/formatStatDuration'
-import { formatStatInteger } from '@modules/statistics/utils/formatStatInteger'
 import { getQuizStatsView } from '@modules/statistics/utils/getQuizStatsView'
 import { renderKindStatsCharts } from '@modules/statistics/utils/renderKindStatsCharts'
+
+import { PATHS } from '@config/routes'
 
 export function QuizPlayStatsPage() {
 	const navigate = useNavigate()
@@ -41,13 +42,13 @@ export function QuizPlayStatsPage() {
 		isPending: stats.isPending,
 		isError: stats.isError,
 		hasData: Boolean(stats.data),
-		error: stats.error,
+		error: stats.error
 	})
 
 	const backToQuiz = () => {
 		void navigate({
 			to: PATHS.quizDetails,
-			params: { quizId: String(quizId) },
+			params: { quizId: String(quizId) }
 		})
 	}
 
@@ -109,7 +110,7 @@ export function QuizPlayStatsPage() {
 function renderReady(data: QuizPlayStats, quizId: number) {
 	const lastPlayed = formatOptionalDate(data.games.lastPlayedAtUtc)
 	const averageDuration = formatOptionalDuration(
-		data.games.averageDurationSeconds,
+		data.games.averageDurationSeconds
 	)
 
 	return (
@@ -118,23 +119,45 @@ function renderReady(data: QuizPlayStats, quizId: number) {
 			<div className={statsKpiGrid}>
 				<StatsKpiCard
 					label={QUIZ_STATS_KPI_LABELS.gamesHosted}
-					value={formatStatInteger(data.games.total)}
+					value={
+						<HostStatValue
+							value={data.games.total}
+							format={HOST_STAT_FORMAT.integer}
+						/>
+					}
 				/>
 				<StatsKpiCard
 					label={QUIZ_STATS_KPI_LABELS.playerJoins}
-					value={formatStatInteger(data.players.totalJoins)}
+					value={
+						<HostStatValue
+							value={data.players.totalJoins}
+							format={HOST_STAT_FORMAT.integer}
+						/>
+					}
 				/>
 				<StatsKpiCard
 					label={QUIZ_STATS_KPI_LABELS.averagePlayersPerGame}
-					value={formatStatDecimal(data.players.averagePerGame)}
+					value={
+						<HostStatValue
+							value={data.players.averagePerGame}
+							format={HOST_STAT_FORMAT.decimal}
+						/>
+					}
 				/>
 				<StatsKpiCard
 					label={QUIZ_STATS_KPI_LABELS.lastPlayed}
-					value={lastPlayed}
+					value={
+						<HostStatValue value={lastPlayed} format={HOST_STAT_FORMAT.text} />
+					}
 				/>
 				<StatsKpiCard
 					label={QUIZ_STATS_KPI_LABELS.averageDuration}
-					value={averageDuration}
+					value={
+						<HostStatValue
+							value={averageDuration}
+							format={HOST_STAT_FORMAT.text}
+						/>
+					}
 				/>
 			</div>
 			<GamesOverTimeChart
@@ -154,7 +177,7 @@ function renderEmptyBanner(isEmpty: boolean) {
 
 	return (
 		<div className={statsEmptyBanner}>
-			<Text tone="muted">{QUIZ_STATS_PAGE_COPY.noFinishedRuns}</Text>
+			<Text tone='muted'>{QUIZ_STATS_PAGE_COPY.noFinishedRuns}</Text>
 		</div>
 	)
 }

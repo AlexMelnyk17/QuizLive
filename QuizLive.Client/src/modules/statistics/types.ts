@@ -3,7 +3,7 @@ import type { z } from 'zod'
 import type {
 	gamePlayStatsSchema,
 	hostStatsSchema,
-	quizPlayStatsSchema,
+	quizPlayStatsSchema
 } from '@modules/statistics/schemas'
 
 export type HostStats = z.infer<typeof hostStatsSchema>
@@ -24,23 +24,23 @@ export type QuizChoiceQuestionStats = NonNullable<
 	QuizPlayStats['quizChoiceQuestions']
 >[number]
 
-export type PollQuestionStats = NonNullable<QuizPlayStats['pollQuestions']>[number]
+export type PollQuestionStats = NonNullable<
+	QuizPlayStats['pollQuestions']
+>[number]
 
-export type OpenQuestionStats = NonNullable<QuizPlayStats['openQuestions']>[number]
+export type OpenQuestionStats = NonNullable<
+	QuizPlayStats['openQuestions']
+>[number]
 
 export type GamePlayStats = z.infer<typeof gamePlayStatsSchema>
 
 export type GamePlayerStats = GamePlayStats['players'][number]
 
-export type QuizStatsView = 'invalid' | 'pending' | 'not-found' | 'error' | 'ready'
+export type QuizStatsView =
+	'invalid' | 'pending' | 'not-found' | 'error' | 'ready'
 
 export type GameStatsView =
-	| 'invalid'
-	| 'pending'
-	| 'not-found'
-	| 'not-finished'
-	| 'error'
-	| 'ready'
+	'invalid' | 'pending' | 'not-found' | 'not-finished' | 'error' | 'ready'
 
 /** Chart view-models (mapped from DTOs in components; not props types). */
 
