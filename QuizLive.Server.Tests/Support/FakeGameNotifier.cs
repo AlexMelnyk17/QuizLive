@@ -17,6 +17,18 @@ namespace QuizLive.Server.Tests.Support
             return Task.CompletedTask;
         }
 
+        public Task QuestionShownAsync(int gameId, QuestionViews views)
+        {
+            _events.Enqueue(new GameEvent(nameof(IGameClient.QuestionShown), gameId, Views: views));
+            return Task.CompletedTask;
+        }
+
+        public Task QuestionClosedAsync(int gameId, int number)
+        {
+            _events.Enqueue(new GameEvent(nameof(IGameClient.QuestionClosed), gameId, Number: number));
+            return Task.CompletedTask;
+        }
+
         public Task GameEndedAsync(int gameId)
         {
             _events.Enqueue(new GameEvent(nameof(IGameClient.GameEnded), gameId));
@@ -24,5 +36,10 @@ namespace QuizLive.Server.Tests.Support
         }
     }
 
-    public record GameEvent(string Name, int GameId, GamePlayerDto? Player = null);
+    public record GameEvent(
+        string Name,
+        int GameId,
+        GamePlayerDto? Player = null,
+        QuestionViews? Views = null,
+        int? Number = null);
 }
