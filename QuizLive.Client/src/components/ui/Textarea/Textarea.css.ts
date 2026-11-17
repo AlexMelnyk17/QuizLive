@@ -15,34 +15,40 @@ export const textarea = recipe({
 		fontFamily: vars.fonts.sans,
 		lineHeight: vars.lineHeights.relaxed,
 		transition: `border-color ${vars.durations.normal}, box-shadow ${vars.durations.normal}`,
+		':disabled': {
+			backgroundColor: vars.colors.disabledBg,
+			color: vars.colors.disabledText,
+			borderColor: vars.colors.disabledBorder,
+			cursor: 'not-allowed'
+		},
 		'::placeholder': {
-			color: vars.colors.textMuted,
+			color: vars.colors.textMuted
 		},
 		selectors: {
 			'&:focus': {
 				outline: 'none',
 				borderColor: vars.colors.primaryBorder,
-				boxShadow: `0 0 0 3px ${vars.colors.primaryMuted}`,
+				boxShadow: `0 0 0 3px ${vars.colors.primaryMuted}`
 			},
 			'&:focus-visible': {
 				outline: 'none',
 				borderColor: vars.colors.primaryBorder,
-				boxShadow: `0 0 0 3px ${vars.colors.primaryMuted}`,
-			},
-		},
+				boxShadow: `0 0 0 3px ${vars.colors.primaryMuted}`
+			}
+		}
 	},
 	variants: {
 		invalid: {
 			true: {
 				borderColor: vars.colors.danger,
 				':focus': {
-					boxShadow: `0 0 0 3px ${vars.colors.dangerMuted}`,
-				},
+					boxShadow: `0 0 0 3px ${vars.colors.dangerMuted}`
+				}
 			},
-			false: {},
-		},
+			false: {}
+		}
 	},
 	defaultVariants: {
-		invalid: false,
-	},
+		invalid: false
+	}
 })

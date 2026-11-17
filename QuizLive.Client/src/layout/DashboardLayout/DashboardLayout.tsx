@@ -17,6 +17,7 @@ import { Button } from '@components/ui/Button'
 import { Divider } from '@components/ui/Divider'
 import { Heading } from '@components/ui/Heading'
 import { Text } from '@components/ui/Text'
+import { ThemeSwitcher } from '@components/ui/ThemeSwitcher'
 
 import { signOut, useSession } from '@modules/auth/store/sessionStore'
 
@@ -82,6 +83,7 @@ export function DashboardLayout({
 							</div>
 						</>
 					) : null}
+					<ThemeSwitcher />
 				</div>
 			</header>
 			<main className={dashboardMain}>{children}</main>

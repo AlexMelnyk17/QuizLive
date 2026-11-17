@@ -2,11 +2,14 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import { ThemeProvider } from '@theme/ThemeProvider'
+import '@theme/global.css'
+import { initializeTheme } from '@theme/initializeTheme'
 
 import { AppProviders } from '@providers/AppProviders'
 
 import App from '@src/App'
-import '@theme/global.css'
+
+initializeTheme()
 
 const rootElement = document.getElementById('root')
 if (!rootElement) {
