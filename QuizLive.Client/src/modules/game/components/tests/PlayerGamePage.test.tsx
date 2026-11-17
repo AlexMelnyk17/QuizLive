@@ -1,7 +1,7 @@
 import { act, cleanup, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { PLAYER_PAGE_COPY } from '@modules/game/constants'
+import { GameStatus, PLAYER_PAGE_COPY } from '@modules/game/constants'
 import { usePlayerGame } from '@modules/game/hooks/usePlayerGame'
 import { usePlayerTokenStore } from '@modules/game/store/playerTokenStore'
 import type { PlayerGameResult } from '@modules/game/types'
@@ -91,6 +91,47 @@ describe('the player page', () => {
 		expect(
 			screen.getByText(PLAYER_PAGE_COPY.gameCode('283646'))
 		).toBeInTheDocument()
+	})
+
+	describe('while the game has not started', () => {
+		const joinedPlayer = {
+			gameId: 7,
+			code: '283646',
+			quizTitle: 'STEM basics',
+			playerId: 1,
+			nickname: 'Ann'
+		}
+
+		it('tells the player to wait for the host', async () => {
+			playerGameMock.mockReturnValue(
+				playerGame({ player: joinedPlayer, status: GameStatus.Lobby })
+			)
+
+			await renderApp(PATHS.play)
+
+			expect(
+				await screen.findByText(PLAYER_PAGE_COPY.waitingForHost)
+			).toBeInTheDocument()
+		})
+
+		it.each([
+			['a question is open', GameStatus.Question],
+			['the results are shown', GameStatus.Results],
+			['the game is over', GameStatus.Finished]
+		])('does not tell the player to wait when %s', async (_name, status) => {
+			playerGameMock.mockReturnValue(
+				playerGame({ player: joinedPlayer, status })
+			)
+
+			await renderApp(PATHS.play)
+
+			await screen.findByRole('heading', {
+				name: PLAYER_PAGE_COPY.joined('Ann')
+			})
+			expect(
+				screen.queryByText(PLAYER_PAGE_COPY.waitingForHost)
+			).not.toBeInTheDocument()
+		})
 	})
 
 	it('shows the text of the server when the player cannot be connected', async () => {

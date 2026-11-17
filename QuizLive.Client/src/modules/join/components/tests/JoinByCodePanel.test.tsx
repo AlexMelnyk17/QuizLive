@@ -1,21 +1,40 @@
-import { cleanup, screen } from '@testing-library/react'
+import { cleanup, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { GameStatus } from '@modules/game/constants'
-import { fetchGameByCode } from '@modules/join/api/joinApi'
+import { usePlayerTokenStore } from '@modules/game/store/playerTokenStore'
+import { fetchGameByCode, joinGame } from '@modules/join/api/joinApi'
 import { JoinByCodePanel } from '@modules/join/components/JoinByCodePanel'
-import { JOIN_GAME_CODE_LENGTH, JOIN_PANEL_COPY } from '@modules/join/constants'
+import {
+	JOIN_FORM_COPY,
+	JOIN_GAME_CODE_LENGTH,
+	JOIN_PANEL_COPY
+} from '@modules/join/constants'
 import type { GameLookupDto } from '@modules/join/types'
+
+import { PATHS } from '@config/routes'
 
 import { ApiError } from '@api/apiError'
 import { HTTP_STATUS } from '@api/httpStatus'
 
 import { renderWithQuery } from '@src/test/testUtils'
 
-vi.mock('@modules/join/api/joinApi', () => ({ fetchGameByCode: vi.fn() }))
+const { navigateMock } = vi.hoisted(() => ({ navigateMock: vi.fn() }))
+
+vi.mock('@tanstack/react-router', async importOriginal => {
+	const actual = await importOriginal<typeof import('@tanstack/react-router')>()
+
+	return { ...actual, useNavigate: () => navigateMock }
+})
+
+vi.mock('@modules/join/api/joinApi', () => ({
+	fetchGameByCode: vi.fn(),
+	joinGame: vi.fn()
+}))
 
 const fetchMock = vi.mocked(fetchGameByCode)
+const joinMock = vi.mocked(joinGame)
 
 const lobbyGame: GameLookupDto = {
 	code: '283646',
@@ -35,6 +54,10 @@ async function typeCode(code: string) {
 describe('JoinByCodePanel', () => {
 	beforeEach(() => {
 		fetchMock.mockReset()
+		joinMock.mockReset()
+		navigateMock.mockReset()
+		sessionStorage.clear()
+		usePlayerTokenStore.setState({ playerToken: null })
 	})
 
 	afterEach(cleanup)
@@ -70,21 +93,17 @@ describe('JoinByCodePanel', () => {
 		expect(screen.getByRole('button', { name: /Join game/i })).toBeDisabled()
 	})
 
-	it('shows the game that the code belongs to and lets the player go on', async () => {
+	it('shows the game that the code belongs to', async () => {
 		fetchMock.mockResolvedValue(lobbyGame)
-		const onContinue = vi.fn()
-		renderWithQuery(<JoinByCodePanel onContinue={onContinue} />)
+		renderWithQuery(<JoinByCodePanel />)
 
-		const user = await typeCode('283646')
+		await typeCode('283646')
 
 		expect(
 			await screen.findByText(JOIN_PANEL_COPY.found('STEM basics'))
 		).toBeInTheDocument()
 		expect(fetchMock).toHaveBeenCalledWith('283646')
-
-		await user.click(screen.getByRole('button', { name: /Join game/i }))
-
-		expect(onContinue).toHaveBeenCalledWith(lobbyGame)
+		expect(screen.getByRole('button', { name: /Join game/i })).toBeEnabled()
 	})
 
 	it('says so when no active game has the code', async () => {
@@ -123,6 +142,90 @@ describe('JoinByCodePanel', () => {
 		expect(
 			await screen.findByText(JOIN_PANEL_COPY.lookupError)
 		).toBeInTheDocument()
+	})
+
+	describe('joining the game', () => {
+		async function goToNicknameStep() {
+			fetchMock.mockResolvedValue(lobbyGame)
+			renderWithQuery(<JoinByCodePanel />)
+			const user = await typeCode('283646')
+			await screen.findByText(JOIN_PANEL_COPY.found('STEM basics'))
+			await user.click(screen.getByRole('button', { name: /Join game/i }))
+
+			return user
+		}
+
+		async function enterNicknameAndJoin(
+			user: ReturnType<typeof userEvent.setup>,
+			nickname: string
+		) {
+			await user.type(
+				await screen.findByLabelText(JOIN_FORM_COPY.nicknameLabel),
+				nickname
+			)
+			await user.click(
+				screen.getByRole('button', { name: JOIN_FORM_COPY.submit })
+			)
+		}
+
+		it('asks for a nickname once the player goes on with the code', async () => {
+			await goToNicknameStep()
+
+			expect(
+				await screen.findByText(JOIN_FORM_COPY.joining('STEM basics'))
+			).toBeInTheDocument()
+			expect(screen.queryAllByRole('textbox')).toHaveLength(1)
+		})
+
+		it('goes back to the code and keeps what was typed', async () => {
+			const user = await goToNicknameStep()
+			await screen.findByLabelText(JOIN_FORM_COPY.nicknameLabel)
+
+			await user.click(
+				screen.getByRole('button', { name: JOIN_FORM_COPY.back })
+			)
+
+			expect(screen.getAllByRole('textbox')).toHaveLength(JOIN_GAME_CODE_LENGTH)
+			expect(
+				await screen.findByText(JOIN_PANEL_COPY.found('STEM basics'))
+			).toBeInTheDocument()
+		})
+
+		it('joins, keeps the player token and opens the player page', async () => {
+			joinMock.mockResolvedValue({
+				gameId: 7,
+				playerId: 1,
+				nickname: 'Ann',
+				token: 'a1b2c3'
+			})
+			const user = await goToNicknameStep()
+
+			await enterNicknameAndJoin(user, 'Ann')
+
+			await waitFor(() =>
+				expect(navigateMock).toHaveBeenCalledWith({ to: PATHS.play })
+			)
+			expect(joinMock).toHaveBeenCalledWith('283646', { nickname: 'Ann' })
+			expect(usePlayerTokenStore.getState().playerToken).toBe('a1b2c3')
+		})
+
+		it('stays on the form with the text of the server when the nickname is taken', async () => {
+			joinMock.mockRejectedValue(
+				new ApiError(HTTP_STATUS.CONFLICT, {
+					status: HTTP_STATUS.CONFLICT,
+					detail: 'The nickname "Ann" is already taken in this game.'
+				})
+			)
+			const user = await goToNicknameStep()
+
+			await enterNicknameAndJoin(user, 'Ann')
+
+			expect(await screen.findByRole('alert')).toHaveTextContent(
+				'The nickname "Ann" is already taken in this game.'
+			)
+			expect(navigateMock).not.toHaveBeenCalled()
+			expect(usePlayerTokenStore.getState().playerToken).toBeNull()
+		})
 	})
 
 	it('forgets the game when the code is changed', async () => {

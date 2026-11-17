@@ -47,7 +47,8 @@ export const GameStatus = {
 export const PLAYER_PAGE_COPY = {
 	connecting: 'Connecting to the game…',
 	joined: (nickname: string) => `You joined as ${nickname}`,
-	gameCode: (code: string) => `Game code: ${code}`
+	gameCode: (code: string) => `Game code: ${code}`,
+	waitingForHost: 'Wait for the host to start the game.'
 } as const
 
 // Where the connection to the hub is. "failed" means it could not be started, or the game could not be

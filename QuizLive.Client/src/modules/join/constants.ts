@@ -34,11 +34,22 @@ export const JOIN_API = {
 export const JOIN_NICKNAME_MAX_LENGTH = 40
 
 export const JOIN_FORM_COPY = {
+	title: 'Choose a nickname',
+	joining: (quizTitle: string) => `Joining: ${quizTitle}`,
+	nicknameLabel: 'Nickname',
+	nicknamePlaceholder: 'Your nickname',
+	submit: 'Join game',
+	back: 'Back',
+	errorTitle: 'Could not join the game',
+	genericError: 'Could not join the game. Check your connection and try again.',
 	validation: {
 		nicknameRequired: 'Enter a nickname.',
 		nicknameMax: `The nickname can be at most ${JOIN_NICKNAME_MAX_LENGTH} characters.`
 	}
 } as const
+
+// The fields of the nickname form; the server names its field errors after them.
+export const JOIN_FORM_FIELDS = ['nickname'] as const
 
 // A game found by its code. The code is part of the key, so each code is cached on its own.
 export const GAME_BY_CODE_QUERY_KEY = ['games', 'by-code'] as const
