@@ -1,7 +1,12 @@
 import { act, cleanup, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { GameStatus, PLAYER_PAGE_COPY } from '@modules/game/constants'
+import {
+	GameStatus,
+	PLAYER_LOBBY_COPY,
+	PLAYER_PAGE_COPY
+} from '@modules/game/constants'
 import { usePlayerGame } from '@modules/game/hooks/usePlayerGame'
 import { usePlayerTokenStore } from '@modules/game/store/playerTokenStore'
 import type { PlayerGameResult } from '@modules/game/types'
@@ -110,8 +115,35 @@ describe('the player page', () => {
 			await renderApp(PATHS.play)
 
 			expect(
-				await screen.findByText(PLAYER_PAGE_COPY.waitingForHost)
+				await screen.findByText(PLAYER_LOBBY_COPY.waitingForHost)
 			).toBeInTheDocument()
+		})
+
+		it('lists the players in the lobby and lets the player leave', async () => {
+			const leave = vi.fn()
+			playerGameMock.mockReturnValue(
+				playerGame({
+					player: joinedPlayer,
+					status: GameStatus.Lobby,
+					players: [
+						{ id: 1, nickname: 'Ann', joinedAtUtc: '2026-11-17T10:00:00Z' },
+						{ id: 2, nickname: 'Bob', joinedAtUtc: '2026-11-17T10:00:10Z' }
+					],
+					connectionState: 'connected',
+					leave
+				})
+			)
+
+			await renderApp(PATHS.play)
+
+			expect(await screen.findAllByRole('listitem')).toHaveLength(2)
+			expect(screen.getByText('Bob')).toBeInTheDocument()
+
+			await userEvent
+				.setup()
+				.click(screen.getByRole('button', { name: PLAYER_LOBBY_COPY.leave }))
+
+			expect(leave).toHaveBeenCalledOnce()
 		})
 
 		it.each([
@@ -129,7 +161,7 @@ describe('the player page', () => {
 				name: PLAYER_PAGE_COPY.joined('Ann')
 			})
 			expect(
-				screen.queryByText(PLAYER_PAGE_COPY.waitingForHost)
+				screen.queryByText(PLAYER_LOBBY_COPY.waitingForHost)
 			).not.toBeInTheDocument()
 		})
 	})
