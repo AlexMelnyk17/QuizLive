@@ -62,7 +62,7 @@ current timed question if it has not expired. It emits
 `TimeAdded({ number, timing: { startedAtUtc, endsAtUtc, serverNowUtc } })` to everyone.
 The original `QuestionShown`/`HostQuestionShown` shapes remain unchanged.
 
-`LiveGameWorker` checks persisted deadlines every 250 ms. It uses the same
+`LiveGameWorker` checks persisted deadlines as soon as it starts, then every 250 ms. It uses the same
 compare-and-set closing transition as `ShowResults`. Its predicate includes the
 question number and exact deadline, so an extension invalidates a pending old timer.
 Late answers are rejected by the server even between a deadline and the next tick.

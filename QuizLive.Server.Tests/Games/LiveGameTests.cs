@@ -163,6 +163,18 @@ public class LiveGameTests(LiveGameFactory factory) : IClassFixture<LiveGameFact
     }
 
     [Fact]
+    public async Task AnOverdueQuestion_IsClosedOnTheWorkerTick()
+    {
+        var setup = await CreateAsync(QuizKind.PollChoice);
+        await Start(setup);
+        factory.Clock.Advance(TimeSpan.FromSeconds(30));
+        await Tick();
+        Assert.Equal(GameStatus.Results, await Status(setup));
+        await Tick();
+        Assert.Equal(GameStatus.Results, await Status(setup));
+    }
+
+    [Fact]
     public async Task TimerAndHostCloseOnceAndExtensionsInvalidateOldDeadlines()
     {
         var setup = await CreateAsync(QuizKind.PollChoice);

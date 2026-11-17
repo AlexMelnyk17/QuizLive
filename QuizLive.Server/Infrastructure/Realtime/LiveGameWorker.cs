@@ -26,16 +26,32 @@ public sealed class LiveGameWorker(IServiceScopeFactory scopes, TimeProvider clo
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(250), clock);
         try
         {
+            await SafeTickAsync(stoppingToken);
+
+            using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(250), clock);
             while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                try { await TickAsync(stoppingToken); }
-                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
-                catch (Exception ex) { logger.LogError(ex, "Live game timer/presence tick failed"); }
+                await SafeTickAsync(stoppingToken);
             }
         }
         catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { }
+    }
+
+    private async Task SafeTickAsync(CancellationToken stoppingToken)
+    {
+        try
+        {
+            await TickAsync(stoppingToken);
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Live game timer/presence tick failed");
+        }
     }
 }

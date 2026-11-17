@@ -193,8 +193,8 @@ namespace QuizLive.Server.Application.Games
 
         public async Task<QuestionTimingDto> AddTimeAsync(int gameId, string hostUserId, int seconds)
         {
-            if (seconds is < 1 or > 300)
-                throw new DomainValidationException("Additional time must be between 1 and 300 seconds.");
+            if (seconds is < 1 or > GameTiming.MaxAddedSeconds)
+                throw new DomainValidationException(GameMessages.InvalidAddedTime);
             await using var transaction = await db.Database.BeginTransactionAsync();
             await LoadActiveAsync(gameId, hostUserId);
             var game = await ActiveGame(gameId).AsNoTracking().SingleAsync();
