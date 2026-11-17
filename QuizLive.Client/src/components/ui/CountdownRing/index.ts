@@ -1,1 +1,4 @@
-export { CountdownRing, type CountdownRingProps } from '@components/ui/CountdownRing/CountdownRing'
+export {
+	CountdownRing,
+	type CountdownRingProps
+} from '@components/ui/CountdownRing/CountdownRing'

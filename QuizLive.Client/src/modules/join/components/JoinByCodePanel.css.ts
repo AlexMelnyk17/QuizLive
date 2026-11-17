@@ -6,11 +6,11 @@ export const panel = style({
 	display: 'flex',
 	flexDirection: 'column',
 	gap: vars.spacing[4],
-	alignItems: 'flex-start',
+	alignItems: 'flex-start'
 })
 
 export const codeLabel = style({
 	fontSize: vars.fontSizes.sm,
 	fontWeight: vars.fontWeights.medium,
-	color: vars.colors.textHeading,
+	color: vars.colors.textHeading
 })

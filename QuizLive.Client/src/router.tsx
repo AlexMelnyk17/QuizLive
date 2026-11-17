@@ -14,9 +14,9 @@ import { DashboardPage } from '@modules/dashboard/components/DashboardPage'
 import { HomePage } from '@modules/home/components/HomePage'
 import { QuizCreatePage } from '@modules/quizzes/components/QuizCreatePage'
 import { QuizDetailsPage } from '@modules/quizzes/components/QuizDetailsPage'
+import { QuizEditPage } from '@modules/quizzes/components/QuizEditPage'
 import { GamePlayStatsPage } from '@modules/statistics/components/GamePlayStatsPage'
 import { QuizPlayStatsPage } from '@modules/statistics/components/QuizPlayStatsPage'
-import { QuizEditPage } from '@modules/quizzes/components/QuizEditPage'
 import { StatisticsPage } from '@modules/statistics/components/StatisticsPage'
 
 import { PATHS } from '@config/routes'
@@ -141,11 +141,11 @@ const quizStatsRoute = createRoute({
 		if (!session) {
 			throw redirect({
 				to: PATHS.login,
-				search: { redirect: location.href },
+				search: { redirect: location.href }
 			})
 		}
 	},
-	component: QuizPlayStatsPage,
+	component: QuizPlayStatsPage
 })
 
 const gameStatsRoute = createRoute({
@@ -156,11 +156,11 @@ const gameStatsRoute = createRoute({
 		if (!session) {
 			throw redirect({
 				to: PATHS.login,
-				search: { redirect: location.href },
+				search: { redirect: location.href }
 			})
 		}
 	},
-	component: GamePlayStatsPage,
+	component: GamePlayStatsPage
 })
 
 const routeTree = rootRoute.addChildren([

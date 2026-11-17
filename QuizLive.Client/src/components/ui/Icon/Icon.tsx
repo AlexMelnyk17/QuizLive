@@ -1,6 +1,5 @@
-import type { LucideIcon } from 'lucide-react'
-
 import cn from 'clsx'
+import type { LucideIcon } from 'lucide-react'
 
 export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
@@ -9,7 +8,7 @@ const sizeMap: Record<IconSize, number> = {
 	sm: 16,
 	md: 20,
 	lg: 24,
-	xl: 32,
+	xl: 32
 }
 
 export type IconProps = {
@@ -23,7 +22,7 @@ export function Icon({
 	icon: LucideComponent,
 	size = 'md',
 	className,
-	'aria-hidden': ariaHidden = true,
+	'aria-hidden': ariaHidden = true
 }: IconProps) {
 	const pixelSize = sizeMap[size]
 	return (

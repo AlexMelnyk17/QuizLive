@@ -12,7 +12,7 @@ export type GameOpenTextEntriesProps = {
 export function GameOpenTextEntries({ questions }: GameOpenTextEntriesProps) {
 	return (
 		<>
-			{questions.map((question) => {
+			{questions.map(question => {
 				const entries = question.entries ?? []
 				if (entries.length === 0) {
 					return null
@@ -22,9 +22,9 @@ export function GameOpenTextEntries({ questions }: GameOpenTextEntriesProps) {
 					<section key={question.questionId}>
 						<Heading level={4}>{question.text}</Heading>
 						<ul className={openTextEntriesList}>
-							{entries.map((entry) => (
+							{entries.map(entry => (
 								<li key={`${entry.playerId}-${entry.answeredAtUtc}`}>
-									<Text size="sm">
+									<Text size='sm'>
 										{entry.nickname}: {entry.text}
 										{entry.isHidden
 											? ` ${GAME_STATS_PAGE_COPY.hiddenAnswerLabel}`

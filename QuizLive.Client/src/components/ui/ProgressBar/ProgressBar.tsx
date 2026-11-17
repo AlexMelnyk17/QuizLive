@@ -1,6 +1,10 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
 
-import { progressFill, progressLabel, progressTrack } from '@components/ui/ProgressBar/ProgressBar.css'
+import {
+	progressFill,
+	progressLabel,
+	progressTrack
+} from '@components/ui/ProgressBar/ProgressBar.css'
 
 type TrackVariants = NonNullable<RecipeVariants<typeof progressTrack>>
 type FillVariants = NonNullable<RecipeVariants<typeof progressFill>>
@@ -21,7 +25,7 @@ export function ProgressBar({
 	variant,
 	striped,
 	animated,
-	showLabel = false,
+	showLabel = false
 }: ProgressBarProps) {
 	const clamped = Math.min(Math.max(value, 0), max)
 	const percent = max === 0 ? 0 : (clamped / max) * 100
@@ -30,7 +34,7 @@ export function ProgressBar({
 		<div className={className}>
 			<div
 				className={progressTrack({ size })}
-				role="progressbar"
+				role='progressbar'
 				aria-valuemin={0}
 				aria-valuemax={max}
 				aria-valuenow={clamped}

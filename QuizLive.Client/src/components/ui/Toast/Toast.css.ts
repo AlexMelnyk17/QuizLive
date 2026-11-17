@@ -14,38 +14,38 @@ export const toast = recipe({
 		borderRadius: vars.radii.md,
 		border: `1px solid ${vars.colors.border}`,
 		backgroundColor: vars.colors.surfaceRaised,
-		boxShadow: vars.shadows.md,
+		boxShadow: vars.shadows.md
 	},
 	variants: {
 		variant: {
 			default: {},
 			success: {
-				borderColor: vars.colors.success,
+				borderColor: vars.colors.success
 			},
 			danger: {
-				borderColor: vars.colors.danger,
+				borderColor: vars.colors.danger
 			},
 			warning: {
-				borderColor: vars.colors.warning,
+				borderColor: vars.colors.warning
 			},
 			info: {
-				borderColor: vars.colors.info,
-			},
-		},
+				borderColor: vars.colors.info
+			}
+		}
 	},
 	defaultVariants: {
-		variant: 'default',
-	},
+		variant: 'default'
+	}
 })
 
 export const toastTitle = style({
 	margin: 0,
 	fontWeight: vars.fontWeights.semibold,
-	color: vars.colors.textHeading,
+	color: vars.colors.textHeading
 })
 
 export const toastMessage = style({
 	margin: 0,
 	fontSize: vars.fontSizes.sm,
-	color: vars.colors.text,
+	color: vars.colors.text
 })

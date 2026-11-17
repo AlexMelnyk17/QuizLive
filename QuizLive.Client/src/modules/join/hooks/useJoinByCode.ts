@@ -16,6 +16,6 @@ export function useJoinByCode() {
 		code,
 		setCode,
 		isComplete,
-		join,
+		join
 	}
 }

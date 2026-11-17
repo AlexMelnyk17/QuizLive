@@ -13,6 +13,6 @@ export function useQuizStats(quizId: number, enabled = true) {
 		enabled,
 		retry: (failureCount, error) =>
 			!(error instanceof ApiError && error.status === HTTP_STATUS.NOT_FOUND) &&
-			failureCount < 1,
+			failureCount < 1
 	})
 }

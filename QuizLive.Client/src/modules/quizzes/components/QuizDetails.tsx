@@ -1,8 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 
-import { PATHS } from '@config/routes'
-
 import { Alert } from '@components/ui/Alert'
 import { Badge } from '@components/ui/Badge'
 import { Button } from '@components/ui/Button'
@@ -40,6 +38,8 @@ import { useQuiz } from '@modules/quizzes/hooks/useQuiz'
 import { useSetQuizArchived } from '@modules/quizzes/hooks/useSetQuizArchived'
 import { formatQuestionCount } from '@modules/quizzes/utils/formatQuestionCount'
 import { formatQuizDate } from '@modules/quizzes/utils/formatQuizDate'
+
+import { PATHS } from '@config/routes'
 
 import { ApiError } from '@api/apiError'
 import { HTTP_STATUS } from '@api/httpStatus'
@@ -167,7 +167,7 @@ export function QuizDetails({
 						onClick={() =>
 							void navigate({
 								to: PATHS.quizStats,
-								params: { quizId: String(quizId) },
+								params: { quizId: String(quizId) }
 							})
 						}
 					>

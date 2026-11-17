@@ -10,21 +10,25 @@ Rules apply to **new and changed** code. When touching a file, **SHOULD** move e
 
 These **MAY** appear directly in code without a named constant:
 
-| Kind | Allowed values | Typical use |
-| --- | --- | --- |
+| Kind    | Allowed values      | Typical use                                                                             |
+| ------- | ------------------- | --------------------------------------------------------------------------------------- |
 | Numbers | `0`, `1`, `-1` only | Array index `0`, increment/decrement by `1`, “previous” index `-1`, empty length checks |
-| Strings | `''`, `' '` only | Default empty value, intentional single-space separator or trim edge case |
+| Strings | `''`, `' '` only    | Default empty value, intentional single-space separator or trim edge case               |
 
 **Everything else** — user-visible text, route paths, HTTP status codes, timeouts, limits, enum discriminators, storage keys, query-key segments beyond the shared factory, and business thresholds — **MUST NOT** be inline literals. Use a named constant (see R-2–R-4).
 
 ```ts
 // Allowed
-if (items.length === 0) { /* ... */ }
+if (items.length === 0) {
+	/* ... */
+}
 const next = index + 1
 const label = parts.join(' ')
 
 // Not allowed — use constants.ts or shared status map
-if (error.status === 404) { /* ... */ }
+if (error.status === 404) {
+	/* ... */
+}
 void navigate({ to: '/dashboard' })
 ```
 
@@ -34,13 +38,13 @@ For HTTP status and API codes, use named constants (e.g. `HTTP_STATUS.NOT_FOUND`
 
 If a string, number, or object shape is used **more than once** or defines **behavior** (navigation, API contract, copy, storage), it **MUST** live in exactly one module-level definition and be imported elsewhere.
 
-| What | Where |
-| --- | --- |
-| User-facing copy (labels, errors, empty states) | `modules/<name>/constants.ts` as `*_COPY` with `as const` |
-| Query keys, storage keys, feature flags | `constants.ts` (or `store` for persist key only) |
-| Domain enums / maps (`QuizKind`, status labels) | `constants.ts` with `as const` / `satisfies` |
-| HTTP paths and redirects | Route SSOT (R-3) |
-| Pure numeric limits (page size, max length matching server) | `constants.ts` next to schema or API |
+| What                                                        | Where                                                     |
+| ----------------------------------------------------------- | --------------------------------------------------------- |
+| User-facing copy (labels, errors, empty states)             | `modules/<name>/constants.ts` as `*_COPY` with `as const` |
+| Query keys, storage keys, feature flags                     | `constants.ts` (or `store` for persist key only)          |
+| Domain enums / maps (`QuizKind`, status labels)             | `constants.ts` with `as const` / `satisfies`              |
+| HTTP paths and redirects                                    | Route SSOT (R-3)                                          |
+| Pure numeric limits (page size, max length matching server) | `constants.ts` next to schema or API                      |
 
 **MUST NOT** copy-paste the same object literal `{ ... }` or the same string in two files. Extract once, import many.
 
@@ -75,8 +79,7 @@ export const PATHS = {
 } as const
 
 export const pathTo = {
-	quizDetails: (quizId: number) =>
-		`/quizzes/${quizId}` as const
+	quizDetails: (quizId: number) => `/quizzes/${quizId}` as const
 }
 ```
 

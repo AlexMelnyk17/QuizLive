@@ -1,5 +1,4 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
-
 import cn from 'clsx'
 
 import { divider } from '@components/ui/Divider/Divider.css'
@@ -14,7 +13,7 @@ export function Divider({
 	className,
 	orientation,
 	spacing,
-	length,
+	length
 }: DividerProps) {
 	const resolvedOrientation = orientation ?? 'horizontal'
 

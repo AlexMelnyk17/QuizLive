@@ -10,8 +10,7 @@ export type QueryProviderProps = {
 
 export function QueryProvider({ children }: QueryProviderProps) {
 	const [client] = useState(
-		() =>
-			new QueryClient({ defaultOptions: QUERY_CLIENT_DEFAULT_OPTIONS })
+		() => new QueryClient({ defaultOptions: QUERY_CLIENT_DEFAULT_OPTIONS })
 	)
 
 	return <QueryClientProvider client={client}>{children}</QueryClientProvider>

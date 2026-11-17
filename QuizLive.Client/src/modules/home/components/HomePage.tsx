@@ -1,20 +1,22 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 
-import { PATHS } from '@config/routes'
-
 import { Button } from '@components/ui/Button'
 import { Heading } from '@components/ui/Heading'
 import { Text } from '@components/ui/Text'
+import { ThemeSwitcher } from '@components/ui/ThemeSwitcher'
 
 import { useSession } from '@modules/auth/store/sessionStore'
-import { HOME_COPY, HOME_TITLE } from '@modules/home/constants'
 import {
+	homeHeader,
 	homePage,
 	hostSection,
 	inlineLink,
-	section,
+	section
 } from '@modules/home/components/HomePage.css'
+import { HOME_COPY, HOME_TITLE } from '@modules/home/constants'
 import { JoinByCodePanel } from '@modules/join/components/JoinByCodePanel'
+
+import { PATHS } from '@config/routes'
 
 export function HomePage() {
 	const navigate = useNavigate()
@@ -22,10 +24,13 @@ export function HomePage() {
 
 	return (
 		<main className={homePage}>
-			<Heading level={1}>{HOME_TITLE}</Heading>
+			<header className={homeHeader}>
+				<Heading level={1}>{HOME_TITLE}</Heading>
+				<ThemeSwitcher />
+			</header>
 
-			<section className={section} aria-labelledby="join-heading">
-				<Heading level={2} id="join-heading">
+			<section className={section} aria-labelledby='join-heading'>
+				<Heading level={2} id='join-heading'>
 					{HOME_COPY.joinSectionTitle}
 				</Heading>
 				<JoinByCodePanel autoFocus />
@@ -33,17 +38,15 @@ export function HomePage() {
 
 			<section
 				className={`${section} ${hostSection}`}
-				aria-labelledby="host-heading"
+				aria-labelledby='host-heading'
 			>
-				<Heading level={2} id="host-heading">
+				<Heading level={2} id='host-heading'>
 					{HOME_COPY.hostSectionTitle}
 				</Heading>
-				<Text tone="muted">
-					{HOME_COPY.hostBody}
-				</Text>
+				<Text tone='muted'>{HOME_COPY.hostBody}</Text>
 				{session ? (
 					<Button
-						variant="secondary"
+						variant='secondary'
 						onClick={() => void navigate({ to: PATHS.dashboard })}
 					>
 						{HOME_COPY.goToDashboard}

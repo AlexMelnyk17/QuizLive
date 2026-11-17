@@ -1,9 +1,16 @@
 import type { ReactNode } from 'react'
 
+import {
+	authCard,
+	authContent,
+	authPage,
+	authStack,
+	authToolbar
+} from '@layout/AuthLayout/AuthLayout.css'
+
 import { Card } from '@components/ui/Card'
 import { Stack } from '@components/ui/Stack'
-
-import { authCard, authPage, authStack } from '@layout/AuthLayout/AuthLayout.css'
+import { ThemeSwitcher } from '@components/ui/ThemeSwitcher'
 
 export type AuthLayoutProps = {
 	children: ReactNode
@@ -12,11 +19,16 @@ export type AuthLayoutProps = {
 export function AuthLayout({ children }: AuthLayoutProps) {
 	return (
 		<div className={authPage}>
-			<Card className={authCard} padding="lg" variant="elevated" fullWidth>
-				<Stack direction="column" align="stretch" className={authStack}>
-					{children}
-				</Stack>
-			</Card>
+			<div className={authToolbar}>
+				<ThemeSwitcher />
+			</div>
+			<div className={authContent}>
+				<Card className={authCard} padding='lg' variant='elevated' fullWidth>
+					<Stack direction='column' align='stretch' className={authStack}>
+						{children}
+					</Stack>
+				</Card>
+			</div>
 		</div>
 	)
 }

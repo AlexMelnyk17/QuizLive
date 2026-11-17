@@ -1,10 +1,10 @@
 import { useNavigate } from '@tanstack/react-router'
 
-import { PATHS } from '@config/routes'
-
 import { DashboardLayout } from '@layout/DashboardLayout/DashboardLayout'
 
 import { QuizList } from '@modules/quizzes/components/QuizList'
+
+import { PATHS } from '@config/routes'
 
 export function DashboardPage() {
 	const navigate = useNavigate()

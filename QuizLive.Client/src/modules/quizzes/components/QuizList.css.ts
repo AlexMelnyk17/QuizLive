@@ -14,6 +14,14 @@ export const quizListFilter = style({
 	gap: vars.spacing[2]
 })
 
+export const quizListToolbar = style({
+	display: 'flex',
+	flexWrap: 'wrap',
+	alignItems: 'center',
+	justifyContent: 'space-between',
+	gap: vars.spacing[3]
+})
+
 // One column on phones, more as the screen grows; cards never get narrower than the screen.
 export const quizGrid = style({
 	display: 'grid',

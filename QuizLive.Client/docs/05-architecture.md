@@ -49,30 +49,30 @@ sequenceDiagram
 
 ## `src/` layout
 
-| Path | Responsibility |
-| --- | --- |
-| `main.tsx`, `App.tsx`, `router.tsx` | Entry and routing |
-| `providers/` | React Query and app-wide providers |
-| `layout/` | Route shells (auth vs dashboard) |
-| `modules/` | Feature slices (see [04-decomposition.md](./04-decomposition.md)) |
-| `components/ui/` | Design-system primitives |
-| `theme/` | vanilla-extract tokens, themes, sprinkles, `ThemeProvider` |
-| `api/` | Shared `apiRequest`, `ApiError`, field error helpers |
-| `config/env.ts` | Validated `ENV` singleton |
-| `utils/` | Cross-feature pure helpers |
-| `test/` | Shared test helpers (`renderWithTheme`, `renderApp`, setup) |
+| Path                                | Responsibility                                                    |
+| ----------------------------------- | ----------------------------------------------------------------- |
+| `main.tsx`, `App.tsx`, `router.tsx` | Entry and routing                                                 |
+| `providers/`                        | React Query and app-wide providers                                |
+| `layout/`                           | Route shells (auth vs dashboard)                                  |
+| `modules/`                          | Feature slices (see [04-decomposition.md](./04-decomposition.md)) |
+| `components/ui/`                    | Design-system primitives                                          |
+| `theme/`                            | vanilla-extract tokens, themes, sprinkles, `ThemeProvider`        |
+| `api/`                              | Shared `apiRequest`, `ApiError`, field error helpers              |
+| `config/env.ts`                     | Validated `ENV` singleton                                         |
+| `utils/`                            | Cross-feature pure helpers                                        |
+| `test/`                             | Shared test helpers (`renderWithTheme`, `renderApp`, setup)       |
 
 Path aliases are defined in `tsconfig.app.json` and resolved by Vite `tsconfigPaths`.
 
 ## State ownership
 
-| State | Tool | Example |
-| --- | --- | --- |
-| Server / remote | TanStack Query | Quizzes list, host stats |
-| Auth session | Zustand + persist | `sessionStore` |
-| Forms | React Hook Form + Zod | Login, register |
-| Ephemeral UI | `useState` | Modal open, tab index |
-| Shareable URL | Router search params | Login `redirect` |
+| State           | Tool                  | Example                  |
+| --------------- | --------------------- | ------------------------ |
+| Server / remote | TanStack Query        | Quizzes list, host stats |
+| Auth session    | Zustand + persist     | `sessionStore`           |
+| Forms           | React Hook Form + Zod | Login, register          |
+| Ephemeral UI    | `useState`            | Modal open, tab index    |
+| Shareable URL   | Router search params  | Login `redirect`         |
 
 ## Zustand (session and feature stores)
 
@@ -87,6 +87,14 @@ Path aliases are defined in `tsconfig.app.json` and resolved by Vite `tsconfigPa
 - **MUST** use vanilla-extract: co-located `Component.css.ts`, tokens from `@theme/tokens` / contract.
 - **MUST NOT** add global CSS files outside the theme setup except `index.html` / build assets.
 - Use `@components/ui` primitives before inventing new controls.
+
+## Theme preferences
+
+- The shared Theme selector is available on the home page, authentication pages and dashboard header. It offers Light, Dark and System; System is the default.
+- Preferences are stored under `quizlive-theme` in local storage and synchronized between tabs. System mode follows changes to the operating system preference. Blocked storage does not prevent switching themes for the current visit.
+- `initializeTheme` applies the preference before React renders. `ThemeProvider` keeps the root theme class and native `color-scheme` synchronized, including dialogs rendered in portals.
+- Semantic colors and chart palettes live in `src/theme/themeColors.ts` and are exposed through the vanilla-extract contract. Components and charts must use these variables instead of fixed colors.
+- Theme tests cover persistence, system updates, unavailable storage and contrast for normal, selected, status, disabled and chart text in both themes.
 
 ## Environment and build
 

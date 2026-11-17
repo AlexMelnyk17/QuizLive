@@ -1,15 +1,14 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
+import cn from 'clsx'
 import type { ReactNode } from 'react'
 
 import { Avatar } from '@components/ui/Avatar'
 import { Badge } from '@components/ui/Badge'
-import cn from 'clsx'
-
 import {
 	playerListItem,
 	playerMeta,
 	playerName,
-	playerScore,
+	playerScore
 } from '@components/ui/PlayerListItem/PlayerListItem.css'
 
 type PlayerListItemVariants = NonNullable<RecipeVariants<typeof playerListItem>>
@@ -29,15 +28,15 @@ export function PlayerListItem({
 	avatarSrc,
 	status = 'online',
 	isHost = false,
-	isSelf = false,
+	isSelf = false
 }: PlayerListItemProps) {
 	return (
 		<div className={cn(playerListItem({ isHost, isSelf }), className)}>
-			<Avatar name={name} src={avatarSrc} size="md" status={status} />
+			<Avatar name={name} src={avatarSrc} size='md' status={status} />
 			<div className={playerMeta}>
 				<p className={playerName}>{name}</p>
 				{isHost ? (
-					<Badge variant="primary" pill>
+					<Badge variant='primary' pill>
 						{'Host'}
 					</Badge>
 				) : null}

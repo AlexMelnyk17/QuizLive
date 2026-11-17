@@ -99,8 +99,8 @@ describe('QuizList', () => {
 		expect(fetchMyQuizzesMock).toHaveBeenLastCalledWith(true)
 		expect(archivedTab).toHaveAttribute('aria-pressed', 'true')
 		expect(
-			screen.queryByRole('button', { name: QUIZ_LIST_COPY.createQuiz })
-		).not.toBeInTheDocument()
+			screen.getByRole('button', { name: QUIZ_LIST_COPY.createQuiz })
+		).toBeEnabled()
 	})
 
 	it('offers to create a quiz when there are no active quizzes', async () => {
@@ -108,6 +108,7 @@ describe('QuizList', () => {
 		const onCreateQuiz = vi.fn()
 		fetchMyQuizzesMock.mockResolvedValue([])
 		renderQuizList({ onCreateQuiz })
+		await screen.findByText(QUIZ_LIST_COPY.empty.active.title)
 
 		await user.click(
 			await screen.findByRole('button', { name: QUIZ_LIST_COPY.createQuiz })

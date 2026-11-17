@@ -52,7 +52,8 @@ namespace QuizLive.Server.Application.Games
         GameStatus Status,
         int PlayerId,
         string Nickname,
-        List<GamePlayerDto> Players);
+        List<GamePlayerDto> Players,
+        PlayerQuestionDto? CurrentQuestion = null);
 
     // The token is returned only once, on join; the client keeps it to connect to the game later.
     public record JoinGameResponse(

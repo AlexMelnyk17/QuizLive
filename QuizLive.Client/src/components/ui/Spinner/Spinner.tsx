@@ -1,5 +1,4 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
-
 import cn from 'clsx'
 
 import { spinner } from '@components/ui/Spinner/Spinner.css'
@@ -15,12 +14,12 @@ export function Spinner({
 	className,
 	size,
 	tone,
-	label = 'Loading',
+	label = 'Loading'
 }: SpinnerProps) {
 	return (
 		<span
 			className={cn(spinner({ size, tone }), className)}
-			role="status"
+			role='status'
 			aria-label={label}
 		/>
 	)
