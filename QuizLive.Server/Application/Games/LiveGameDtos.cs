@@ -35,6 +35,12 @@ namespace QuizLive.Server.Application.Games
         PlayerQuestionDto ForPlayers,
         HostQuestionDto ForHost);
 
+    // What the host gets when a connection joins: the game and, while a question is open or its results are
+    // shown, that question, so a new tab or a reloaded page shows the same screen as the others.
+    public record HostGameStateDto(
+        GameDto Game,
+        HostQuestionDto? CurrentQuestion);
+
     // The next question, or none when the last one was already shown and the game is finished.
     public record NextQuestionResult(QuestionViews? Question)
     {

@@ -21,6 +21,34 @@ namespace QuizLive.Server.Application.Games
             int? CurrentQuestionOrder,
             int PlayerCount);
 
+        public async Task<QuestionViews?> GetCurrentQuestionAsync(int gameId)
+        {
+            var game = await ActiveGame(gameId)
+                .Where(g => g.Status == GameStatus.Question || g.Status == GameStatus.Results)
+                .AsNoTracking()
+                .Select(g => new
+                {
+                    g.QuizId,
+                    g.Quiz.Kind,
+                    g.CurrentQuestionOrder,
+                    g.CurrentQuestionStartedAtUtc,
+                    g.CurrentQuestionEndsAtUtc
+                })
+                .FirstOrDefaultAsync();
+
+            if (game?.CurrentQuestionOrder is not { } order || game.CurrentQuestionStartedAtUtc is not { } startedAt)
+            {
+                return null;
+            }
+
+            var questions = await QuestionQueries.ForQuiz(db, game.QuizId, game.Kind).ToListAsync();
+            var current = questions.FirstOrDefault(q => q.Order == order);
+
+            return current is null
+                ? null
+                : LiveGameMappings.ToViews(current, questions.Count, startedAt, game.CurrentQuestionEndsAtUtc);
+        }
+
         public async Task<QuestionViews> StartAsync(int gameId, string hostUserId)
         {
             var game = await LoadActiveAsync(gameId, hostUserId);

@@ -26,7 +26,7 @@ namespace QuizLive.Server.Tests.Games
             await using var connection = factory.CreateHubConnection(host.BearerToken());
             var joined = connection.Subscribe<GamePlayerDto>("PlayerJoined");
             await connection.StartAsync(Ct);
-            await connection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+            await connection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct);
 
             var player = await host.JoinAsync(game.Code, "Ann");
 
@@ -47,7 +47,7 @@ namespace QuizLive.Server.Tests.Games
             await using var hostConnection = factory.CreateHubConnection(host.BearerToken());
             var hostSees = hostConnection.Subscribe<GamePlayerDto>("PlayerJoined");
             await hostConnection.StartAsync(Ct);
-            await hostConnection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+            await hostConnection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct);
 
             await using var annConnection = factory.CreateHubConnection();
             var annSees = annConnection.Subscribe<GamePlayerDto>("PlayerJoined");
@@ -75,7 +75,7 @@ namespace QuizLive.Server.Tests.Games
             await using var hostConnection = factory.CreateHubConnection(host.BearerToken());
             var hostSees = hostConnection.Subscribe("GameEnded");
             await hostConnection.StartAsync(Ct);
-            await hostConnection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+            await hostConnection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct);
 
             await using var annConnection = factory.CreateHubConnection();
             var annSees = annConnection.Subscribe("GameEnded");
@@ -110,9 +110,9 @@ namespace QuizLive.Server.Tests.Games
 
             hooks.AfterStateRead = () => host.JoinAsync(game.Code, "Late");
 
-            var snapshot = await connection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+            var snapshot = await connection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct);
 
-            Assert.Empty(snapshot.Players);
+            Assert.Empty(snapshot.Game.Players);
 
             var received = await joined.NextAsync();
             Assert.Equal("Late", received.Nickname);
@@ -155,12 +155,12 @@ namespace QuizLive.Server.Tests.Games
             var firstTabSees = firstTab.Subscribe<HostQuestionDto>("HostQuestionShown");
             var firstTabLeak = firstTab.Subscribe<JsonElement>("QuestionShown");
             await firstTab.StartAsync(Ct);
-            await firstTab.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+            await firstTab.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct);
 
             await using var secondTab = factory.CreateHubConnection(host.BearerToken());
             var secondTabSees = secondTab.Subscribe<HostQuestionDto>("HostQuestionShown");
             await secondTab.StartAsync(Ct);
-            await secondTab.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+            await secondTab.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct);
 
             await using var player = factory.CreateHubConnection();
             var playerSees = player.Subscribe<JsonElement>("QuestionShown");
@@ -205,7 +205,7 @@ namespace QuizLive.Server.Tests.Games
             var hostClosed = hostConnection.Subscribe<int>("QuestionClosed");
             var hostEnded = hostConnection.Subscribe("GameEnded");
             await hostConnection.StartAsync(Ct);
-            await hostConnection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+            await hostConnection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct);
 
             await using var player = factory.CreateHubConnection();
             var playerQuestions = player.Subscribe<PlayerQuestionDto>("QuestionShown");

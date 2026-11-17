@@ -8,6 +8,10 @@ namespace QuizLive.Server.Application.Abstractions
     // not fit the current state is a ConflictException and changes nothing.
     public interface IGameFlowService
     {
+        // The question that is open or whose results are shown, for a connection that joins in the middle of a
+        // game; null in the lobby. It does not check who asks: call it only after an access check.
+        Task<QuestionViews?> GetCurrentQuestionAsync(int gameId);
+
         // Lobby to the first question.
         Task<QuestionViews> StartAsync(int gameId, string hostUserId);
 

@@ -36,6 +36,7 @@ namespace QuizLive.Server.Tests.Games
             Assert.Equal(player.PlayerId, state.PlayerId);
             Assert.Equal("Ann", state.Nickname);
             Assert.Equal(["Ann"], state.Players.Select(p => p.Nickname));
+            Assert.Null(state.CurrentQuestion);
         }
 
         [Fact]
@@ -89,11 +90,12 @@ namespace QuizLive.Server.Tests.Games
 
             await using var connection = await StartAsync(factory, host.BearerToken());
 
-            var result = await connection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+            var result = await connection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct);
 
-            Assert.Equal(game.Id, result.Id);
-            Assert.Equal(game.Code, result.Code);
-            Assert.Equal(["Ann"], result.Players.Select(p => p.Nickname));
+            Assert.Equal(game.Id, result.Game.Id);
+            Assert.Equal(game.Code, result.Game.Code);
+            Assert.Equal(["Ann"], result.Game.Players.Select(p => p.Nickname));
+            Assert.Null(result.CurrentQuestion);
         }
 
         [Fact]
@@ -106,7 +108,7 @@ namespace QuizLive.Server.Tests.Games
             await using var connection = await StartAsync(factory);
 
             var error = await Assert.ThrowsAsync<HubException>(
-                () => connection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct));
+                () => connection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct));
 
             // What the client sees is recorded here: [Authorize] rejects the call before the method runs.
             Assert.Contains("ConnectAsHost", error.Message);
@@ -125,7 +127,7 @@ namespace QuizLive.Server.Tests.Games
             await using var connection = await StartAsync(factory, forged);
 
             await Assert.ThrowsAsync<HubException>(
-                () => connection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct));
+                () => connection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct));
         }
 
         [Fact]
@@ -139,7 +141,7 @@ namespace QuizLive.Server.Tests.Games
             await using var connection = await StartAsync(factory, stranger.BearerToken());
 
             var error = await Assert.ThrowsAsync<HubException>(
-                () => connection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct));
+                () => connection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct));
 
             Assert.Contains($"Game {game.Id} was not found.", error.Message);
         }
@@ -155,7 +157,7 @@ namespace QuizLive.Server.Tests.Games
             await using var connection = await StartAsync(factory, host.BearerToken());
 
             var error = await Assert.ThrowsAsync<HubException>(
-                () => connection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct));
+                () => connection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct));
 
             Assert.Contains($"Game {game.Id} was not found.", error.Message);
         }
@@ -212,10 +214,10 @@ namespace QuizLive.Server.Tests.Games
             var game = await host.CreateGameAsync(quiz.Id);
 
             await using var connection = await StartAsync(factory, host.BearerToken());
-            await connection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+            await connection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct);
 
             var error = await Assert.ThrowsAsync<HubException>(
-                () => connection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct));
+                () => connection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct));
 
             Assert.Contains("already joined a game", error.Message);
         }
@@ -232,7 +234,7 @@ namespace QuizLive.Server.Tests.Games
             await connection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", player.Token, Ct);
 
             var error = await Assert.ThrowsAsync<HubException>(
-                () => connection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct));
+                () => connection.InvokeAsync<HostGameStateDto>("ConnectAsHost", game.Id, Ct));
 
             Assert.Contains("already joined a game", error.Message);
         }

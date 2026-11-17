@@ -200,7 +200,7 @@ namespace QuizLive.Server.Tests.Games
         {
             var connection = factory.CreateHubConnection(setup.Host.BearerToken());
             await connection.StartAsync(Ct);
-            await connection.InvokeAsync<GameDto>("ConnectAsHost", setup.Game.Id, Ct);
+            await connection.InvokeAsync<HostGameStateDto>("ConnectAsHost", setup.Game.Id, Ct);
             return connection;
         }
 

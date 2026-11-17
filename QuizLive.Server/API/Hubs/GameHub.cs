@@ -34,6 +34,10 @@ namespace QuizLive.Server.API.Hubs
             try
             {
                 state = await gameService.GetPlayerStateAsync(playerToken);
+
+                // A player who joins in the middle of a game gets the running question, without IsCorrect.
+                var current = await gameFlow.GetCurrentQuestionAsync(gameId);
+                state = state with { CurrentQuestion = current?.ForPlayers };
             }
             catch
             {
@@ -50,7 +54,7 @@ namespace QuizLive.Server.API.Hubs
         }
 
         [Authorize]
-        public async Task<GameDto> ConnectAsHost(int gameId)
+        public async Task<HostGameStateDto> ConnectAsHost(int gameId)
         {
             EnsureNotConnected();
 
@@ -64,11 +68,15 @@ namespace QuizLive.Server.API.Hubs
             // players' group. The notifier sends every lobby event to the host group as well.
             await Groups.AddToGroupAsync(Context.ConnectionId, GameGroups.Host(gameId));
 
-            GameDto game;
+            HostGameStateDto state;
 
             try
             {
-                game = await gameService.GetActiveHostGameAsync(gameId, userId);
+                var game = await gameService.GetActiveHostGameAsync(gameId, userId);
+
+                // A host tab opened in the middle of a game gets the running question, like the other tabs have it.
+                var current = await gameFlow.GetCurrentQuestionAsync(gameId);
+                state = new HostGameStateDto(game, current?.ForHost);
             }
             catch
             {
@@ -80,7 +88,7 @@ namespace QuizLive.Server.API.Hubs
             Context.Items[GameIdKey] = gameId;
             Context.Items[RoleKey] = ConnectionRole.Host;
 
-            return game;
+            return state;
         }
 
         // The host's commands. A command has no game id: it always acts on the game this connection joined, so

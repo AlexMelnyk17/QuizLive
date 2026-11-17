@@ -167,9 +167,11 @@ namespace QuizLive.Server.Application.Games
                     p.GameSession.Players
                         .OrderBy(x => x.JoinedAtUtc)
                         .Select(x => new GamePlayerDto(x.Id, x.Nickname, x.JoinedAtUtc))
-                        .ToList()))
+                        .ToList(),
+                    null))
                 .FirstOrDefaultAsync();
 
+            // The running question is not part of this query: it lives in three tables, and the hub adds it.
             return state ?? throw PlayerNotFound();
         }
 
