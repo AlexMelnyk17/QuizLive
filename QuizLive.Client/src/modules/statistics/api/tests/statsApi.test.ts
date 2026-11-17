@@ -4,7 +4,7 @@ import { QuizKind } from '@modules/quizzes/constants'
 import {
 	fetchGameStats,
 	fetchHostStats,
-	fetchQuizStats,
+	fetchQuizStats
 } from '@modules/statistics/api/statsApi'
 import { STATS_API } from '@modules/statistics/constants'
 
@@ -18,21 +18,21 @@ const hostFixture = {
 	quizzes: {
 		total: 1,
 		archived: 0,
-		byKind: { openText: 1, pollChoice: 0, quizChoice: 0 },
+		byKind: { openText: 1, pollChoice: 0, quizChoice: 0 }
 	},
 	questions: { total: 1, averagePerQuiz: 1 },
 	games: {
 		total: 0,
 		finished: 0,
 		byStatus: { lobby: 0, question: 0, results: 0, finished: 0 },
-		byKind: { openText: 0, pollChoice: 0, quizChoice: 0 },
+		byKind: { openText: 0, pollChoice: 0, quizChoice: 0 }
 	},
 	players: { totalJoins: 0, averagePerGame: 0, maxInOneGame: 0 },
 	activity: {
 		gamesLast7Days: 0,
 		gamesLast30Days: 0,
-		gamesPerDay: [],
-	},
+		gamesPerDay: []
+	}
 }
 
 const quizPlayBase = {
@@ -44,7 +44,7 @@ const quizPlayBase = {
 		total: 1,
 		finished: 1,
 		lastPlayedAtUtc: '2026-11-16T12:00:00Z',
-		averageDurationSeconds: 120,
+		averageDurationSeconds: 120
 	},
 	players: { totalJoins: 2, averagePerGame: 2, maxInOneGame: 2 },
 	activity: hostFixture.activity,
@@ -57,8 +57,8 @@ const quizPlayBase = {
 			playerCount: 2,
 			averagePoints: null,
 			correctPercent: null,
-			answerCount: 1,
-		},
+			answerCount: 1
+		}
 	],
 	quizChoiceQuestions: null,
 	pollQuestions: [
@@ -68,10 +68,10 @@ const quizPlayBase = {
 			text: 'Favorite drink?',
 			playerAnsweredCount: 1,
 			possibleAnswers: 2,
-			options: [{ optionId: 1, order: 1, text: 'Tea', count: 1 }],
-		},
+			options: [{ optionId: 1, order: 1, text: 'Tea', count: 1 }]
+		}
 	],
-	openQuestions: null,
+	openQuestions: null
 }
 
 const gamePlayFixture = {
@@ -90,12 +90,12 @@ const gamePlayFixture = {
 			joinedAtUtc: '2026-11-16T12:00:01Z',
 			answerCount: 1,
 			correctCount: 1,
-			totalPoints: 50,
-		},
+			totalPoints: 50
+		}
 	],
 	quizChoiceQuestions: [],
 	pollQuestions: null,
-	openQuestions: null,
+	openQuestions: null
 }
 
 beforeEach(() => {

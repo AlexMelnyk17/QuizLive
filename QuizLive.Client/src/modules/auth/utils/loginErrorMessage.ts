@@ -1,6 +1,7 @@
+import { AUTH_COPY } from '@modules/auth/constants'
+
 import { ApiError } from '@api/apiError'
 import { HTTP_STATUS } from '@api/httpStatus'
-import { AUTH_COPY } from '@modules/auth/constants'
 
 export function getLoginRootErrorMessage(error: unknown): string {
 	if (!(error instanceof ApiError)) {

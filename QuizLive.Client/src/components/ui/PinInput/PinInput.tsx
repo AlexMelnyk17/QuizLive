@@ -1,7 +1,6 @@
+import cn from 'clsx'
 import type { ClipboardEvent, KeyboardEvent } from 'react'
 import { useCallback, useMemo, useRef } from 'react'
-
-import cn from 'clsx'
 
 import { pinCell, pinRow } from '@components/ui/PinInput/PinInput.css'
 
@@ -24,7 +23,7 @@ export function PinInput({
 	className,
 	name,
 	autoFocus,
-	'aria-labelledby': ariaLabelledBy,
+	'aria-labelledby': ariaLabelledBy
 }: PinInputProps) {
 	const inputsRef = useRef<Array<HTMLInputElement | null>>([])
 	const chars = useMemo(() => {
@@ -42,14 +41,20 @@ export function PinInput({
 	)
 
 	const handleChange = (index: number, nextValue: string) => {
-		const char = nextValue.replace(/[^a-zA-Z0-9]/g, '').slice(-1).toUpperCase()
+		const char = nextValue
+			.replace(/[^a-zA-Z0-9]/g, '')
+			.slice(-1)
+			.toUpperCase()
 		updateAt(index, char)
 		if (char && index < length - 1) {
 			inputsRef.current[index + 1]?.focus()
 		}
 	}
 
-	const handleKeyDown = (index: number, event: KeyboardEvent<HTMLInputElement>) => {
+	const handleKeyDown = (
+		index: number,
+		event: KeyboardEvent<HTMLInputElement>
+	) => {
 		if (event.key === 'Backspace' && !chars[index] && index > 0) {
 			inputsRef.current[index - 1]?.focus()
 			updateAt(index - 1, '')
@@ -77,24 +82,24 @@ export function PinInput({
 	return (
 		<div
 			className={cn(pinRow, className)}
-			role="group"
+			role='group'
 			aria-labelledby={ariaLabelledBy}
 			aria-label={ariaLabelledBy ? undefined : (name ?? 'PIN input')}
 		>
 			{chars.map((char, index) => (
 				<input
 					key={index}
-					ref={(el) => {
+					ref={el => {
 						inputsRef.current[index] = el
 					}}
 					className={pinCell({ filled: Boolean(char), invalid })}
-					inputMode="text"
+					inputMode='text'
 					autoComplete={index === 0 ? 'one-time-code' : 'off'}
 					autoFocus={autoFocus && index === 0}
 					maxLength={1}
 					value={char}
-					onChange={(event) => handleChange(index, event.target.value)}
-					onKeyDown={(event) => handleKeyDown(index, event)}
+					onChange={event => handleChange(index, event.target.value)}
+					onKeyDown={event => handleKeyDown(index, event)}
 					onPaste={handlePaste}
 					aria-invalid={invalid || undefined}
 				/>

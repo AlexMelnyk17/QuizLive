@@ -1,8 +1,8 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
+import cn from 'clsx'
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { select } from '@components/ui/Select/Select.css'
-import cn from 'clsx'
 
 type SelectVariants = NonNullable<RecipeVariants<typeof select>>
 

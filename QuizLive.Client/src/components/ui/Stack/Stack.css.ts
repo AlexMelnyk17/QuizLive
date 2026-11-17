@@ -2,34 +2,34 @@ import { recipe } from '@vanilla-extract/recipes'
 
 export const stack = recipe({
 	base: {
-		display: 'flex',
+		display: 'flex'
 	},
 	variants: {
 		direction: {
 			row: { flexDirection: 'row' },
-			column: { flexDirection: 'column' },
+			column: { flexDirection: 'column' }
 		},
 		align: {
 			start: { alignItems: 'flex-start' },
 			center: { alignItems: 'center' },
 			end: { alignItems: 'flex-end' },
-			stretch: { alignItems: 'stretch' },
+			stretch: { alignItems: 'stretch' }
 		},
 		justify: {
 			start: { justifyContent: 'flex-start' },
 			center: { justifyContent: 'center' },
 			end: { justifyContent: 'flex-end' },
-			between: { justifyContent: 'space-between' },
+			between: { justifyContent: 'space-between' }
 		},
 		wrap: {
 			true: { flexWrap: 'wrap' },
-			false: { flexWrap: 'nowrap' },
-		},
+			false: { flexWrap: 'nowrap' }
+		}
 	},
 	defaultVariants: {
 		direction: 'column',
 		align: 'stretch',
 		justify: 'start',
-		wrap: false,
-	},
+		wrap: false
+	}
 })

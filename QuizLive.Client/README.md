@@ -22,15 +22,15 @@ React + TypeScript SPA built with [Vite](https://vite.dev/).
 
 Coding standards for this project live under [`docs/`](docs/):
 
-| File | Topic |
-| --- | --- |
-| [01-api.md](docs/01-api.md) | HTTP client, DTO validation, React Query |
-| [02-typescript.md](docs/02-typescript.md) | Strict TypeScript, types from Zod |
-| [03-code-style.md](docs/03-code-style.md) | Prettier, ESLint, naming, barrels |
-| [04-decomposition.md](docs/04-decomposition.md) | Modules, boundaries, state placement |
-| [05-architecture.md](docs/05-architecture.md) | Runtime, data flow, Zustand, theming |
-| [06-testing.md](docs/06-testing.md) | Vitest, Testing Library, mocks |
-| [07-solid.md](docs/07-solid.md) | SOLID, SRP, one export per file |
+| File                                                          | Topic                                         |
+| ------------------------------------------------------------- | --------------------------------------------- |
+| [01-api.md](docs/01-api.md)                                   | HTTP client, DTO validation, React Query      |
+| [02-typescript.md](docs/02-typescript.md)                     | Strict TypeScript, types from Zod             |
+| [03-code-style.md](docs/03-code-style.md)                     | Prettier, ESLint, naming, barrels             |
+| [04-decomposition.md](docs/04-decomposition.md)               | Modules, boundaries, state placement          |
+| [05-architecture.md](docs/05-architecture.md)                 | Runtime, data flow, Zustand, theming          |
+| [06-testing.md](docs/06-testing.md)                           | Vitest, Testing Library, mocks                |
+| [07-solid.md](docs/07-solid.md)                               | SOLID, SRP, one export per file               |
 | [08-constants-and-routes.md](docs/08-constants-and-routes.md) | No magic literals, route SSOT, `constants.ts` |
 
 If docs disagree with [`.prettierrc.json`](.prettierrc.json), [`eslint.config.js`](eslint.config.js), or [`tsconfig.app.json`](tsconfig.app.json), **config wins**.
@@ -63,26 +63,26 @@ src/modules/<name>/
 
 ### Shared `src/` layout
 
-| Path | Purpose |
-| ---- | ------- |
-| `src/theme/` | Design tokens, light/dark themes, sprinkles (`@theme/*`) |
-| `src/components/ui/` | Reusable UI primitives (`@components/ui`) |
-| `src/api/`, `layout/`, `providers/`, `utils/`, `config/`, `assets/` | Cross-cutting concerns |
+| Path                                                                | Purpose                                                  |
+| ------------------------------------------------------------------- | -------------------------------------------------------- |
+| `src/theme/`                                                        | Design tokens, light/dark themes, sprinkles (`@theme/*`) |
+| `src/components/ui/`                                                | Reusable UI primitives (`@components/ui`)                |
+| `src/api/`, `layout/`, `providers/`, `utils/`, `config/`, `assets/` | Cross-cutting concerns                                   |
 
 ### Path aliases
 
-| Alias | Purpose |
-| ----- | ------- |
-| `@modules/*` | Feature modules (concrete file paths) |
-| `@theme/*` | Theme contract, sprinkles, `ThemeProvider` |
-| `@components/ui` / `@components/ui/*` | Design-system components |
-| `@api/*` | Shared HTTP client / base API utilities |
-| `@layout/*` | App shells and route layouts |
-| `@providers/*` | Global React providers |
-| `@config/*` | App configuration (`ENV` from `@config/env`) |
-| `@utils/*` | Pure utilities (redirect safety, date formatting, etc.) |
-| `@assets/*` | Static assets |
-| `@src/*` | App entry and other top-level `src` files |
+| Alias                                 | Purpose                                                 |
+| ------------------------------------- | ------------------------------------------------------- |
+| `@modules/*`                          | Feature modules (concrete file paths)                   |
+| `@theme/*`                            | Theme contract, sprinkles, `ThemeProvider`              |
+| `@components/ui` / `@components/ui/*` | Design-system components                                |
+| `@api/*`                              | Shared HTTP client / base API utilities                 |
+| `@layout/*`                           | App shells and route layouts                            |
+| `@providers/*`                        | Global React providers                                  |
+| `@config/*`                           | App configuration (`ENV` from `@config/env`)            |
+| `@utils/*`                            | Pure utilities (redirect safety, date formatting, etc.) |
+| `@assets/*`                           | Static assets                                           |
+| `@src/*`                              | App entry and other top-level `src` files               |
 
 Paths are defined in [`tsconfig.app.json`](tsconfig.app.json); Vite resolves them via `tsconfigPaths` in [`vite.config.ts`](vite.config.ts).
 

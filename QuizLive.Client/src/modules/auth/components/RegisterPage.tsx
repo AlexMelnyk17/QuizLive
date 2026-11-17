@@ -4,10 +4,8 @@ import type { FormEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
-import { PATHS } from '@config/routes'
+import { AuthLayout } from '@layout/AuthLayout/AuthLayout'
 
-import { ApiError } from '@api/apiError'
-import { HTTP_STATUS } from '@api/httpStatus'
 import { Alert } from '@components/ui/Alert'
 import { Button } from '@components/ui/Button'
 import { Heading } from '@components/ui/Heading'
@@ -15,8 +13,6 @@ import { Input } from '@components/ui/Input'
 import { Stack } from '@components/ui/Stack'
 import { Text } from '@components/ui/Text'
 
-import { AuthLayout } from '@layout/AuthLayout/AuthLayout'
-import { AUTH_COPY } from '@modules/auth/constants'
 import {
 	field,
 	fieldError,
@@ -24,10 +20,16 @@ import {
 	formActions,
 	formAlert,
 	formFooter,
-	inlineLink,
+	inlineLink
 } from '@modules/auth/components/AuthForm.css'
+import { AUTH_COPY } from '@modules/auth/constants'
 import { useRegister } from '@modules/auth/hooks/useRegister'
 import { registerFormSchema } from '@modules/auth/schemas'
+
+import { PATHS } from '@config/routes'
+
+import { ApiError } from '@api/apiError'
+import { HTTP_STATUS } from '@api/httpStatus'
 
 type RegisterFormValues = z.infer<typeof registerFormSchema>
 
@@ -39,10 +41,10 @@ export function RegisterPage() {
 		register,
 		handleSubmit,
 		formState: { errors },
-		setError,
+		setError
 	} = useForm<RegisterFormValues>({
 		resolver: zodResolver(registerFormSchema),
-		defaultValues: { userName: '', password: '' },
+		defaultValues: { userName: '', password: '' }
 	})
 
 	const submitRegister = async (values: RegisterFormValues) => {
@@ -62,19 +64,19 @@ export function RegisterPage() {
 					}
 					if (!userNameMsg && !passwordMsg) {
 						setError('root', {
-							message: err.detail ?? AUTH_COPY.register.failed,
+							message: err.detail ?? AUTH_COPY.register.failed
 						})
 					}
 					return
 				}
 				if (err.status === HTTP_STATUS.CONFLICT) {
 					setError('userName', {
-						message: err.detail ?? AUTH_COPY.register.userNameTaken,
+						message: err.detail ?? AUTH_COPY.register.userNameTaken
 					})
 					return
 				}
 				setError('root', {
-					message: err.detail ?? AUTH_COPY.register.failedRetry,
+					message: err.detail ?? AUTH_COPY.register.failedRetry
 				})
 				return
 			}
@@ -89,16 +91,16 @@ export function RegisterPage() {
 	return (
 		<AuthLayout>
 			<Heading level={2}>{AUTH_COPY.register.title}</Heading>
-			<Text tone="muted" size="sm">
+			<Text tone='muted' size='sm'>
 				{AUTH_COPY.register.subtitle}
 			</Text>
 
 			<form onSubmit={onSubmit} noValidate>
-				<Stack direction="column" align="stretch">
+				<Stack direction='column' align='stretch'>
 					{errors.root?.message ? (
 						<Alert
 							className={formAlert}
-							variant="danger"
+							variant='danger'
 							title={AUTH_COPY.register.errorTitle}
 						>
 							{errors.root.message}
@@ -106,37 +108,37 @@ export function RegisterPage() {
 					) : null}
 
 					<div className={field}>
-						<label className={fieldLabel} htmlFor="register-userName">
+						<label className={fieldLabel} htmlFor='register-userName'>
 							{AUTH_COPY.register.userNameLabel}
 						</label>
 						<Input
-							id="register-userName"
-							autoComplete="username"
+							id='register-userName'
+							autoComplete='username'
 							invalid={Boolean(errors.userName)}
 							fullWidth
 							{...register('userName')}
 						/>
 						{errors.userName?.message ? (
-							<p className={fieldError} role="alert">
+							<p className={fieldError} role='alert'>
 								{errors.userName.message}
 							</p>
 						) : null}
 					</div>
 
 					<div className={field}>
-						<label className={fieldLabel} htmlFor="register-password">
+						<label className={fieldLabel} htmlFor='register-password'>
 							{AUTH_COPY.register.passwordLabel}
 						</label>
 						<Input
-							id="register-password"
-							type="password"
-							autoComplete="new-password"
+							id='register-password'
+							type='password'
+							autoComplete='new-password'
 							invalid={Boolean(errors.password)}
 							fullWidth
 							{...register('password')}
 						/>
 						{errors.password?.message ? (
-							<p className={fieldError} role="alert">
+							<p className={fieldError} role='alert'>
 								{errors.password.message}
 							</p>
 						) : null}
@@ -144,8 +146,8 @@ export function RegisterPage() {
 
 					<div className={formActions}>
 						<Button
-							type="submit"
-							variant="primary"
+							type='submit'
+							variant='primary'
 							fullWidth
 							loading={registerMutation.isPending}
 						>
@@ -156,7 +158,7 @@ export function RegisterPage() {
 			</form>
 
 			<div className={formFooter}>
-				<Text size="sm" tone="muted">
+				<Text size='sm' tone='muted'>
 					{AUTH_COPY.register.hasAccount}
 				</Text>{' '}
 				<Link to={PATHS.login} className={inlineLink}>

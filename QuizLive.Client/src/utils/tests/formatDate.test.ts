@@ -8,7 +8,7 @@ describe('formatDate', () => {
 			new Date('2026-11-15T00:00:00Z').toLocaleDateString(undefined, {
 				month: 'short',
 				day: 'numeric',
-				timeZone: 'UTC',
+				timeZone: 'UTC'
 			})
 		)
 	})

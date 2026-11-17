@@ -4,7 +4,7 @@ import type { FormEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import type { z } from 'zod'
 
-import { PATHS } from '@config/routes'
+import { AuthLayout } from '@layout/AuthLayout/AuthLayout'
 
 import { Alert } from '@components/ui/Alert'
 import { Button } from '@components/ui/Button'
@@ -13,8 +13,6 @@ import { Input } from '@components/ui/Input'
 import { Stack } from '@components/ui/Stack'
 import { Text } from '@components/ui/Text'
 
-import { AuthLayout } from '@layout/AuthLayout/AuthLayout'
-import { AUTH_COPY } from '@modules/auth/constants'
 import {
 	field,
 	fieldError,
@@ -22,11 +20,14 @@ import {
 	formActions,
 	formAlert,
 	formFooter,
-	inlineLink,
+	inlineLink
 } from '@modules/auth/components/AuthForm.css'
+import { AUTH_COPY } from '@modules/auth/constants'
 import { useLogin } from '@modules/auth/hooks/useLogin'
 import { loginFormSchema } from '@modules/auth/schemas'
 import { submitLogin } from '@modules/auth/utils/submitLogin'
+
+import { PATHS } from '@config/routes'
 
 type LoginFormValues = z.infer<typeof loginFormSchema>
 
@@ -39,10 +40,10 @@ export function LoginPage() {
 		register,
 		handleSubmit,
 		formState: { errors },
-		setError,
+		setError
 	} = useForm<LoginFormValues>({
 		resolver: zodResolver(loginFormSchema),
-		defaultValues: { userName: '', password: '' },
+		defaultValues: { userName: '', password: '' }
 	})
 
 	const onLoginSubmit = (values: LoginFormValues) =>
@@ -50,7 +51,7 @@ export function LoginPage() {
 			mutateAsync: login.mutateAsync,
 			navigate,
 			redirect: search.redirect,
-			setError,
+			setError
 		})
 
 	const onSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -60,16 +61,16 @@ export function LoginPage() {
 	return (
 		<AuthLayout>
 			<Heading level={2}>{AUTH_COPY.login.title}</Heading>
-			<Text tone="muted" size="sm">
+			<Text tone='muted' size='sm'>
 				{AUTH_COPY.login.subtitle}
 			</Text>
 
 			<form onSubmit={onSubmit} noValidate>
-				<Stack direction="column" align="stretch">
+				<Stack direction='column' align='stretch'>
 					{errors.root?.message ? (
 						<Alert
 							className={formAlert}
-							variant="danger"
+							variant='danger'
 							title={AUTH_COPY.login.errorTitle}
 						>
 							{errors.root.message}
@@ -77,37 +78,37 @@ export function LoginPage() {
 					) : null}
 
 					<div className={field}>
-						<label className={fieldLabel} htmlFor="login-userName">
+						<label className={fieldLabel} htmlFor='login-userName'>
 							{AUTH_COPY.login.userNameLabel}
 						</label>
 						<Input
-							id="login-userName"
-							autoComplete="username"
+							id='login-userName'
+							autoComplete='username'
 							invalid={Boolean(errors.userName)}
 							fullWidth
 							{...register('userName')}
 						/>
 						{errors.userName?.message ? (
-							<p className={fieldError} role="alert">
+							<p className={fieldError} role='alert'>
 								{errors.userName.message}
 							</p>
 						) : null}
 					</div>
 
 					<div className={field}>
-						<label className={fieldLabel} htmlFor="login-password">
+						<label className={fieldLabel} htmlFor='login-password'>
 							{AUTH_COPY.login.passwordLabel}
 						</label>
 						<Input
-							id="login-password"
-							type="password"
-							autoComplete="current-password"
+							id='login-password'
+							type='password'
+							autoComplete='current-password'
 							invalid={Boolean(errors.password)}
 							fullWidth
 							{...register('password')}
 						/>
 						{errors.password?.message ? (
-							<p className={fieldError} role="alert">
+							<p className={fieldError} role='alert'>
 								{errors.password.message}
 							</p>
 						) : null}
@@ -115,8 +116,8 @@ export function LoginPage() {
 
 					<div className={formActions}>
 						<Button
-							type="submit"
-							variant="primary"
+							type='submit'
+							variant='primary'
 							fullWidth
 							loading={login.isPending}
 						>
@@ -127,7 +128,7 @@ export function LoginPage() {
 			</form>
 
 			<div className={formFooter}>
-				<Text size="sm" tone="muted">
+				<Text size='sm' tone='muted'>
 					{AUTH_COPY.login.noAccount}
 				</Text>{' '}
 				<Link to={PATHS.register} className={inlineLink}>

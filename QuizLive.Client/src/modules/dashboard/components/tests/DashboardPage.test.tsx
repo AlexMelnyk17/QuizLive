@@ -3,11 +3,12 @@ import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { PATHS } from '@config/routes'
-
 import { DASHBOARD_LAYOUT_COPY } from '@layout/constants'
+
 import { DashboardPage } from '@modules/dashboard/components/DashboardPage'
 import type { QuizListProps } from '@modules/quizzes/components/QuizList'
+
+import { PATHS } from '@config/routes'
 
 import { renderWithTheme } from '@src/test/testUtils'
 

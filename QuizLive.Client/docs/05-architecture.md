@@ -49,30 +49,30 @@ sequenceDiagram
 
 ## `src/` layout
 
-| Path | Responsibility |
-| --- | --- |
-| `main.tsx`, `App.tsx`, `router.tsx` | Entry and routing |
-| `providers/` | React Query and app-wide providers |
-| `layout/` | Route shells (auth vs dashboard) |
-| `modules/` | Feature slices (see [04-decomposition.md](./04-decomposition.md)) |
-| `components/ui/` | Design-system primitives |
-| `theme/` | vanilla-extract tokens, themes, sprinkles, `ThemeProvider` |
-| `api/` | Shared `apiRequest`, `ApiError`, field error helpers |
-| `config/env.ts` | Validated `ENV` singleton |
-| `utils/` | Cross-feature pure helpers |
-| `test/` | Shared test helpers (`renderWithTheme`, `renderApp`, setup) |
+| Path                                | Responsibility                                                    |
+| ----------------------------------- | ----------------------------------------------------------------- |
+| `main.tsx`, `App.tsx`, `router.tsx` | Entry and routing                                                 |
+| `providers/`                        | React Query and app-wide providers                                |
+| `layout/`                           | Route shells (auth vs dashboard)                                  |
+| `modules/`                          | Feature slices (see [04-decomposition.md](./04-decomposition.md)) |
+| `components/ui/`                    | Design-system primitives                                          |
+| `theme/`                            | vanilla-extract tokens, themes, sprinkles, `ThemeProvider`        |
+| `api/`                              | Shared `apiRequest`, `ApiError`, field error helpers              |
+| `config/env.ts`                     | Validated `ENV` singleton                                         |
+| `utils/`                            | Cross-feature pure helpers                                        |
+| `test/`                             | Shared test helpers (`renderWithTheme`, `renderApp`, setup)       |
 
 Path aliases are defined in `tsconfig.app.json` and resolved by Vite `tsconfigPaths`.
 
 ## State ownership
 
-| State | Tool | Example |
-| --- | --- | --- |
-| Server / remote | TanStack Query | Quizzes list, host stats |
-| Auth session | Zustand + persist | `sessionStore` |
-| Forms | React Hook Form + Zod | Login, register |
-| Ephemeral UI | `useState` | Modal open, tab index |
-| Shareable URL | Router search params | Login `redirect` |
+| State           | Tool                  | Example                  |
+| --------------- | --------------------- | ------------------------ |
+| Server / remote | TanStack Query        | Quizzes list, host stats |
+| Auth session    | Zustand + persist     | `sessionStore`           |
+| Forms           | React Hook Form + Zod | Login, register          |
+| Ephemeral UI    | `useState`            | Modal open, tab index    |
+| Shareable URL   | Router search params  | Login `redirect`         |
 
 ## Zustand (session and feature stores)
 

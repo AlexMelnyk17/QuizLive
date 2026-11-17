@@ -12,16 +12,16 @@ Rules apply to **new and changed** code. Older files that bundle several exports
 
 ### File export matrix (MUST for new code)
 
-| File pattern | Allowed exports | Must not export |
-| --- | --- | --- |
-| `PascalCase.tsx` (component) | The component matching the filename (`QuizList`), and **optional** `QuizListProps` | Hooks, fetchers, Zustand store, unrelated helpers, constants used outside this UI, second components, **non-props exported types** (those belong in `types.ts` — [02-typescript.md](./02-typescript.md) R-5) |
-| `useXxx.ts` (hook) | **One** `useXxx` hook whose name matches the filename | Components, multiple unrelated hooks, API functions |
-| `camelCase.ts` in `utils/` (shared or module) | **One** primary function whose name matches the filename (e.g. `formatDate.ts` → `formatDate`) | Second public functions — use another file or a non-exported local helper |
-| `*Api.ts` | One async function per endpoint (see [01-api.md](./01-api.md)) | React, hooks, UI |
-| `schemas.ts` | Zod schemas and schema-only helpers | Components, hooks |
-| `types.ts` | Schema-inferred DTOs, chart/hook/view-model aliases, any named type used outside one file | Runtime values, React components |
-| `constants.ts` | Constants, copy objects, query-key factories (no inline copy — see [08-constants-and-routes.md](./08-constants-and-routes.md)) | Components, side effects |
-| `store/*Store.ts` | Store hook + store-specific selectors/actions tied to that store | Unrelated domain logic, components |
+| File pattern                                  | Allowed exports                                                                                                                | Must not export                                                                                                                                                                                              |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `PascalCase.tsx` (component)                  | The component matching the filename (`QuizList`), and **optional** `QuizListProps`                                             | Hooks, fetchers, Zustand store, unrelated helpers, constants used outside this UI, second components, **non-props exported types** (those belong in `types.ts` — [02-typescript.md](./02-typescript.md) R-5) |
+| `useXxx.ts` (hook)                            | **One** `useXxx` hook whose name matches the filename                                                                          | Components, multiple unrelated hooks, API functions                                                                                                                                                          |
+| `camelCase.ts` in `utils/` (shared or module) | **One** primary function whose name matches the filename (e.g. `formatDate.ts` → `formatDate`)                                 | Second public functions — use another file or a non-exported local helper                                                                                                                                    |
+| `*Api.ts`                                     | One async function per endpoint (see [01-api.md](./01-api.md))                                                                 | React, hooks, UI                                                                                                                                                                                             |
+| `schemas.ts`                                  | Zod schemas and schema-only helpers                                                                                            | Components, hooks                                                                                                                                                                                            |
+| `types.ts`                                    | Schema-inferred DTOs, chart/hook/view-model aliases, any named type used outside one file                                      | Runtime values, React components                                                                                                                                                                             |
+| `constants.ts`                                | Constants, copy objects, query-key factories (no inline copy — see [08-constants-and-routes.md](./08-constants-and-routes.md)) | Components, side effects                                                                                                                                                                                     |
+| `store/*Store.ts`                             | Store hook + store-specific selectors/actions tied to that store                                                               | Unrelated domain logic, components                                                                                                                                                                           |
 
 ### Component files (MUST)
 
@@ -39,7 +39,9 @@ export function QuizList({ onOpenQuiz }: QuizListProps) {
 }
 
 // Bad — same file
-export function formatQuizTitle(title: string) { /* ... */ }
+export function formatQuizTitle(title: string) {
+	/* ... */
+}
 export const QUIZ_PAGE_SIZE = 10
 ```
 

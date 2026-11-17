@@ -8,7 +8,7 @@ export const dashboardRoot = style({
 	flexDirection: 'column',
 	padding: vars.spacing[6],
 	boxSizing: 'border-box',
-	gap: vars.spacing[8],
+	gap: vars.spacing[8]
 })
 
 export const dashboardHeader = style({
@@ -18,27 +18,27 @@ export const dashboardHeader = style({
 	justifyContent: 'space-between',
 	gap: vars.spacing[4],
 	paddingBottom: vars.spacing[4],
-	borderBottom: `1px solid ${vars.colors.border}`,
+	borderBottom: `1px solid ${vars.colors.border}`
 })
 
 export const dashboardHeaderUser = style({
 	display: 'flex',
 	alignItems: 'center',
-	gap: vars.spacing[2],
+	gap: vars.spacing[2]
 })
 
 export const dashboardHeaderActions = style({
 	display: 'flex',
 	flexWrap: 'wrap',
 	alignItems: 'center',
-	gap: vars.spacing[2],
+	gap: vars.spacing[2]
 })
 
 export const dashboardHeaderNav = style({
 	display: 'flex',
 	flexWrap: 'wrap',
 	alignItems: 'center',
-	gap: vars.spacing[1],
+	gap: vars.spacing[1]
 })
 
 export const dashboardNavLink = style({
@@ -52,10 +52,10 @@ export const dashboardNavLink = style({
 	textDecoration: 'none',
 	transition: `background-color ${vars.durations.normal}`,
 	':hover': {
-		backgroundColor: vars.colors.primaryMuted,
-	},
+		backgroundColor: vars.colors.primaryMuted
+	}
 })
 
 export const dashboardMain = style({
-	flex: 1,
+	flex: 1
 })

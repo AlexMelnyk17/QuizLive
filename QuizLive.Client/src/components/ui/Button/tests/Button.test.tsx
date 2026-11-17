@@ -15,11 +15,13 @@ describe('Button', () => {
 		renderWithTheme(
 			<>
 				<Button>{'Join game'}</Button>
-				<Button variant="danger">{'Leave'}</Button>
+				<Button variant='danger'>{'Leave'}</Button>
 			</>
 		)
 
-		expect(screen.getByRole('button', { name: 'Join game' })).toBeInTheDocument()
+		expect(
+			screen.getByRole('button', { name: 'Join game' })
+		).toBeInTheDocument()
 		expect(screen.getByRole('button', { name: 'Leave' })).toBeInTheDocument()
 	})
 

@@ -1,8 +1,8 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
+import cn from 'clsx'
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { text } from '@components/ui/Text/Text.css'
-import cn from 'clsx'
 
 type TextVariants = NonNullable<RecipeVariants<typeof text>>
 

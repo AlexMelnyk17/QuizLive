@@ -7,7 +7,7 @@ export const statsBackButton = style({
 	minHeight: '28px',
 	paddingInline: vars.spacing[2],
 	fontSize: vars.fontSizes.xs,
-	flexShrink: 0,
+	flexShrink: 0
 })
 
 export const statsPlayPageToolbar = style({
@@ -16,16 +16,16 @@ export const statsPlayPageToolbar = style({
 	alignItems: 'center',
 	gap: vars.spacing[4],
 	marginBottom: vars.spacing[3],
-	width: '100%',
+	width: '100%'
 })
 
 export const statsPlayPageToolbarTitle = style({
 	flex: '1 1 12rem',
-	minWidth: 0,
+	minWidth: 0
 })
 
 export const statsPlayPageToolbarTitleSkeleton = style({
 	width: '14rem',
 	height: vars.fontSizes['2xl'],
-	flex: '1 1 12rem',
+	flex: '1 1 12rem'
 })

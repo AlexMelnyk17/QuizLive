@@ -8,72 +8,72 @@ export const divider = recipe({
 		border: 'none',
 		margin: 0,
 		flexShrink: 0,
-		backgroundColor: vars.colors.border,
+		backgroundColor: vars.colors.border
 	},
 	variants: {
 		orientation: {
 			horizontal: {
 				width: '100%',
-				height: '1px',
+				height: '1px'
 			},
 			vertical: {
-				width: '1px',
-			},
+				width: '1px'
+			}
 		},
 		spacing: {
 			none: {},
 			sm: {},
 			md: {},
-			lg: {},
+			lg: {}
 		},
 		length: {
 			inherit: {},
-			short: {},
-		},
+			short: {}
+		}
 	},
 	compoundVariants: [
 		{
 			variants: { orientation: 'horizontal', spacing: 'sm' },
-			style: { marginBlock: vars.spacing[2] },
+			style: { marginBlock: vars.spacing[2] }
 		},
 		{
 			variants: { orientation: 'horizontal', spacing: 'md' },
-			style: { marginBlock: vars.spacing[4] },
+			style: { marginBlock: vars.spacing[4] }
 		},
 		{
 			variants: { orientation: 'horizontal', spacing: 'lg' },
-			style: { marginBlock: vars.spacing[6] },
+			style: { marginBlock: vars.spacing[6] }
 		},
 		{
 			variants: { orientation: 'vertical', spacing: 'sm' },
-			style: { marginInline: vars.spacing[2] },
+			style: { marginInline: vars.spacing[2] }
 		},
 		{
 			variants: { orientation: 'vertical', spacing: 'md' },
-			style: { marginInline: vars.spacing[4] },
+			style: { marginInline: vars.spacing[4] }
 		},
 		{
 			variants: { orientation: 'vertical', spacing: 'lg' },
-			style: { marginInline: vars.spacing[6] },
+			style: { marginInline: vars.spacing[6] }
 		},
 		{
 			variants: { orientation: 'vertical', length: 'inherit' },
 			style: {
 				alignSelf: 'stretch',
-				minHeight: '1.25rem',
-			},
+				minHeight: '1.25rem'
+			}
 		},
 		{
 			variants: { orientation: 'vertical', length: 'short' },
 			style: {
 				height: '1.75rem',
-				alignSelf: 'center',
-			},
-		},
+				alignSelf: 'center'
+			}
+		}
 	],
 	defaultVariants: {
 		orientation: 'horizontal',
 		spacing: 'md',
-		length: 'inherit',
-	},
+		length: 'inherit'
+	}
 })

@@ -24,6 +24,6 @@ export function useGameStats(gameId: number, enabled = true) {
 			}
 
 			return failureCount < 1
-		},
+		}
 	})
 }

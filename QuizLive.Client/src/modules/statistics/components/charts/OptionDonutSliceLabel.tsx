@@ -11,7 +11,7 @@ import {
 	STATISTICS_DONUT_LABEL_MIN_PERCENT,
 	STATISTICS_DONUT_LABEL_OFFSET,
 	STATISTICS_DONUT_LABEL_TRUNCATE,
-	STATISTICS_PERCENT_SCALE,
+	STATISTICS_PERCENT_SCALE
 } from '@modules/statistics/constants'
 import { formatStatPercent } from '@modules/statistics/utils/formatStatPercent'
 import { truncateLabel } from '@modules/statistics/utils/truncateLabel'
@@ -33,7 +33,7 @@ export function OptionDonutSliceLabel({
 	midAngle = 0,
 	outerRadius,
 	name = '',
-	percent = 0,
+	percent = 0
 }: OptionDonutSliceLabelProps) {
 	const centerX = Number(cx ?? 0)
 	const centerY = Number(cy ?? 0)
@@ -60,7 +60,7 @@ export function OptionDonutSliceLabel({
 		<g>
 			<polyline
 				points={`${startX},${startY} ${midX},${midY} ${endX},${endY}`}
-				fill="none"
+				fill='none'
 				stroke={statsChartColors.stroke}
 				strokeWidth={STATISTICS_CHART_STROKE_WIDTH}
 			/>
@@ -68,7 +68,7 @@ export function OptionDonutSliceLabel({
 				x={endX}
 				y={endY}
 				textAnchor={textAnchor}
-				dominantBaseline="central"
+				dominantBaseline='central'
 			>
 				<tspan
 					x={endX}

@@ -1,1 +1,4 @@
-export { PlayerListItem, type PlayerListItemProps } from '@components/ui/PlayerListItem/PlayerListItem'
+export {
+	PlayerListItem,
+	type PlayerListItemProps
+} from '@components/ui/PlayerListItem/PlayerListItem'

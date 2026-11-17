@@ -6,8 +6,9 @@ import { QuizChoiceStatsCharts } from '@modules/statistics/components/QuizChoice
 import type {
 	OpenQuestionStats,
 	PollQuestionStats,
-	QuizChoiceQuestionStats,
+	QuizChoiceQuestionStats
 } from '@modules/statistics/types'
+
 import { assertNever } from '@utils/assertNever'
 
 type KindStatsChartData = {
@@ -18,16 +19,14 @@ type KindStatsChartData = {
 
 export function renderKindStatsCharts(
 	kind: QuizKindValue,
-	data: KindStatsChartData,
+	data: KindStatsChartData
 ) {
 	switch (kind) {
 		case QuizKind.QuizChoice:
 			if (!data.quizChoiceQuestions) {
 				return null
 			}
-			return (
-				<QuizChoiceStatsCharts questions={data.quizChoiceQuestions} />
-			)
+			return <QuizChoiceStatsCharts questions={data.quizChoiceQuestions} />
 		case QuizKind.PollChoice:
 			if (!data.pollQuestions) {
 				return null

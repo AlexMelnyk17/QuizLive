@@ -5,5 +5,5 @@ export const DASHBOARD_LAYOUT_COPY = {
 	navStatistics: 'Statistics',
 	createQuiz: 'Create quiz',
 	signOut: 'Sign out',
-	hostBadge: 'Host',
+	hostBadge: 'Host'
 } as const
