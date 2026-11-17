@@ -1,6 +1,8 @@
 import { createContext } from 'react'
 
-export type ThemeMode = 'light' | 'dark' | 'system'
+import type { THEME_MODES } from '@theme/constants'
+
+export type ThemeMode = (typeof THEME_MODES)[number]
 
 export type ThemeContextValue = {
 	mode: ThemeMode

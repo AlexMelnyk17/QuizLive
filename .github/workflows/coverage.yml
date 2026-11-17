@@ -1,8 +1,10 @@
-# Separate from the CI workflow (#37): it only builds coverage reports and uploads them as artifacts.
+# Coverage reports plus formatting, static checks and production builds.
 # The jobs run the same npm scripts as a local run (see "Test coverage" in the README).
 name: Coverage
 
 on:
+  push:
+    branches: [dev, main]
   pull_request:
     branches: [dev, main]
   workflow_dispatch:
@@ -17,8 +19,13 @@ concurrency:
 jobs:
   server:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
       # The tests target net8.0 (runtime 8), the build uses SDK 9.
       - uses: actions/setup-dotnet@v4
@@ -35,6 +42,10 @@ jobs:
       - name: Run server tests with coverage
         run: npm run coverage:server
 
+      # The client is built independently in the client job; the esproj has no server assembly.
+      - name: Publish server in Release mode
+        run: dotnet publish QuizLive.Server/QuizLive.Server.csproj --configuration Release --output artifacts/server --property:BuildClientAssets=false
+
       - name: Add summary to the job
         if: always() && hashFiles('coverage/server/report/SummaryGithub.md') != ''
         run: cat coverage/server/report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
@@ -50,6 +61,7 @@ jobs:
 
   client:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -68,8 +80,26 @@ jobs:
         run: npm ci
         working-directory: QuizLive.Client
 
+      - name: Lint
+        run: npm run lint
+        working-directory: QuizLive.Client
+
+      - name: Check formatting
+        run: npm run format:check
+        working-directory: QuizLive.Client
+
+      - name: Typecheck
+        run: npm run typecheck
+        working-directory: QuizLive.Client
+
       - name: Run client tests with coverage
         run: npm run coverage:client
+
+      - name: Build production client
+        run: npm run build
+        working-directory: QuizLive.Client
+        env:
+          VITE_API_BASE_URL: /api
 
       - name: Add summary to the job
         if: always() && hashFiles('QuizLive.Client/coverage/summary/SummaryGithub.md') != ''

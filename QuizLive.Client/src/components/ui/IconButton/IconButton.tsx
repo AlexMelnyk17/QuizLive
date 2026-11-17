@@ -1,13 +1,13 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
+import cn from 'clsx'
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 
 import { button } from '@components/ui/Button/Button.css'
 import {
 	iconButtonBase,
-	iconButtonSize,
+	iconButtonSize
 } from '@components/ui/IconButton/IconButton.css'
 import { Spinner } from '@components/ui/Spinner'
-import cn from 'clsx'
 
 type ButtonVariants = NonNullable<RecipeVariants<typeof button>>
 
@@ -35,7 +35,7 @@ export const IconButton = ({
 
 	return (
 		<button
-			type="button"
+			type='button'
 			className={cn(
 				button({ variant, size, fullWidth: false }),
 				iconButtonSize({ size }),

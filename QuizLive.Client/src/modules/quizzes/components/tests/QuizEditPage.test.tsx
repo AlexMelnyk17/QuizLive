@@ -63,6 +63,11 @@ describe('QuizEditPage sign out', () => {
 		const user = userEvent.setup()
 		renderPage()
 		await user.click(
+			await screen.findByRole('button', {
+				name: DASHBOARD_LAYOUT_COPY.openMenu
+			})
+		)
+		await user.click(
 			await screen.findByRole('button', { name: DASHBOARD_LAYOUT_COPY.signOut })
 		)
 		expect(
@@ -72,7 +77,7 @@ describe('QuizEditPage sign out', () => {
 		await user.click(screen.getByRole('button', { name: QUIZ_FORM_COPY.stay }))
 		expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 		expect(
-			screen.getByRole('button', { name: DASHBOARD_LAYOUT_COPY.signOut })
+			screen.getByRole('button', { name: DASHBOARD_LAYOUT_COPY.openMenu })
 		).toBeInTheDocument()
 		await user.click(
 			screen.getByRole('button', { name: QUIZ_FORM_COPY.submitEdit })
@@ -83,6 +88,11 @@ describe('QuizEditPage sign out', () => {
 	it('signs out only after confirming the exit', async () => {
 		const user = userEvent.setup()
 		renderPage()
+		await user.click(
+			await screen.findByRole('button', {
+				name: DASHBOARD_LAYOUT_COPY.openMenu
+			})
+		)
 		await user.click(
 			await screen.findByRole('button', { name: DASHBOARD_LAYOUT_COPY.signOut })
 		)

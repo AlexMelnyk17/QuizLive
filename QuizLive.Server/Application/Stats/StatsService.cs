@@ -5,7 +5,7 @@ using QuizLive.Server.Infrastructure.Data;
 
 namespace QuizLive.Server.Application.Stats
 {
-    public class StatsService(AppDbContext db, ICurrentUser currentUser) : IStatsService
+    public partial class StatsService(AppDbContext db, ICurrentUser currentUser) : IStatsService
     {
         private const int ActivityDays = 30;
 

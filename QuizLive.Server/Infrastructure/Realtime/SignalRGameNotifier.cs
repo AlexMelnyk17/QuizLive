@@ -9,19 +9,54 @@ namespace QuizLive.Server.Infrastructure.Realtime
         IHubContext<GameHub, IGameClient> hub,
         ILogger<SignalRGameNotifier> logger) : IGameNotifier
     {
+        public Task AnswerProgressAsync(int gameId, AnswerProgressDto progress) =>
+            SendAsync(gameId, nameof(IGameClient.AnswerProgress), clients => clients.Group(GameGroups.Host(gameId)).AnswerProgress(progress));
+
+        public Task HostResultsAsync(int gameId, HostQuestionResultsDto results) =>
+            SendAsync(gameId, nameof(IGameClient.HostResults), clients => clients.Group(GameGroups.Host(gameId)).HostResults(results));
+
+        public Task PlayerResultsAsync(int gameId, int playerId, PlayerQuestionResultsDto results) =>
+            SendAsync(gameId, nameof(IGameClient.PlayerResults), clients => clients.Group(GameGroups.Player(gameId, playerId)).PlayerResults(results));
+
+        public Task LeaderboardAsync(int gameId, LeaderboardDto leaderboard) =>
+            SendAsync(gameId, nameof(IGameClient.Leaderboard), clients => Everyone(clients, gameId).Leaderboard(leaderboard));
+
+        public Task TimeAddedAsync(int gameId, QuestionTimeAddedDto timing) =>
+            SendAsync(gameId, nameof(IGameClient.TimeAdded), clients => Everyone(clients, gameId).TimeAdded(timing));
+
+        public Task PlayerPresenceChangedAsync(int gameId, PlayerPresenceDto presence) =>
+            SendAsync(gameId, nameof(IGameClient.PlayerPresenceChanged), clients => Everyone(clients, gameId).PlayerPresenceChanged(presence));
+
+        public Task PlayerLeftAsync(int gameId, int playerId) =>
+            SendAsync(gameId, nameof(IGameClient.PlayerLeft), clients => Everyone(clients, gameId).PlayerLeft(playerId));
+
         public Task PlayerJoinedAsync(int gameId, GamePlayerDto player) =>
-            SendAsync(gameId, nameof(IGameClient.PlayerJoined), group => group.PlayerJoined(player));
+            SendAsync(gameId, nameof(IGameClient.PlayerJoined), clients => Everyone(clients, gameId).PlayerJoined(player));
+
+        // Two payloads for two audiences: the players' group never gets the host version.
+        public Task QuestionShownAsync(int gameId, QuestionViews views) =>
+            SendAsync(gameId, nameof(IGameClient.QuestionShown), async clients =>
+            {
+                await clients.Group(GameGroups.All(gameId)).QuestionShown(views.ForPlayers);
+                await clients.Group(GameGroups.Host(gameId)).HostQuestionShown(views.ForHost);
+            });
+
+        public Task QuestionClosedAsync(int gameId, int number) =>
+            SendAsync(gameId, nameof(IGameClient.QuestionClosed), clients => Everyone(clients, gameId).QuestionClosed(number));
 
         public Task GameEndedAsync(int gameId) =>
-            SendAsync(gameId, nameof(IGameClient.GameEnded), group => group.GameEnded());
+            SendAsync(gameId, nameof(IGameClient.GameEnded), clients => Everyone(clients, gameId).GameEnded());
+
+        // The host is not in the players' group, so these events go to both groups; a connection is in one of them only.
+        private static IGameClient Everyone(IHubClients<IGameClient> clients, int gameId) =>
+            clients.Groups(GameGroups.All(gameId), GameGroups.Host(gameId));
 
         // The change is already saved, so a failed broadcast must not fail the request.
-        // The host is not in the players' group, so lobby events go to both groups; a connection is in one of them only.
-        private async Task SendAsync(int gameId, string eventName, Func<IGameClient, Task> send)
+        private async Task SendAsync(int gameId, string eventName, Func<IHubClients<IGameClient>, Task> send)
         {
             try
             {
-                await send(hub.Clients.Groups(GameGroups.All(gameId), GameGroups.Host(gameId)));
+                await send(hub.Clients);
             }
             catch (Exception ex)
             {

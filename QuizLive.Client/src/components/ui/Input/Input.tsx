@@ -1,8 +1,12 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
+import cn from 'clsx'
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 
-import { inputField, inputIcon, inputWrapper } from '@components/ui/Input/Input.css'
-import cn from 'clsx'
+import {
+	inputField,
+	inputIcon,
+	inputWrapper
+} from '@components/ui/Input/Input.css'
 
 type InputVariants = NonNullable<RecipeVariants<typeof inputWrapper>>
 

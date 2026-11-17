@@ -50,13 +50,11 @@ describe('QuestionForm', () => {
 	})
 
 	it('keeps question input after a conflict', async () => {
-		const save = vi
-			.fn()
-			.mockRejectedValue(
-				new ApiError(HTTP_STATUS.CONFLICT, {
-					detail: 'This question has answers.'
-				})
-			)
+		const save = vi.fn().mockRejectedValue(
+			new ApiError(HTTP_STATUS.CONFLICT, {
+				detail: 'This question has answers.'
+			})
+		)
 		const user = userEvent.setup()
 		renderWithTheme(
 			<QuestionForm

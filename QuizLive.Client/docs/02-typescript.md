@@ -22,7 +22,6 @@ Run `npm run typecheck` (`tsc -b`) before pushing.
 ```ts
 // Good
 import type { QuizDto } from '@modules/quizzes/types'
-
 // Bad — may emit invalid runtime imports
 import { QuizDto } from '@modules/quizzes/types'
 ```
@@ -50,23 +49,50 @@ For API and form DTOs:
 
 **MUST NOT** hand-write duplicate interfaces for the same shape unless there is no schema.
 
-## R-5. Annotate public surfaces (SHOULD)
+## R-5. Module `types.ts` vs component props (MUST)
+
+Each feature module **MUST** keep shared type aliases in `types.ts`:
+
+- DTOs from Zod (`z.infer`, indexed access, `NonNullable` helpers) — see R-4.
+- Any other **named export** used outside a single component file: chart series rows, hook result shapes, store slices, form values, etc.
+
+**Component files** (`PascalCase.tsx`) **MAY** export only the matching `XxxProps` type (same file as the component — see [07-solid.md](./07-solid.md)). **MUST NOT** export non-props types from components, hooks, or utils — put them in `types.ts`.
+
+```ts
+// QuestionCorrectPercentChart.tsx
+import type { QuestionCorrectPoint } from '@modules/statistics/types'
+
+// types.ts
+export type QuestionCorrectPoint = {
+	key: string
+	label: string
+	correctPercent: number
+}
+
+export type QuestionCorrectPercentChartProps = {
+	points: QuestionCorrectPoint[]
+}
+```
+
+Non-exported locals (`type TreemapContentProps = ...` inside a file) **MAY** stay beside the only consumer.
+
+## R-6. Annotate public surfaces (SHOULD)
 
 - **SHOULD** type component props (`type XxxProps = { ... }`) and exported hook return shapes when not obvious.
 - **MAY** let locals infer when the initializer is clear.
 
-## R-6. Modern patterns (SHOULD)
+## R-7. Modern patterns (SHOULD)
 
 - **SHOULD** use discriminated unions for variants (`type` + literal `kind` / `status`).
 - **SHOULD** use `satisfies` to check object literals without widening (e.g. const maps).
 - **SHOULD** use `readonly` on data that must not be mutated in place.
 - **SHOULD** end exhaustive `switch` on unions with `assertNever` or a `default` that satisfies `never`.
 
-## R-7. Path aliases only (MUST)
+## R-8. Path aliases only (MUST)
 
 ESLint `no-restricted-imports` forbids `../` and `./` in application code. Use aliases from `tsconfig.app.json` (`@modules/*`, `@api/*`, `@utils/*`, etc.).
 
-## R-8. Optional hardening (SHOULD consider)
+## R-9. Optional hardening (SHOULD consider)
 
 Not enabled today; consider enabling incrementally:
 

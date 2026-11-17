@@ -7,7 +7,7 @@ describe('ApiError', () => {
 		const error = new ApiError(401, {
 			title: 'Unauthorized',
 			detail: 'Invalid user name or password.',
-			remainingAttempts: 3,
+			remainingAttempts: 3
 		})
 		expect(error.status).toBe(401)
 		expect(error.detail).toBe('Invalid user name or password.')
@@ -20,7 +20,7 @@ describe('parseProblemResponse', () => {
 		const response = new Response(
 			JSON.stringify({
 				title: 'Validation failed',
-				errors: { userName: ['Too short'] },
+				errors: { userName: ['Too short'] }
 			}),
 			{ headers: { 'content-type': 'application/problem+json' } }
 		)

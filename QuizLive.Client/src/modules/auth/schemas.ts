@@ -16,7 +16,10 @@ export const authResponseSchema = z.object({
 export const loginFormSchema = z.object({
 	userName: z
 		.string()
-		.min(AUTH_FIELD_LIMITS.loginFieldMin, AUTH_COPY.validation.userNameRequired),
+		.min(
+			AUTH_FIELD_LIMITS.loginFieldMin,
+			AUTH_COPY.validation.userNameRequired
+		),
 	password: z
 		.string()
 		.min(AUTH_FIELD_LIMITS.loginFieldMin, AUTH_COPY.validation.passwordRequired)

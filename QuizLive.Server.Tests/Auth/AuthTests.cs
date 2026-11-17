@@ -3,6 +3,10 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Identity;
+using QuizLive.Server.Infrastructure.Data;
 using QuizLive.Server.Application.Auth;
 using QuizLive.Server.Tests.Support;
 
@@ -14,6 +18,47 @@ namespace QuizLive.Server.Tests.Auth
         private const int MaxFailedAttempts = 5;
 
         private static CancellationToken Ct => TestContext.Current.CancellationToken;
+
+        [Fact]
+        public async Task GetMe_WithValidTokenForDeletedUser_Returns401()
+        {
+            var client = factory.CreateClient();
+            var auth = await client.RegisterAsync();
+            using (var scope = factory.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var user = await db.Users.SingleAsync(user => user.Id == auth.User.Id, Ct);
+                db.Users.Remove(user);
+                await db.SaveChangesAsync(Ct);
+            }
+
+            var response = await GetMeAsync(client, auth.Token);
+
+            var problem = await ProblemAssert.HasStatusAsync(response, HttpStatusCode.Unauthorized);
+            Assert.Equal("User no longer exists.", problem.Detail);
+        }
+
+        [Theory]
+        [InlineData("bad#name")]
+        [InlineData("bad name")]
+        public async Task Register_WithIdentityInvalidUserName_ReturnsUserNameValidationError(string userName)
+        {
+            var response = await PostRegisterAsync(factory.CreateClient(), userName);
+
+            await ProblemAssert.HasErrorAsync(response, HttpStatusCode.BadRequest, "userName");
+        }
+
+        [Fact]
+        public async Task Register_WhenIdentityRejectsPassword_ReturnsPasswordValidationError()
+        {
+            using var stricterFactory = factory.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+                services.PostConfigure<IdentityOptions>(options => options.Password.RequiredUniqueChars = 4)));
+            var client = stricterFactory.CreateClient();
+
+            var response = await client.PostAsJsonAsync("/api/auth/register", new RegisterRequest(NewUserName(), "aaaaaa"), Ct);
+
+            await ProblemAssert.HasErrorAsync(response, HttpStatusCode.BadRequest, "password");
+        }
 
         [Fact]
         public async Task Register_ReturnsTokenAndUser()

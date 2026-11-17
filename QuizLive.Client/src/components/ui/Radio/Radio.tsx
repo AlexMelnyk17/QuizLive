@@ -1,16 +1,18 @@
-import type { ComponentPropsWithoutRef } from 'react'
-
 import cn from 'clsx'
+import type { ComponentPropsWithoutRef } from 'react'
 
 import {
 	radioControl,
 	radioDot,
 	radioInput,
 	radioLabel,
-	radioRoot,
+	radioRoot
 } from '@components/ui/Radio/Radio.css'
 
-export type RadioProps = Omit<ComponentPropsWithoutRef<'input'>, 'type' | 'size'> & {
+export type RadioProps = Omit<
+	ComponentPropsWithoutRef<'input'>,
+	'type' | 'size'
+> & {
 	label?: string
 }
 
@@ -26,7 +28,7 @@ export function Radio({
 		<label className={cn(radioRoot, className)} htmlFor={id}>
 			<input
 				id={id}
-				type="radio"
+				type='radio'
 				className={radioInput}
 				checked={checked}
 				disabled={disabled}
@@ -35,7 +37,7 @@ export function Radio({
 			<span
 				className={radioControl({
 					checked: Boolean(checked),
-					disabled: Boolean(disabled),
+					disabled: Boolean(disabled)
 				})}
 				aria-hidden
 			>

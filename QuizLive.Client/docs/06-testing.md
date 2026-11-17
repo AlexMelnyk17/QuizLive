@@ -28,11 +28,11 @@ Prefer queries in this order (Testing Library):
 4. `getByText` (static copy)
 5. `getByTestId` — **last resort**
 
-| Variant | When |
-| --- | --- |
-| `getBy*` | Present now |
-| `queryBy*` | Assert absence |
-| `findBy*` | Appears after async (`await findBy...`) |
+| Variant    | When                                    |
+| ---------- | --------------------------------------- |
+| `getBy*`   | Present now                             |
+| `queryBy*` | Assert absence                          |
+| `findBy*`  | Appears after async (`await findBy...`) |
 
 **AVOID** fixed `setTimeout` / sleeps. Use `findBy*` or `waitFor`.
 
@@ -65,13 +65,13 @@ Wrap router-dependent UI with `MemoryRouter` or `renderApp` as appropriate.
 
 ## R-6. What to test (SHOULD)
 
-| Layer | Approach |
-| --- | --- |
-| Zod `schemas` | Valid/invalid payloads |
-| `utils.ts` | Pure functions, edge cases |
-| `*Api.ts` | Mock `fetch` / `apiRequest`; assert URL, parse, errors |
-| Zustand store | Call store API directly (`sessionStore.test.ts`) |
-| Components | User flows with mocked hooks/API modules |
+| Layer         | Approach                                               |
+| ------------- | ------------------------------------------------------ |
+| Zod `schemas` | Valid/invalid payloads                                 |
+| `utils.ts`    | Pure functions, edge cases                             |
+| `*Api.ts`     | Mock `fetch` / `apiRequest`; assert URL, parse, errors |
+| Zustand store | Call store API directly (`sessionStore.test.ts`)       |
+| Components    | User flows with mocked hooks/API modules               |
 
 **AVOID** testing trivial re-exports and duplicate schema/type-only files.
 
@@ -93,11 +93,11 @@ Prefer mocking `api` functions or hooks over deep component trees when that matc
 
 ## R-8. Running tests (MUST)
 
-| Command | Use |
-| --- | --- |
-| `npm run test` | CI-style single run |
-| `npm run test:watch` | Local iteration |
-| `npm run verify` | Lint + typecheck + test (pre-push) |
+| Command              | Use                                |
+| -------------------- | ---------------------------------- |
+| `npm run test`       | CI-style single run                |
+| `npm run test:watch` | Local iteration                    |
+| `npm run verify`     | Lint + typecheck + test (pre-push) |
 
 ## See also
 

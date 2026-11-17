@@ -1,8 +1,8 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
+import cn from 'clsx'
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { stack } from '@components/ui/Stack/Stack.css'
-import cn from 'clsx'
 
 type StackVariants = NonNullable<RecipeVariants<typeof stack>>
 

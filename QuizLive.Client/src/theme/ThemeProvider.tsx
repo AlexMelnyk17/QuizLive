@@ -1,60 +1,54 @@
 import {
+	type ReactNode,
+	useCallback,
 	useEffect,
 	useLayoutEffect,
-	useState,
-	type ReactNode,
+	useMemo,
+	useState
 } from 'react'
 
-import { darkTheme } from '@theme/dark.css'
-import { lightTheme } from '@theme/light.css'
+import { applyTheme } from '@theme/applyTheme'
+import { THEME_STORAGE_KEY } from '@theme/constants'
 import { ThemeContext, type ThemeMode } from '@theme/themeContext'
-
-const storageKey = 'quizlive-theme'
-
-const isThemeMode = (value: string | null): value is ThemeMode =>
-	value === 'light' || value === 'dark' || value === 'system'
-
-const readStoredMode = (): ThemeMode => {
-	const stored = localStorage.getItem(storageKey)
-	return isThemeMode(stored) ? stored : 'system'
-}
-
-const readSystemTheme = (): 'light' | 'dark' =>
-	window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+import {
+	parseThemeMode,
+	readThemeMode,
+	writeThemeMode
+} from '@theme/themeStorage'
+import { useSystemTheme } from '@theme/useSystemTheme'
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-	const [mode, setMode] = useState<ThemeMode>(() => readStoredMode())
-	const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>(() =>
-		readSystemTheme()
-	)
+	const [mode, setMode] = useState<ThemeMode>(readThemeMode)
+	const systemTheme = useSystemTheme()
 
 	const resolved = mode === 'system' ? systemTheme : mode
 
 	useLayoutEffect(() => {
-		const root = document.documentElement
-		root.classList.remove(lightTheme, darkTheme)
-		root.classList.add(resolved === 'dark' ? darkTheme : lightTheme)
-	}, [resolved])
+		applyTheme(mode, resolved)
+	}, [mode, resolved])
 
 	useEffect(() => {
-		const media = window.matchMedia('(prefers-color-scheme: dark)')
-		const handleChange = () => setSystemTheme(media.matches ? 'dark' : 'light')
-		media.addEventListener('change', handleChange)
-		return () => media.removeEventListener('change', handleChange)
+		const syncPreference = (event: StorageEvent) => {
+			if (event.key === THEME_STORAGE_KEY || event.key === null)
+				setMode(parseThemeMode(event.newValue))
+		}
+		window.addEventListener('storage', syncPreference)
+		return () => window.removeEventListener('storage', syncPreference)
 	}, [])
 
-	const setThemeMode = (next: ThemeMode) => {
+	const setThemeMode = useCallback((next: ThemeMode) => {
 		setMode(next)
-		localStorage.setItem(storageKey, next)
-	}
+		writeThemeMode(next)
+	}, [])
 
-	const toggle = () => setThemeMode(resolved === 'dark' ? 'light' : 'dark')
-
-	return (
-		<ThemeContext.Provider
-			value={{ mode, resolved, setMode: setThemeMode, toggle }}
-		>
-			{children}
-		</ThemeContext.Provider>
+	const toggle = useCallback(
+		() => setThemeMode(resolved === 'dark' ? 'light' : 'dark'),
+		[resolved, setThemeMode]
 	)
+	const value = useMemo(
+		() => ({ mode, resolved, setMode: setThemeMode, toggle }),
+		[mode, resolved, setThemeMode, toggle]
+	)
+
+	return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }

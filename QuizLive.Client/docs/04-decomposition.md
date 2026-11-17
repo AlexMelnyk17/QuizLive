@@ -8,13 +8,13 @@ Features are **vertical slices** under `src/modules/`. Shared code stays small a
 
 Each `src/modules/<name>/` slice **SHOULD** contain everything needed for that product area:
 
-| Segment | Role |
-| --- | --- |
-| `api/` | HTTP + DTO parse for this module |
-| `components/` | Pages and feature UI |
-| `hooks/` | React Query and feature hooks |
-| `store/` | Zustand (or similar) when client state is needed |
-| `schemas.ts`, `types.ts`, `constants.ts`, `utils.ts` | Domain definitions and pure helpers |
+| Segment                                              | Role                                                                                                                                            |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api/`                                               | HTTP + DTO parse for this module                                                                                                                |
+| `components/`                                        | Pages and feature UI                                                                                                                            |
+| `hooks/`                                             | React Query and feature hooks                                                                                                                   |
+| `store/`                                             | Zustand (or similar) when client state is needed                                                                                                |
+| `schemas.ts`, `types.ts`, `constants.ts`, `utils.ts` | Domain definitions and pure helpers (`types.ts` holds DTOs and shared aliases — not `XxxProps`; see [02-typescript.md](./02-typescript.md) R-5) |
 
 Domain rules for one feature **MUST NOT** live in `src/utils` unless reused by a second feature.
 
@@ -66,11 +66,11 @@ flowchart BT
   app --> shared
 ```
 
-| Layer | May import | Must not import |
-| --- | --- | --- |
-| `src/components/ui`, `theme`, `api`, `utils`, `config` | npm packages only | `modules`, `layout` (except types if needed — prefer avoiding) |
-| `src/modules/*` | shared aliases, other modules’ concrete exports | sibling module “internals” without a clear path |
-| `src/router`, `providers`, `layout` | modules + shared | — |
+| Layer                                                  | May import                                      | Must not import                                                |
+| ------------------------------------------------------ | ----------------------------------------------- | -------------------------------------------------------------- |
+| `src/components/ui`, `theme`, `api`, `utils`, `config` | npm packages only                               | `modules`, `layout` (except types if needed — prefer avoiding) |
+| `src/modules/*`                                        | shared aliases, other modules’ concrete exports | sibling module “internals” without a clear path                |
+| `src/router`, `providers`, `layout`                    | modules + shared                                | —                                                              |
 
 ## R-5. Promote to shared only on reuse (SHOULD)
 
@@ -89,13 +89,13 @@ Example: `statistics/components/charts/*` extracted from `StatisticsPage`.
 
 ## R-7. Where logic lives (MUST)
 
-| Concern | Location |
-| --- | --- |
-| Server data | `hooks/` + React Query |
-| Pure transforms | `utils.ts` |
-| Session / feature client state | `store/` (Zustand) |
-| Form state | React Hook Form local to the form |
-| URL state | TanStack Router search params |
+| Concern                        | Location                          |
+| ------------------------------ | --------------------------------- |
+| Server data                    | `hooks/` + React Query            |
+| Pure transforms                | `utils.ts`                        |
+| Session / feature client state | `store/` (Zustand)                |
+| Form state                     | React Hook Form local to the form |
+| URL state                      | TanStack Router search params     |
 
 **MUST NOT** mirror server cache in Zustand.
 

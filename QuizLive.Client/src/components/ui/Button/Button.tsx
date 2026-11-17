@@ -1,9 +1,9 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
+import cn from 'clsx'
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 
 import { button } from '@components/ui/Button/Button.css'
 import { Spinner } from '@components/ui/Spinner'
-import cn from 'clsx'
 
 type ButtonVariants = NonNullable<RecipeVariants<typeof button>>
 
@@ -30,7 +30,7 @@ export const Button = ({
 
 	return (
 		<button
-			type="button"
+			type='button'
 			className={cn(button({ variant, size, fullWidth }), className)}
 			disabled={isDisabled}
 			aria-busy={loading || undefined}

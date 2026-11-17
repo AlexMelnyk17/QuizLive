@@ -9,13 +9,14 @@ import {
 	radii,
 	shadows,
 	spacing,
-	zIndices,
+	zIndices
 } from '@theme/tokens'
 
 export const vars = createThemeContract({
 	colors: {
 		bg: null,
 		surface: null,
+		surfaceSunken: null,
 		surfaceRaised: null,
 		text: null,
 		textMuted: null,
@@ -38,6 +39,20 @@ export const vars = createThemeContract({
 		focusRing: null,
 		overlay: null,
 		codeBg: null,
+		disabledBg: null,
+		disabledText: null,
+		disabledBorder: null
+	},
+	charts: {
+		blue: null,
+		purple: null,
+		green: null,
+		amber: null,
+		red: null,
+		indigo: null,
+		pink: null,
+		teal: null,
+		textOnFill: null
 	},
 	spacing,
 	radii,
@@ -47,5 +62,5 @@ export const vars = createThemeContract({
 	shadows,
 	zIndices,
 	durations,
-	fonts,
+	fonts
 })

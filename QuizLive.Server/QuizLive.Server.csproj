@@ -34,7 +34,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\QuizLive.Client\QuizLive.Client.esproj">
+    <!-- CI validates the client separately and can publish the server without rebuilding SPA assets. -->
+    <ProjectReference Include="..\QuizLive.Client\QuizLive.Client.esproj" Condition="'$(BuildClientAssets)' != 'false'">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>

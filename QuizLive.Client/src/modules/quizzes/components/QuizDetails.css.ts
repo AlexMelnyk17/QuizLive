@@ -48,12 +48,6 @@ export const quizDetailsActions = style({
 	gap: vars.spacing[2]
 })
 
-export const startGameButton = style({
-	':disabled': {
-		backgroundColor: vars.colors.success,
-		color: vars.colors.onPrimary
-	}
-})
 export const actionWithHint = style({
 	display: 'flex',
 	flexDirection: 'column',
@@ -108,6 +102,7 @@ export const optionItem = style({
 	gap: vars.spacing[2],
 	padding: `${vars.spacing[2]} ${vars.spacing[3]}`,
 	borderRadius: vars.radii.md,
+	backgroundColor: vars.colors.surfaceSunken,
 	border: `1px solid ${vars.colors.borderStrong}`,
 	minWidth: 0,
 	overflowWrap: 'anywhere'

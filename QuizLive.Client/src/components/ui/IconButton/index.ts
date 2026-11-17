@@ -1,1 +1,4 @@
-export { IconButton, type IconButtonProps } from '@components/ui/IconButton/IconButton'
+export {
+	IconButton,
+	type IconButtonProps
+} from '@components/ui/IconButton/IconButton'

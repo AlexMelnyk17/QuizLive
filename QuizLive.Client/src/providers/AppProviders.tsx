@@ -1,15 +1,17 @@
 import type { ReactNode } from 'react'
 
-import { configureApiClient } from '@api/client'
+import { QueryProvider } from '@providers/QueryProvider'
+
 import {
 	getAccessToken,
 	handleUnauthorized
 } from '@modules/auth/store/sessionStore'
-import { QueryProvider } from '@providers/QueryProvider'
+
+import { configureApiClient } from '@api/client'
 
 configureApiClient({
 	getAccessToken,
-	onUnauthorized: handleUnauthorized,
+	onUnauthorized: handleUnauthorized
 })
 
 export type AppProvidersProps = {

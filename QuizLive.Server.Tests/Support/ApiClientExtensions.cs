@@ -30,6 +30,16 @@ namespace QuizLive.Server.Tests.Support
             client.DefaultRequestHeaders.Authorization?.Parameter
             ?? throw new InvalidOperationException("The client is not authorized.");
 
+        // Like CreateAuthorizedClientAsync, and also gives the user id for calls that take the host explicitly.
+        public static async Task<(HttpClient Client, string UserId)> CreateHostAsync(this WebApplicationFactory<Program> factory)
+        {
+            var client = factory.CreateClient();
+            var auth = await client.RegisterAsync();
+
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.Token);
+            return (client, auth.User.Id);
+        }
+
         public static async Task<AuthResponse> RegisterAsync(this HttpClient client, string? userName = null)
         {
             var request = new RegisterRequest(userName ?? $"u{Guid.NewGuid():N}", Password);

@@ -1,4 +1,4 @@
-import { defineProperties, createSprinkles } from '@vanilla-extract/sprinkles'
+import { createSprinkles, defineProperties } from '@vanilla-extract/sprinkles'
 
 import { vars } from '@theme/contract.css'
 
@@ -6,7 +6,7 @@ const responsiveProperties = defineProperties({
 	conditions: {
 		mobile: {},
 		tablet: { '@media': 'screen and (min-width: 768px)' },
-		desktop: { '@media': 'screen and (min-width: 1024px)' },
+		desktop: { '@media': 'screen and (min-width: 1024px)' }
 	},
 	defaultCondition: 'mobile',
 	properties: {
@@ -20,7 +20,7 @@ const responsiveProperties = defineProperties({
 			'flex-end',
 			'space-between',
 			'space-around',
-			'space-evenly',
+			'space-evenly'
 		],
 		gap: vars.spacing,
 		paddingTop: vars.spacing,
@@ -34,8 +34,8 @@ const responsiveProperties = defineProperties({
 		width: ['auto', '100%', 'fit-content'],
 		maxWidth: ['100%'],
 		textAlign: ['left', 'center', 'right'],
-		borderRadius: vars.radii,
-	},
+		borderRadius: vars.radii
+	}
 })
 
 const colorProperties = defineProperties({
@@ -49,11 +49,12 @@ const colorProperties = defineProperties({
 			success: vars.colors.success,
 			danger: vars.colors.danger,
 			warning: vars.colors.warning,
-			info: vars.colors.info,
+			info: vars.colors.info
 		},
 		backgroundColor: {
 			bg: vars.colors.bg,
 			surface: vars.colors.surface,
+			surfaceSunken: vars.colors.surfaceSunken,
 			surfaceRaised: vars.colors.surfaceRaised,
 			primary: vars.colors.primary,
 			primaryMuted: vars.colors.primaryMuted,
@@ -61,9 +62,9 @@ const colorProperties = defineProperties({
 			dangerMuted: vars.colors.dangerMuted,
 			warningMuted: vars.colors.warningMuted,
 			infoMuted: vars.colors.infoMuted,
-			transparent: 'transparent',
-		},
-	},
+			transparent: 'transparent'
+		}
+	}
 })
 
 export const sprinkles = createSprinkles(responsiveProperties, colorProperties)

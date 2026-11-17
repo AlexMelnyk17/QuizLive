@@ -13,8 +13,7 @@ export function useQuiz(quizId: number, enabled = true) {
 		enabled,
 		// A missing quiz stays missing, so a 404 is shown right away instead of after a retry.
 		retry: (failureCount, error) =>
-			!(
-				error instanceof ApiError && error.status === HTTP_STATUS.NOT_FOUND
-			) && failureCount < 1
+			!(error instanceof ApiError && error.status === HTTP_STATUS.NOT_FOUND) &&
+			failureCount < 1
 	})
 }

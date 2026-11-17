@@ -1,9 +1,12 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
+import cn from 'clsx'
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 
-import cn from 'clsx'
-
-import { answerLetter, answerOption, answerText } from '@components/ui/AnswerOption/AnswerOption.css'
+import {
+	answerLetter,
+	answerOption,
+	answerText
+} from '@components/ui/AnswerOption/AnswerOption.css'
 
 type AnswerVariants = NonNullable<RecipeVariants<typeof answerOption>>
 
@@ -38,11 +41,8 @@ export function AnswerOption({
 
 	return (
 		<button
-			type="button"
-			className={cn(
-				answerOption({ color: resolvedColor, state }),
-				className
-			)}
+			type='button'
+			className={cn(answerOption({ color: resolvedColor, state }), className)}
 			disabled={isDisabled}
 			{...props}
 		>

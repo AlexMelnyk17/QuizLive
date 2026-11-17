@@ -1,23 +1,23 @@
-import { palette } from '@theme/tokens'
+import { vars } from '@theme/contract.css'
+
+/** Shared categorical fills (donut, treemap, multi-series bars). */
+export const statsChartSeries = [
+	vars.charts.blue,
+	vars.charts.purple,
+	vars.charts.green,
+	vars.charts.amber,
+	vars.charts.red,
+	vars.charts.indigo,
+	vars.charts.pink,
+	vars.charts.teal
+] as const
 
 export const statsChartColors = {
-	primary: palette.purple500,
-	info: palette.blue500,
-	success: palette.green500,
-	warning: palette.amber500,
-	axis: palette.gray400,
-	grid: palette.gray200,
+	fill: statsChartSeries[0],
+	success: statsChartSeries[2],
+	stroke: vars.colors.borderStrong,
+	surface: vars.colors.surfaceRaised,
+	text: vars.colors.textHeading,
+	textMuted: vars.colors.textMuted,
+	textOnFill: vars.charts.textOnFill
 } as const
-
-export const gamesByKindColors = [
-	statsChartColors.primary,
-	statsChartColors.info,
-	statsChartColors.success,
-] as const
-
-export const gamesByStatusColors = [
-	statsChartColors.info,
-	statsChartColors.warning,
-	statsChartColors.primary,
-	statsChartColors.success,
-] as const

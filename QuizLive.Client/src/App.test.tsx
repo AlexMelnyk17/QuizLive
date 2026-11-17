@@ -26,7 +26,7 @@ describe('App', () => {
 		).toBeInTheDocument()
 		await waitFor(() => {
 			expect(router.state.location.search).toEqual({
-				redirect: pathTo.quizDetails(7),
+				redirect: pathTo.quizDetails(7)
 			})
 		})
 	})
@@ -39,7 +39,7 @@ describe('App', () => {
 		).toBeInTheDocument()
 		await waitFor(() => {
 			expect(router.state.location.search).toEqual({
-				redirect: PATHS.quizCreate,
+				redirect: PATHS.quizCreate
 			})
 		})
 	})

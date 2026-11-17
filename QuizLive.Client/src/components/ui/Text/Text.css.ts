@@ -6,14 +6,14 @@ import { vars } from '@theme/contract.css'
 export const truncate = style({
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
-	whiteSpace: 'nowrap',
+	whiteSpace: 'nowrap'
 })
 
 export const text = recipe({
 	base: {
 		margin: 0,
 		fontFamily: vars.fonts.sans,
-		lineHeight: vars.lineHeights.normal,
+		lineHeight: vars.lineHeights.normal
 	},
 	variants: {
 		size: {
@@ -21,13 +21,13 @@ export const text = recipe({
 			sm: { fontSize: vars.fontSizes.sm },
 			md: { fontSize: vars.fontSizes.md },
 			lg: { fontSize: vars.fontSizes.lg },
-			xl: { fontSize: vars.fontSizes.xl },
+			xl: { fontSize: vars.fontSizes.xl }
 		},
 		weight: {
 			normal: { fontWeight: vars.fontWeights.normal },
 			medium: { fontWeight: vars.fontWeights.medium },
 			semibold: { fontWeight: vars.fontWeights.semibold },
-			bold: { fontWeight: vars.fontWeights.bold },
+			bold: { fontWeight: vars.fontWeights.bold }
 		},
 		tone: {
 			default: { color: vars.colors.text },
@@ -37,29 +37,29 @@ export const text = recipe({
 			success: { color: vars.colors.success },
 			danger: { color: vars.colors.danger },
 			warning: { color: vars.colors.warning },
-			info: { color: vars.colors.info },
+			info: { color: vars.colors.info }
 		},
 		align: {
 			left: { textAlign: 'left' },
 			center: { textAlign: 'center' },
-			right: { textAlign: 'right' },
+			right: { textAlign: 'right' }
 		},
 		truncate: {
 			true: {},
-			false: {},
-		},
+			false: {}
+		}
 	},
 	compoundVariants: [
 		{
 			variants: { truncate: true },
-			style: truncate,
-		},
+			style: truncate
+		}
 	],
 	defaultVariants: {
 		size: 'md',
 		weight: 'normal',
 		tone: 'default',
 		align: 'left',
-		truncate: false,
-	},
+		truncate: false
+	}
 })

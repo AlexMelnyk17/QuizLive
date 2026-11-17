@@ -1,15 +1,14 @@
+import cn from 'clsx'
 import { Check } from 'lucide-react'
 import type { ComponentPropsWithoutRef } from 'react'
-
-import { Icon } from '@components/ui/Icon'
-import cn from 'clsx'
 
 import {
 	checkboxControl,
 	checkboxInput,
 	checkboxLabel,
-	checkboxRoot,
+	checkboxRoot
 } from '@components/ui/Checkbox/Checkbox.css'
+import { Icon } from '@components/ui/Icon'
 
 export type CheckboxProps = Omit<
 	ComponentPropsWithoutRef<'input'>,
@@ -30,7 +29,7 @@ export function Checkbox({
 		<label className={cn(checkboxRoot, className)} htmlFor={id}>
 			<input
 				id={id}
-				type="checkbox"
+				type='checkbox'
 				className={checkboxInput}
 				checked={checked}
 				disabled={disabled}
@@ -39,11 +38,11 @@ export function Checkbox({
 			<span
 				className={checkboxControl({
 					checked: Boolean(checked),
-					disabled: Boolean(disabled),
+					disabled: Boolean(disabled)
 				})}
 				aria-hidden
 			>
-				{checked ? <Icon icon={Check} size="xs" aria-hidden /> : null}
+				{checked ? <Icon icon={Check} size='xs' aria-hidden /> : null}
 			</span>
 			{label ? <span className={checkboxLabel}>{label}</span> : null}
 		</label>

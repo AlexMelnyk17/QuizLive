@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using QuizLive.Server.API.Hubs;
@@ -40,6 +41,12 @@ namespace QuizLive.Server
             builder.Services.AddScoped<IQuizService, QuizService>();
             builder.Services.AddScoped<IQuestionService, QuestionService>();
             builder.Services.AddScoped<IGameService, GameService>();
+            builder.Services.AddScoped<GameFlowService>();
+            builder.Services.AddScoped<IGameFlowService>(s => s.GetRequiredService<GameFlowService>());
+            builder.Services.AddScoped<LiveGameService>();
+            builder.Services.AddSingleton(TimeProvider.System);
+            builder.Services.AddSingleton<GamePresence>();
+            builder.Services.AddHostedService<LiveGameWorker>();
             builder.Services.AddScoped<IStatsService, StatsService>();
             builder.Services.AddSignalR(options => options.AddFilter<HubExceptionFilter>());
             builder.Services.AddSingleton<IGameNotifier, SignalRGameNotifier>();
@@ -86,7 +93,10 @@ namespace QuizLive.Server
             }
 
             app.UseDefaultFiles();
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                OnPrepareResponse = ConfigureStaticAssetCache
+            });
 
             if (app.Environment.IsDevelopment())
             {
@@ -102,10 +112,37 @@ namespace QuizLive.Server
             app.MapControllers();
             app.MapHub<GameHub>(HubRoutes.Game);
 
-            app.MapFallbackToFile("/index.html");
+            app.MapFallbackToFile("/index.html", new StaticFileOptions
+            {
+                OnPrepareResponse = ConfigureHtmlCache
+            });
 
             await app.RunAsync();
             return 0;
+        }
+
+        private const string HashedAssetPathPrefix = "/assets";
+        private const string HashedAssetCacheControl = "public, max-age=31536000, immutable";
+        private const string HtmlCacheControl = "no-cache";
+        private const string HtmlFileName = "index.html";
+
+        private static void ConfigureStaticAssetCache(StaticFileResponseContext context)
+        {
+            if (context.Context.Request.Path.StartsWithSegments(HashedAssetPathPrefix))
+            {
+                context.Context.Response.Headers.CacheControl = HashedAssetCacheControl;
+                return;
+            }
+
+            if (string.Equals(context.File.Name, HtmlFileName, StringComparison.OrdinalIgnoreCase))
+            {
+                ConfigureHtmlCache(context);
+            }
+        }
+
+        private static void ConfigureHtmlCache(StaticFileResponseContext context)
+        {
+            context.Context.Response.Headers.CacheControl = HtmlCacheControl;
         }
     }
 }

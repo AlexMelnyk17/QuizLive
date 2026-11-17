@@ -1,8 +1,8 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
+import cn from 'clsx'
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { badge } from '@components/ui/Badge/Badge.css'
-import cn from 'clsx'
 
 type BadgeVariants = NonNullable<RecipeVariants<typeof badge>>
 

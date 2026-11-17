@@ -1,0 +1,290 @@
+import { cleanup, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import type { ReactNode } from 'react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { HostGamePage } from '@modules/game/components/HostGamePage'
+import {
+	GameStatus,
+	HOST_END_GAME_COPY,
+	HOST_FINISHED_COPY,
+	HOST_GAME_COPY,
+	HOST_LOBBY_COPY,
+	HOST_QUESTION_COPY,
+	HOST_RESULTS_COPY
+} from '@modules/game/constants'
+import { useHostGame } from '@modules/game/hooks/useHostGame'
+import type { HostGameResult, HostQuestionDto } from '@modules/game/types'
+
+import { PATHS } from '@config/routes'
+
+import { renderWithTheme } from '@src/test/testUtils'
+
+const navigateMock = vi.fn()
+const paramsMock = vi.fn<() => { gameId: string }>()
+
+vi.mock('@tanstack/react-router', () => ({
+	Link: ({ children, to }: { children: ReactNode; to: string }) => (
+		<a href={to}>{children}</a>
+	),
+	useNavigate: () => navigateMock,
+	useParams: () => paramsMock()
+}))
+
+vi.mock('@modules/auth/store/sessionStore', () => ({
+	useSession: () => null,
+	signOut: vi.fn()
+}))
+
+// The hook would open a real connection; the page is tested with what the hook says.
+vi.mock('@modules/game/hooks/useHostGame', () => ({
+	useHostGame: vi.fn()
+}))
+
+const hostGameMock = vi.mocked(useHostGame)
+
+function hostGame(overrides: Partial<HostGameResult> = {}): HostGameResult {
+	return {
+		game: null,
+		status: null,
+		players: [],
+		currentQuestion: null,
+		questionReceivedAtMs: null,
+		closedQuestionNumber: null,
+		connectionState: 'connecting',
+		error: null,
+		commands: {
+			addTime: vi.fn().mockResolvedValue(null),
+			startGame: vi.fn(),
+			showResults: vi.fn(),
+			nextQuestion: vi.fn(),
+			endGame: vi.fn()
+		},
+		...overrides
+	}
+}
+
+const joinedGame = {
+	id: 7,
+	code: '283646',
+	quizId: 3,
+	quizTitle: 'STEM basics',
+	quizKind: 2
+} as const
+
+const closableQuestion: HostQuestionDto = {
+	number: 1,
+	total: 3,
+	question: {
+		id: 12,
+		order: 1,
+		text: 'What is 2 + 2?',
+		timeLimitSeconds: null,
+		basePoints: null,
+		imageUrl: null,
+		options: [
+			{ id: 21, order: 1, text: '4', isCorrect: true },
+			{ id: 22, order: 2, text: '5', isCorrect: false }
+		]
+	},
+	timing: {
+		startedAtUtc: '2026-11-17T10:00:00Z',
+		endsAtUtc: null,
+		serverNowUtc: '2026-11-17T10:00:05Z'
+	}
+}
+
+describe('the host page', () => {
+	beforeEach(() => {
+		navigateMock.mockReset()
+		hostGameMock.mockReset()
+		paramsMock.mockReturnValue({ gameId: '7' })
+		hostGameMock.mockReturnValue(hostGame())
+	})
+
+	afterEach(cleanup)
+
+	it('connects to the game from the address', () => {
+		renderWithTheme(<HostGamePage />)
+
+		expect(hostGameMock).toHaveBeenCalledWith(7)
+	})
+
+	it('says it is connecting until the host has joined the game', () => {
+		renderWithTheme(<HostGamePage />)
+
+		expect(screen.getByText(HOST_GAME_COPY.connecting)).toBeInTheDocument()
+	})
+
+	it('shows the quiz of the game once the host has joined it', () => {
+		hostGameMock.mockReturnValue(
+			hostGame({
+				game: {
+					id: 7,
+					code: '283646',
+					quizId: 3,
+					quizTitle: 'STEM basics',
+					quizKind: 0
+				},
+				status: GameStatus.Lobby
+			})
+		)
+
+		renderWithTheme(<HostGamePage />)
+
+		expect(
+			screen.getByRole('heading', { name: 'STEM basics' })
+		).toBeInTheDocument()
+		expect(
+			screen.queryByText(HOST_GAME_COPY.connecting)
+		).not.toBeInTheDocument()
+	})
+
+	it('shows the lobby with the code and the players, and starts the game from it', async () => {
+		const startGame = vi.fn().mockResolvedValue(null)
+		hostGameMock.mockReturnValue(
+			hostGame({
+				game: {
+					id: 7,
+					code: '283646',
+					quizId: 3,
+					quizTitle: 'STEM basics',
+					quizKind: 0
+				},
+				status: GameStatus.Lobby,
+				players: [
+					{ id: 1, nickname: 'Ann', joinedAtUtc: '2026-11-17T10:00:00Z' }
+				],
+				connectionState: 'connected',
+				commands: { ...hostGame().commands, startGame }
+			})
+		)
+		renderWithTheme(<HostGamePage />)
+
+		expect(screen.getByText('283646')).toBeInTheDocument()
+		expect(screen.getByText('Ann')).toBeInTheDocument()
+
+		await userEvent
+			.setup()
+			.click(screen.getByRole('button', { name: HOST_LOBBY_COPY.start }))
+
+		expect(startGame).toHaveBeenCalledOnce()
+	})
+
+	it('shows the running question with the correct option, and shows the results from it', async () => {
+		const showResults = vi.fn().mockResolvedValue(null)
+		hostGameMock.mockReturnValue(
+			hostGame({
+				game: joinedGame,
+				status: GameStatus.Question,
+				currentQuestion: closableQuestion,
+				questionReceivedAtMs: 1000,
+				commands: { ...hostGame().commands, showResults }
+			})
+		)
+		renderWithTheme(<HostGamePage />)
+
+		expect(screen.getByText('What is 2 + 2?')).toBeInTheDocument()
+		expect(screen.getByText(HOST_QUESTION_COPY.correct)).toBeInTheDocument()
+
+		await userEvent
+			.setup()
+			.click(
+				screen.getByRole('button', { name: HOST_QUESTION_COPY.showResults })
+			)
+
+		expect(showResults).toHaveBeenCalledOnce()
+	})
+
+	it('shows the closed question, and moves on to the next one from it', async () => {
+		const nextQuestion = vi.fn().mockResolvedValue(null)
+		hostGameMock.mockReturnValue(
+			hostGame({
+				game: joinedGame,
+				status: GameStatus.Results,
+				currentQuestion: closableQuestion,
+				closedQuestionNumber: 1,
+				commands: { ...hostGame().commands, nextQuestion }
+			})
+		)
+		renderWithTheme(<HostGamePage />)
+
+		expect(
+			screen.getByRole('heading', { name: HOST_RESULTS_COPY.heading(1, 3) })
+		).toBeInTheDocument()
+
+		await userEvent
+			.setup()
+			.click(screen.getByRole('button', { name: HOST_RESULTS_COPY.next }))
+
+		expect(nextQuestion).toHaveBeenCalledOnce()
+	})
+
+	it('lets the host end the game from the lobby', async () => {
+		const user = userEvent.setup()
+		const endGame = vi.fn().mockResolvedValue(null)
+		hostGameMock.mockReturnValue(
+			hostGame({
+				game: joinedGame,
+				status: GameStatus.Lobby,
+				commands: { ...hostGame().commands, endGame }
+			})
+		)
+		renderWithTheme(<HostGamePage />)
+
+		await user.click(
+			screen.getByRole('button', { name: HOST_END_GAME_COPY.open })
+		)
+		await user.click(
+			screen.getByRole('button', { name: HOST_END_GAME_COPY.confirm })
+		)
+
+		expect(endGame).toHaveBeenCalledOnce()
+	})
+
+	it('shows the end of the game, without the end button', () => {
+		hostGameMock.mockReturnValue(
+			hostGame({ game: joinedGame, status: GameStatus.Finished })
+		)
+		renderWithTheme(<HostGamePage />)
+
+		expect(
+			screen.getByRole('heading', { name: HOST_FINISHED_COPY.title })
+		).toBeInTheDocument()
+		expect(
+			screen.queryByRole('button', { name: HOST_END_GAME_COPY.open })
+		).not.toBeInTheDocument()
+	})
+
+	it('shows the text of the server when the host cannot be connected, and lets the host go back', async () => {
+		hostGameMock.mockReturnValue(hostGame({ error: 'Game was not found.' }))
+		renderWithTheme(<HostGamePage />)
+
+		expect(screen.getByRole('alert')).toHaveTextContent('Game was not found.')
+		expect(
+			screen.queryByText(HOST_GAME_COPY.connecting)
+		).not.toBeInTheDocument()
+
+		await userEvent
+			.setup()
+			.click(screen.getByRole('button', { name: HOST_GAME_COPY.backToQuizzes }))
+
+		expect(navigateMock).toHaveBeenCalledWith({ to: PATHS.dashboard })
+	})
+
+	it('does not connect for an address that is not a game id, and lets the host go back', async () => {
+		paramsMock.mockReturnValue({ gameId: 'abc' })
+		renderWithTheme(<HostGamePage />)
+
+		expect(screen.getByRole('alert')).toHaveTextContent(
+			HOST_GAME_COPY.invalidGame
+		)
+		expect(hostGameMock).not.toHaveBeenCalled()
+
+		await userEvent
+			.setup()
+			.click(screen.getByRole('button', { name: HOST_GAME_COPY.backToQuizzes }))
+
+		expect(navigateMock).toHaveBeenCalledWith({ to: PATHS.dashboard })
+	})
+})

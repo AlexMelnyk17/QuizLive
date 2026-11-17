@@ -3,19 +3,13 @@ import {
 	createRootRoute,
 	createRoute,
 	createRouter,
+	lazyRouteComponent,
 	redirect
 } from '@tanstack/react-router'
 import { z } from 'zod'
 
-import { LoginPage } from '@modules/auth/components/LoginPage'
-import { RegisterPage } from '@modules/auth/components/RegisterPage'
 import { readSession } from '@modules/auth/store/sessionStore'
-import { DashboardPage } from '@modules/dashboard/components/DashboardPage'
-import { HomePage } from '@modules/home/components/HomePage'
-import { QuizCreatePage } from '@modules/quizzes/components/QuizCreatePage'
-import { QuizDetailsPage } from '@modules/quizzes/components/QuizDetailsPage'
-import { QuizEditPage } from '@modules/quizzes/components/QuizEditPage'
-import { StatisticsPage } from '@modules/statistics/components/StatisticsPage'
+import { usePlayerTokenStore } from '@modules/game/store/playerTokenStore'
 
 import { PATHS } from '@config/routes'
 
@@ -32,7 +26,10 @@ const loginSearchSchema = z.object({
 const indexRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: PATHS.home,
-	component: HomePage
+	component: lazyRouteComponent(
+		() => import('@modules/home/components/HomePage'),
+		'HomePage'
+	)
 })
 
 const loginRoute = createRoute({
@@ -45,7 +42,10 @@ const loginRoute = createRoute({
 			throw redirect({ to: sanitizeRedirectPath(search.redirect) })
 		}
 	},
-	component: LoginPage
+	component: lazyRouteComponent(
+		() => import('@modules/auth/components/LoginPage'),
+		'LoginPage'
+	)
 })
 
 const registerRoute = createRoute({
@@ -57,67 +57,78 @@ const registerRoute = createRoute({
 			throw redirect({ to: PATHS.dashboard })
 		}
 	},
-	component: RegisterPage
+	component: lazyRouteComponent(
+		() => import('@modules/auth/components/RegisterPage'),
+		'RegisterPage'
+	)
 })
 
 const dashboardRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: PATHS.dashboard,
 	beforeLoad: () => {
-		const session = readSession()
-		if (!session) {
+		if (!readSession()) {
 			throw redirect({
 				to: PATHS.login,
 				search: { redirect: PATHS.dashboard }
 			})
 		}
 	},
-	component: DashboardPage
+	component: lazyRouteComponent(
+		() => import('@modules/dashboard/components/DashboardPage'),
+		'DashboardPage'
+	)
 })
 
 const statisticsRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: PATHS.statistics,
 	beforeLoad: () => {
-		const session = readSession()
-		if (!session) {
+		if (!readSession()) {
 			throw redirect({
 				to: PATHS.login,
 				search: { redirect: PATHS.statistics }
 			})
 		}
 	},
-	component: StatisticsPage
+	component: lazyRouteComponent(
+		() => import('@modules/statistics/components/StatisticsPage'),
+		'StatisticsPage'
+	)
 })
 
 const quizCreateRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: PATHS.quizCreate,
 	beforeLoad: () => {
-		const session = readSession()
-		if (!session) {
+		if (!readSession()) {
 			throw redirect({
 				to: PATHS.login,
 				search: { redirect: PATHS.quizCreate }
 			})
 		}
 	},
-	component: QuizCreatePage
+	component: lazyRouteComponent(
+		() => import('@modules/quizzes/components/QuizCreatePage'),
+		'QuizCreatePage'
+	)
 })
 
 const quizDetailsRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: PATHS.quizDetails,
 	beforeLoad: ({ location }) => {
-		const session = readSession()
-		if (!session) {
+		if (!readSession()) {
 			throw redirect({
 				to: PATHS.login,
 				search: { redirect: location.href }
 			})
 		}
 	},
-	component: QuizDetailsPage
+	component: lazyRouteComponent(
+		() => import('@modules/quizzes/components/QuizDetailsPage'),
+		'QuizDetailsPage'
+	)
 })
 
 const quizEditRoute = createRoute({
@@ -128,17 +139,91 @@ const quizEditRoute = createRoute({
 			throw redirect({ to: PATHS.login, search: { redirect: location.href } })
 		}
 	},
-	component: QuizEditPage
+	component: lazyRouteComponent(
+		() => import('@modules/quizzes/components/QuizEditPage'),
+		'QuizEditPage'
+	)
+})
+
+const quizStatsRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: PATHS.quizStats,
+	beforeLoad: ({ location }) => {
+		if (!readSession()) {
+			throw redirect({
+				to: PATHS.login,
+				search: { redirect: location.href }
+			})
+		}
+	},
+	component: lazyRouteComponent(
+		() => import('@modules/statistics/components/QuizPlayStatsPage'),
+		'QuizPlayStatsPage'
+	)
+})
+
+const gameStatsRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: PATHS.gameStats,
+	beforeLoad: ({ location }) => {
+		if (!readSession()) {
+			throw redirect({
+				to: PATHS.login,
+				search: { redirect: location.href }
+			})
+		}
+	},
+	component: lazyRouteComponent(
+		() => import('@modules/statistics/components/GamePlayStatsPage'),
+		'GamePlayStatsPage'
+	)
+})
+
+// A player has no account, so the page is public. Without a player token there is no game to show.
+const playRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: PATHS.play,
+	beforeLoad: () => {
+		if (!usePlayerTokenStore.getState().playerToken) {
+			throw redirect({ to: PATHS.home })
+		}
+	},
+	component: lazyRouteComponent(
+		() => import('@modules/game/components/PlayerGamePage'),
+		'PlayerGamePage'
+	)
+})
+
+// The host drives the game with the JWT, so the page is protected; after logging in the host comes back to it.
+const hostGameRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: PATHS.hostGame,
+	beforeLoad: ({ location }) => {
+		if (!readSession()) {
+			throw redirect({
+				to: PATHS.login,
+				search: { redirect: location.href }
+			})
+		}
+	},
+	component: lazyRouteComponent(
+		() => import('@modules/game/components/HostGamePage'),
+		'HostGamePage'
+	)
 })
 
 const routeTree = rootRoute.addChildren([
 	indexRoute,
+	playRoute,
+	hostGameRoute,
 	loginRoute,
 	registerRoute,
 	dashboardRoute,
 	statisticsRoute,
 	quizCreateRoute,
 	quizDetailsRoute,
+	quizStatsRoute,
+	gameStatsRoute,
 	quizEditRoute
 ])
 

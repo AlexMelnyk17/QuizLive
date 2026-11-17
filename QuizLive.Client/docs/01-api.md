@@ -59,7 +59,9 @@ Components and pages **MUST** load and mutate data through hooks in `modules/<na
 const { data, isPending, error } = useQuiz(quizId)
 
 // Bad — component calls api directly
-useEffect(() => { fetchQuiz(quizId).then(setQuiz) }, [quizId])
+useEffect(() => {
+	fetchQuiz(quizId).then(setQuiz)
+}, [quizId])
 ```
 
 ## R-6. Query keys (MUST)
