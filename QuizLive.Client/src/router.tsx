@@ -9,6 +9,7 @@ import {
 import { z } from 'zod'
 
 import { readSession } from '@modules/auth/store/sessionStore'
+import { usePlayerTokenStore } from '@modules/game/store/playerTokenStore'
 
 import { PATHS } from '@config/routes'
 
@@ -178,8 +179,24 @@ const gameStatsRoute = createRoute({
 	)
 })
 
+// A player has no account, so the page is public. Without a player token there is no game to show.
+const playRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: PATHS.play,
+	beforeLoad: () => {
+		if (!usePlayerTokenStore.getState().playerToken) {
+			throw redirect({ to: PATHS.home })
+		}
+	},
+	component: lazyRouteComponent(
+		() => import('@modules/game/components/PlayerGamePage'),
+		'PlayerGamePage'
+	)
+})
+
 const routeTree = rootRoute.addChildren([
 	indexRoute,
+	playRoute,
 	loginRoute,
 	registerRoute,
 	dashboardRoute,
