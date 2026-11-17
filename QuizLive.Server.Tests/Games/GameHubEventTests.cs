@@ -1,7 +1,10 @@
 using System.Net;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Games;
 using QuizLive.Server.Core.Enums;
 using QuizLive.Server.Tests.Support;
@@ -138,6 +141,109 @@ namespace QuizLive.Server.Tests.Games
 
             var received = await joined.NextAsync();
             Assert.Equal("Late", received.Nickname);
+        }
+
+        [Fact]
+        public async Task QuestionShown_ReachesPlayersWithoutIsCorrect_AndEveryHostTabWithIt()
+        {
+            var (host, hostId) = await factory.CreateHostAsync();
+            var quiz = await host.CreatePlayableQuizAsync(QuizKind.QuizChoice);
+            var game = await host.CreateGameAsync(quiz.Id);
+            var ann = await host.JoinAsync(game.Code, "Ann");
+
+            await using var firstTab = factory.CreateHubConnection(host.BearerToken());
+            var firstTabSees = firstTab.Subscribe<HostQuestionDto>("HostQuestionShown");
+            var firstTabLeak = firstTab.Subscribe<JsonElement>("QuestionShown");
+            await firstTab.StartAsync(Ct);
+            await firstTab.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+
+            await using var secondTab = factory.CreateHubConnection(host.BearerToken());
+            var secondTabSees = secondTab.Subscribe<HostQuestionDto>("HostQuestionShown");
+            await secondTab.StartAsync(Ct);
+            await secondTab.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+
+            await using var player = factory.CreateHubConnection();
+            var playerSees = player.Subscribe<JsonElement>("QuestionShown");
+            var playerLeak = player.Subscribe<JsonElement>("HostQuestionShown");
+            await player.StartAsync(Ct);
+            await player.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", ann.Token, Ct);
+
+            await Flow(f => f.StartAsync(game.Id, hostId));
+
+            foreach (var tab in new[] { firstTabSees, secondTabSees })
+            {
+                var forHost = await tab.NextAsync();
+
+                Assert.Equal(1, forHost.Number);
+                Assert.Single(forHost.Question.Options!, option => option.IsCorrect == true);
+            }
+
+            // The players' payload is checked as raw JSON: the correct option must not be in it in any form.
+            var forPlayer = await playerSees.NextAsync();
+
+            Assert.DoesNotContain("isCorrect", forPlayer.GetRawText(), StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(2, forPlayer.GetProperty("options").GetArrayLength());
+
+            await firstTabSees.AssertNoMoreAsync();
+            await playerSees.AssertNoMoreAsync();
+            await firstTabLeak.AssertNoMoreAsync();
+            await playerLeak.AssertNoMoreAsync();
+        }
+
+        [Fact]
+        public async Task TheWholeGame_IsReportedOnceToTheHostAndThePlayer_InOrder()
+        {
+            var (host, hostId) = await factory.CreateHostAsync();
+            var quiz = await host.CreateQuizAsync(QuizKind.QuizChoice);
+            await host.AddQuestionAsync(quiz.Id, QuizKind.QuizChoice);
+            await host.AddQuestionAsync(quiz.Id, QuizKind.QuizChoice);
+            var game = await host.CreateGameAsync(quiz.Id);
+            var ann = await host.JoinAsync(game.Code, "Ann");
+
+            await using var hostConnection = factory.CreateHubConnection(host.BearerToken());
+            var hostQuestions = hostConnection.Subscribe<HostQuestionDto>("HostQuestionShown");
+            var hostClosed = hostConnection.Subscribe<int>("QuestionClosed");
+            var hostEnded = hostConnection.Subscribe("GameEnded");
+            await hostConnection.StartAsync(Ct);
+            await hostConnection.InvokeAsync<GameDto>("ConnectAsHost", game.Id, Ct);
+
+            await using var player = factory.CreateHubConnection();
+            var playerQuestions = player.Subscribe<PlayerQuestionDto>("QuestionShown");
+            var playerClosed = player.Subscribe<int>("QuestionClosed");
+            var playerEnded = player.Subscribe("GameEnded");
+            await player.StartAsync(Ct);
+            await player.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", ann.Token, Ct);
+
+            await Flow(f => f.StartAsync(game.Id, hostId));
+            Assert.Equal(1, (await hostQuestions.NextAsync()).Number);
+            Assert.Equal(1, (await playerQuestions.NextAsync()).Number);
+
+            await Flow(f => f.ShowResultsAsync(game.Id, hostId));
+            Assert.Equal(1, await hostClosed.NextAsync());
+            Assert.Equal(1, await playerClosed.NextAsync());
+
+            await Flow(f => f.NextQuestionAsync(game.Id, hostId));
+            Assert.Equal(2, (await hostQuestions.NextAsync()).Number);
+            Assert.Equal(2, (await playerQuestions.NextAsync()).Number);
+
+            await Flow(f => f.ShowResultsAsync(game.Id, hostId));
+            Assert.Equal(2, await hostClosed.NextAsync());
+            Assert.Equal(2, await playerClosed.NextAsync());
+
+            await Flow(f => f.NextQuestionAsync(game.Id, hostId));
+            await hostEnded.NextAsync();
+            await playerEnded.NextAsync();
+
+            await hostEnded.AssertNoMoreAsync();
+            await playerEnded.AssertNoMoreAsync();
+            await hostQuestions.AssertNoMoreAsync();
+            await playerQuestions.AssertNoMoreAsync();
+        }
+
+        private async Task<T> Flow<T>(Func<IGameFlowService, Task<T>> action)
+        {
+            using var scope = factory.Services.CreateScope();
+            return await action(scope.ServiceProvider.GetRequiredService<IGameFlowService>());
         }
 
         private WebApplicationFactory<Program> WithHooks(GameServiceHooks hooks) =>

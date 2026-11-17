@@ -199,12 +199,9 @@ namespace QuizLive.Server.Application.Games
 
         public async Task EndAsync(int id)
         {
-            // The same implementation as the host's EndGame command. Ending an already ended game is a no-op,
-            // and then nothing is sent.
-            if (await gameFlow.EndAsync(id, currentUser.UserId))
-            {
-                await notifier.GameEndedAsync(id);
-            }
+            // The same implementation as the host's EndGame command; it also sends GameEnded.
+            // Ending an already ended game is a no-op, and then nothing is sent.
+            await gameFlow.EndAsync(id, currentUser.UserId);
         }
 
         public async Task<GameLookupDto> GetByCodeAsync(string code)

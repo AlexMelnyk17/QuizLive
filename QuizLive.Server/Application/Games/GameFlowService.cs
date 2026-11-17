@@ -10,7 +10,9 @@ namespace QuizLive.Server.Application.Games
 {
     // Every transition is compare-and-set: the UPDATE names the state the command expects, so a stale or
     // repeated command (for example from a second host tab) changes nothing and gets a conflict.
-    public class GameFlowService(AppDbContext db) : IGameFlowService
+    // After a transition is saved, the service tells the connected clients; the commands are therefore
+    // the single place that sends these events, whether they come from the hub or from REST.
+    public class GameFlowService(AppDbContext db, IGameNotifier notifier) : IGameFlowService
     {
         private sealed record FlowState(
             GameStatus Status,
@@ -54,7 +56,10 @@ namespace QuizLive.Server.Application.Games
                 throw new ConflictException(GameMessages.AlreadyStarted);
             }
 
-            return LiveGameMappings.ToViews(first, questions.Count, startedAt, endsAt);
+            var views = LiveGameMappings.ToViews(first, questions.Count, startedAt, endsAt);
+            await notifier.QuestionShownAsync(gameId, views);
+
+            return views;
         }
 
         public async Task<int> ShowResultsAsync(int gameId, string hostUserId)
@@ -77,6 +82,8 @@ namespace QuizLive.Server.Application.Games
             {
                 throw new ConflictException(GameMessages.QuestionNotOpen);
             }
+
+            await notifier.QuestionClosedAsync(gameId, order);
 
             return order;
         }
@@ -110,6 +117,8 @@ namespace QuizLive.Server.Application.Games
                     throw new ConflictException(GameMessages.ResultsNotShown);
                 }
 
+                await notifier.GameEndedAsync(gameId);
+
                 return new NextQuestionResult(null);
             }
 
@@ -128,7 +137,10 @@ namespace QuizLive.Server.Application.Games
                 throw new ConflictException(GameMessages.ResultsNotShown);
             }
 
-            return new NextQuestionResult(LiveGameMappings.ToViews(next, questions.Count, now, endsAt));
+            var views = LiveGameMappings.ToViews(next, questions.Count, now, endsAt);
+            await notifier.QuestionShownAsync(gameId, views);
+
+            return new NextQuestionResult(views);
         }
 
         public async Task<bool> EndAsync(int gameId, string hostUserId)
@@ -146,7 +158,14 @@ namespace QuizLive.Server.Application.Games
                     .SetProperty(g => g.Status, GameStatus.Finished)
                     .SetProperty(g => g.EndedAtUtc, DateTime.UtcNow));
 
-            return changed > 0;
+            if (changed == 0)
+            {
+                return false;
+            }
+
+            await notifier.GameEndedAsync(gameId);
+
+            return true;
         }
 
         private IQueryable<GameSessionRecord> ActiveGame(int gameId) =>
