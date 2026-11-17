@@ -5,6 +5,12 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using QuizLive.Server.Infrastructure.Auth;
 using QuizLive.Server.Application.Abstractions;
 using QuizLive.Server.Application.Games;
 using QuizLive.Server.Core.Enums;
@@ -17,6 +23,35 @@ namespace QuizLive.Server.Tests.Games
         private const string SecretDetail = "secret detail that must not reach the client";
 
         private static CancellationToken Ct => TestContext.Current.CancellationToken;
+
+        [Fact]
+        public async Task ConnectAsHost_WithSignedTokenWithoutUserIdentifier_IsRejectedGracefully()
+        {
+            var jwt = factory.Services.GetRequiredService<IOptions<JwtOptions>>().Value;
+            var token = new JwtSecurityTokenHandler().WriteToken(new JwtSecurityToken(
+                issuer: jwt.Issuer, audience: jwt.Audience,
+                claims: [new Claim(ClaimTypes.Name, "No subject")], expires: DateTime.UtcNow.AddMinutes(5),
+                signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)), SecurityAlgorithms.HmacSha256)));
+            await using var connection = await StartAsync(factory, token);
+
+            var error = await Assert.ThrowsAsync<HubException>(() => connection.InvokeAsync<HostGameStateDto>("ConnectAsHost", 1, Ct));
+
+            Assert.Contains("The user is not authenticated.", error.Message);
+        }
+
+        [Fact]
+        public async Task ExplicitHubException_PreservesItsPublicMessage()
+        {
+            using var app = factory.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
+            {
+                services.RemoveAll<IGameService>();
+                services.AddScoped<IGameService, PublicFailureGameService>();
+            }));
+            await using var connection = await StartAsync(app);
+            var error = await Assert.ThrowsAsync<HubException>(() => connection.InvokeAsync<PlayerGameStateDto>("ConnectAsPlayer", "any-token", Ct));
+            Assert.Contains("Public retry message", error.Message);
+            Assert.DoesNotContain(SecretDetail, error.Message);
+        }
 
         [Fact]
         public async Task ConnectAsPlayer_WithValidToken_ReturnsLobbyState()
@@ -273,7 +308,7 @@ namespace QuizLive.Server.Tests.Games
         // Only the first service call of ConnectAsPlayer fails; everything else is never reached in this test.
         private class FailingGameService : IGameService
         {
-            public Task<int> GetActivePlayerGameIdAsync(string playerToken) =>
+            public virtual Task<int> GetActivePlayerGameIdAsync(string playerToken) =>
                 throw new InvalidOperationException(SecretDetail);
 
             public Task<GameDto> CreateAsync(CreateGameRequest request) => throw new NotImplementedException();
@@ -285,6 +320,11 @@ namespace QuizLive.Server.Tests.Games
             public Task<GameDto> GetActiveHostGameAsync(int gameId, string hostUserId) => throw new NotImplementedException();
             public Task EnsureActiveHostGameAsync(int gameId, string hostUserId) => throw new NotImplementedException();
             public Task<PlayerGameStateDto> GetPlayerStateAsync(string playerToken) => throw new NotImplementedException();
+        }
+
+        private class PublicFailureGameService : FailingGameService
+        {
+            public override Task<int> GetActivePlayerGameIdAsync(string playerToken) => throw new HubException("Public retry message");
         }
 
         private class CapturingLoggerProvider : ILoggerProvider
