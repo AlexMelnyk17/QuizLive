@@ -5,12 +5,13 @@ import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { QuizKind } from '@modules/quizzes/constants'
+import { QuizPlayStatsPage } from '@modules/statistics/components/QuizPlayStatsPage'
 import {
 	QUIZ_STATS_PAGE_COPY,
-	STATISTICS_CHART_COPY,
+	STATISTICS_CHART_COPY
 } from '@modules/statistics/constants'
-import { QuizPlayStatsPage } from '@modules/statistics/components/QuizPlayStatsPage'
 import type { QuizPlayStats } from '@modules/statistics/types'
+
 import { renderWithTheme } from '@src/test/testUtils'
 
 type QuizStatsQuery = Pick<
@@ -27,13 +28,13 @@ const sampleQuizStats: QuizPlayStats = {
 		total: 2,
 		finished: 1,
 		lastPlayedAtUtc: '2026-11-16T12:00:00Z',
-		averageDurationSeconds: 90,
+		averageDurationSeconds: 90
 	},
 	players: { totalJoins: 3, averagePerGame: 1.5, maxInOneGame: 3 },
 	activity: {
 		gamesLast7Days: 1,
 		gamesLast30Days: 1,
-		gamesPerDay: [{ date: '2026-11-16', count: 1 }],
+		gamesPerDay: [{ date: '2026-11-16', count: 1 }]
 	},
 	runs: [],
 	quizChoiceQuestions: [
@@ -53,13 +54,13 @@ const sampleQuizStats: QuizPlayStats = {
 					order: 1,
 					text: 'Yes',
 					count: 1,
-					isCorrect: true,
-				},
-			],
-		},
+					isCorrect: true
+				}
+			]
+		}
 	],
 	pollQuestions: null,
-	openQuestions: null,
+	openQuestions: null
 }
 
 const useQuizStatsMock = vi.fn<() => QuizStatsQuery>()
@@ -69,20 +70,20 @@ vi.mock('@tanstack/react-router', () => ({
 	useNavigate: () => vi.fn(),
 	Link: ({ children, to }: { children: ReactNode; to: string }) => (
 		<a href={to}>{children}</a>
-	),
+	)
 }))
 
 vi.mock('@modules/auth', () => ({
 	useSession: () => ({
 		token: 't',
 		expiresAtUtc: new Date(Date.now() + 60_000).toISOString(),
-		user: { id: '1', userName: 'quizzer' },
+		user: { id: '1', userName: 'quizzer' }
 	}),
-	signOut: vi.fn(),
+	signOut: vi.fn()
 }))
 
 vi.mock('@modules/statistics/hooks/useQuizStats', () => ({
-	useQuizStats: (): QuizStatsQuery => useQuizStatsMock(),
+	useQuizStats: (): QuizStatsQuery => useQuizStatsMock()
 }))
 
 describe('QuizPlayStatsPage', () => {
@@ -101,14 +102,16 @@ describe('QuizPlayStatsPage', () => {
 			data: sampleQuizStats,
 			refetch: vi.fn(),
 			isFetching: false,
-			error: null,
+			error: null
 		})
 
 		renderWithTheme(<QuizPlayStatsPage />)
 
-		expect(screen.getByText(QUIZ_STATS_PAGE_COPY.noFinishedRuns)).toBeInTheDocument()
 		expect(
-			screen.getByText(STATISTICS_CHART_COPY.questionCorrectPercent),
+			screen.getByText(QUIZ_STATS_PAGE_COPY.noFinishedRuns)
+		).toBeInTheDocument()
+		expect(
+			screen.getByText(STATISTICS_CHART_COPY.questionCorrectPercent)
 		).toBeInTheDocument()
 	})
 
@@ -121,13 +124,13 @@ describe('QuizPlayStatsPage', () => {
 			data: undefined,
 			refetch,
 			isFetching: false,
-			error: new Error('fail'),
+			error: new Error('fail')
 		})
 
 		renderWithTheme(<QuizPlayStatsPage />)
 
 		await user.click(
-			screen.getByRole('button', { name: QUIZ_STATS_PAGE_COPY.loadError.retry }),
+			screen.getByRole('button', { name: QUIZ_STATS_PAGE_COPY.loadError.retry })
 		)
 
 		expect(refetch).toHaveBeenCalled()

@@ -15,16 +15,16 @@ import {
 import { QUIZ_DETAILS_COPY } from '@modules/quizzes/constants'
 import type { QuizDetailsDto } from '@modules/quizzes/types'
 
-import { ApiError } from '@api/apiError'
-
 import { PATHS } from '@config/routes'
+
+import { ApiError } from '@api/apiError'
 
 import { renderWithTheme } from '@src/test/testUtils'
 
 const navigateMock = vi.fn()
 
 vi.mock('@tanstack/react-router', () => ({
-	useNavigate: () => navigateMock,
+	useNavigate: () => navigateMock
 }))
 
 vi.mock('@modules/quizzes/api/quizzesApi', () => ({
@@ -147,12 +147,12 @@ describe('QuizDetails', () => {
 		renderQuizDetails()
 
 		await user.click(
-			await screen.findByRole('button', { name: QUIZ_DETAILS_COPY.viewStats }),
+			await screen.findByRole('button', { name: QUIZ_DETAILS_COPY.viewStats })
 		)
 
 		expect(navigateMock).toHaveBeenCalledWith({
 			to: PATHS.quizStats,
-			params: { quizId: '7' },
+			params: { quizId: '7' }
 		})
 	})
 

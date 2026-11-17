@@ -1,12 +1,13 @@
 import { screen } from '@testing-library/react'
-import type { ReactNode } from 'react'
 import userEvent from '@testing-library/user-event'
+import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { LoginPage } from '@modules/auth/components/LoginPage'
+
 import { renderWithTheme } from '@src/test/testUtils'
 
-vi.mock('@tanstack/react-router', async (importOriginal) => {
+vi.mock('@tanstack/react-router', async importOriginal => {
 	const actual = await importOriginal<typeof import('@tanstack/react-router')>()
 	return {
 		...actual,
@@ -14,15 +15,15 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
 			<a href={to}>{children}</a>
 		),
 		useNavigate: () => vi.fn(),
-		useSearch: () => ({}),
+		useSearch: () => ({})
 	}
 })
 
 vi.mock('@modules/auth/hooks/useLogin', () => ({
 	useLogin: () => ({
 		mutateAsync: vi.fn(),
-		isPending: false,
-	}),
+		isPending: false
+	})
 }))
 
 describe('LoginPage', () => {

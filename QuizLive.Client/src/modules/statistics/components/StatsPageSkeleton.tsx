@@ -3,11 +3,11 @@ import { Skeleton } from '@components/ui/Skeleton'
 import {
 	statsChartGrid,
 	statsKpiGrid,
-	statsPage,
+	statsPage
 } from '@modules/statistics/components/StatisticsPage.css'
 import {
 	statsSkeletonChart,
-	statsSkeletonKpi,
+	statsSkeletonKpi
 } from '@modules/statistics/components/StatsPageSkeleton.css'
 
 export type StatsPageSkeletonProps = {
@@ -17,17 +17,13 @@ export type StatsPageSkeletonProps = {
 
 export function StatsPageSkeleton({
 	kpiCount,
-	chartCount = 0,
+	chartCount = 0
 }: StatsPageSkeletonProps) {
 	return (
 		<div className={statsPage}>
 			<div className={statsKpiGrid}>
 				{Array.from({ length: kpiCount }, (_, index) => (
-					<Skeleton
-						key={index}
-						variant="rect"
-						className={statsSkeletonKpi}
-					/>
+					<Skeleton key={index} variant='rect' className={statsSkeletonKpi} />
 				))}
 			</div>
 			{chartCount > 0 ? (
@@ -35,7 +31,7 @@ export function StatsPageSkeleton({
 					{Array.from({ length: chartCount }, (_, index) => (
 						<Skeleton
 							key={index}
-							variant="rect"
+							variant='rect'
 							className={statsSkeletonChart}
 						/>
 					))}

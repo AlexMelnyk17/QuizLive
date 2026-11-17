@@ -4,28 +4,28 @@ import { QuizKind } from '@modules/quizzes/constants'
 import {
 	gamePlayStatsSchema,
 	hostStatsSchema,
-	quizPlayStatsSchema,
+	quizPlayStatsSchema
 } from '@modules/statistics/schemas'
 
 const fixture = {
 	quizzes: {
 		total: 3,
 		archived: 0,
-		byKind: { openText: 1, pollChoice: 1, quizChoice: 1 },
+		byKind: { openText: 1, pollChoice: 1, quizChoice: 1 }
 	},
 	questions: { total: 9, averagePerQuiz: 3.0 },
 	games: {
 		total: 2,
 		finished: 1,
 		byStatus: { lobby: 0, question: 0, results: 0, finished: 1 },
-		byKind: { openText: 1, pollChoice: 1, quizChoice: 0 },
+		byKind: { openText: 1, pollChoice: 1, quizChoice: 0 }
 	},
 	players: { totalJoins: 5, averagePerGame: 2.5, maxInOneGame: 3 },
 	activity: {
 		gamesLast7Days: 1,
 		gamesLast30Days: 2,
-		gamesPerDay: [{ date: '2026-11-15', count: 1 }],
-	},
+		gamesPerDay: [{ date: '2026-11-15', count: 1 }]
+	}
 }
 
 describe('hostStatsSchema', () => {
@@ -46,7 +46,7 @@ const quizPlayFixture = {
 		total: 0,
 		finished: 0,
 		lastPlayedAtUtc: null,
-		averageDurationSeconds: null,
+		averageDurationSeconds: null
 	},
 	players: { totalJoins: 0, averagePerGame: 0, maxInOneGame: 0 },
 	activity: fixture.activity,
@@ -64,9 +64,9 @@ const quizPlayFixture = {
 			hiddenCount: 0,
 			answers: [],
 			otherCount: 0,
-			entries: null,
-		},
-	],
+			entries: null
+		}
+	]
 }
 
 describe('quizPlayStatsSchema', () => {
@@ -81,8 +81,8 @@ describe('quizPlayStatsSchema', () => {
 		expect(() =>
 			quizPlayStatsSchema.parse({
 				...quizPlayFixture,
-				games: undefined,
-			}),
+				games: undefined
+			})
 		).toThrow()
 	})
 })
@@ -101,7 +101,7 @@ describe('gamePlayStatsSchema', () => {
 			players: [],
 			quizChoiceQuestions: null,
 			pollQuestions: null,
-			openQuestions: null,
+			openQuestions: null
 		})
 		expect(parsed.durationSeconds).toBe(300)
 	})

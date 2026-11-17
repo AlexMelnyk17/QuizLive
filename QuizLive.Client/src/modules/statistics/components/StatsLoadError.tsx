@@ -15,17 +15,17 @@ export function StatsLoadError({
 	body,
 	retryLabel,
 	isFetching,
-	onRetry,
+	onRetry
 }: StatsLoadErrorProps) {
 	return (
-		<Stack direction="column" align="stretch">
-			<Alert variant="danger" title={title}>
+		<Stack direction='column' align='stretch'>
+			<Alert variant='danger' title={title}>
 				{body}
 			</Alert>
 			<div>
 				<Button
-					variant="primary"
-					size="sm"
+					variant='primary'
+					size='sm'
 					loading={isFetching}
 					onClick={onRetry}
 				>

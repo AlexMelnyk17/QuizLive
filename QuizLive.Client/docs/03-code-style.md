@@ -8,13 +8,13 @@ Formatting and linting are automated. Consistency comes from Prettier and ESLint
 
 From [`.prettierrc.json`](../.prettierrc.json):
 
-| Setting | Value |
-| --- | --- |
-| Indent | Tabs, `tabWidth: 2` |
-| Semicolons | No |
-| Quotes | Single (`jsxSingleQuote: true`) |
-| `arrowParens` | `avoid` |
-| Trailing comma | `none` |
+| Setting        | Value                           |
+| -------------- | ------------------------------- |
+| Indent         | Tabs, `tabWidth: 2`             |
+| Semicolons     | No                              |
+| Quotes         | Single (`jsxSingleQuote: true`) |
+| `arrowParens`  | `avoid`                         |
+| Trailing comma | `none`                          |
 
 Run `npm run format` or let lint-staged format on commit. **MUST NOT** hand-format to match taste.
 
@@ -49,16 +49,16 @@ Specifiers within a group are sorted alphabetically.
 
 ## R-4. Naming (MUST)
 
-| Kind | Convention | Example |
-| --- | --- | --- |
-| React component file | PascalCase = export name | `QuizList.tsx` → `QuizList` |
-| Hook file | `use` prefix | `useQuiz.ts` |
-| API module | `*Api.ts` | `quizzesApi.ts` |
-| Styles (vanilla-extract) | `*.css.ts` next to component | `QuizList.css.ts` |
-| Test file | `*.test.ts` / `*.test.tsx` | `QuizList.test.tsx` |
-| Query key constants | `SCREAMING_SNAKE` or factory | `QUIZZES_QUERY_KEY` |
-| Functions / variables | camelCase | `formatDate` |
-| Route paths | Central `PATHS` / `pathTo` | See [08-constants-and-routes.md](./08-constants-and-routes.md) |
+| Kind                     | Convention                   | Example                                                        |
+| ------------------------ | ---------------------------- | -------------------------------------------------------------- |
+| React component file     | PascalCase = export name     | `QuizList.tsx` → `QuizList`                                    |
+| Hook file                | `use` prefix                 | `useQuiz.ts`                                                   |
+| API module               | `*Api.ts`                    | `quizzesApi.ts`                                                |
+| Styles (vanilla-extract) | `*.css.ts` next to component | `QuizList.css.ts`                                              |
+| Test file                | `*.test.ts` / `*.test.tsx`   | `QuizList.test.tsx`                                            |
+| Query key constants      | `SCREAMING_SNAKE` or factory | `QUIZZES_QUERY_KEY`                                            |
+| Functions / variables    | camelCase                    | `formatDate`                                                   |
+| Route paths              | Central `PATHS` / `pathTo`   | See [08-constants-and-routes.md](./08-constants-and-routes.md) |
 
 ## R-5. Components and exports (MUST)
 

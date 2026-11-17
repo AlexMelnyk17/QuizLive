@@ -1,7 +1,6 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
-import type { ReactNode } from 'react'
-
 import cn from 'clsx'
+import type { ReactNode } from 'react'
 
 import { toast, toastMessage, toastTitle } from '@components/ui/Toast/Toast.css'
 
@@ -19,10 +18,10 @@ export function Toast({
 	variant,
 	title,
 	children,
-	icon,
+	icon
 }: ToastProps) {
 	return (
-		<div className={cn(toast({ variant }), className)} role="status">
+		<div className={cn(toast({ variant }), className)} role='status'>
 			{icon}
 			<div>
 				{title ? <p className={toastTitle}>{title}</p> : null}

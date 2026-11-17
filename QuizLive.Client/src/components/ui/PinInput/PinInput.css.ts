@@ -5,7 +5,7 @@ import { vars } from '@theme/contract.css'
 
 export const pinRow = style({
 	display: 'inline-flex',
-	gap: vars.spacing[2],
+	gap: vars.spacing[2]
 })
 
 export const pinCell = recipe({
@@ -25,25 +25,25 @@ export const pinCell = recipe({
 		':focus': {
 			outline: 'none',
 			borderColor: vars.colors.primaryBorder,
-			boxShadow: `0 0 0 3px ${vars.colors.primaryMuted}`,
-		},
+			boxShadow: `0 0 0 3px ${vars.colors.primaryMuted}`
+		}
 	},
 	variants: {
 		filled: {
 			true: {
-				borderColor: vars.colors.primaryBorder,
+				borderColor: vars.colors.primaryBorder
 			},
-			false: {},
+			false: {}
 		},
 		invalid: {
 			true: {
-				borderColor: vars.colors.danger,
+				borderColor: vars.colors.danger
 			},
-			false: {},
-		},
+			false: {}
+		}
 	},
 	defaultVariants: {
 		filled: false,
-		invalid: false,
-	},
+		invalid: false
+	}
 })

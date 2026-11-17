@@ -20,7 +20,7 @@ export const treemapLabelBox = style({
 	fontWeight: vars.fontWeights.normal,
 	lineHeight: vars.lineHeights.tight,
 	textAlign: 'center',
-	wordBreak: 'break-word',
+	wordBreak: 'break-word'
 })
 
 export const treemapLabelText = style({
@@ -28,5 +28,5 @@ export const treemapLabelText = style({
 	WebkitLineClamp: STATISTICS_TREEMAP_LABEL_LINES,
 	WebkitBoxOrient: 'vertical',
 	overflow: 'hidden',
-	textOverflow: 'ellipsis',
+	textOverflow: 'ellipsis'
 })

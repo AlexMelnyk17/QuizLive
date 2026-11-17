@@ -1,12 +1,16 @@
-import { apiRequest } from '@api/client'
-
+import { STATS_API } from '@modules/statistics/constants'
 import {
 	gamePlayStatsSchema,
 	hostStatsSchema,
-	quizPlayStatsSchema,
+	quizPlayStatsSchema
 } from '@modules/statistics/schemas'
-import { STATS_API } from '@modules/statistics/constants'
-import type { GamePlayStats, HostStats, QuizPlayStats } from '@modules/statistics/types'
+import type {
+	GamePlayStats,
+	HostStats,
+	QuizPlayStats
+} from '@modules/statistics/types'
+
+import { apiRequest } from '@api/client'
 
 export async function fetchHostStats(): Promise<HostStats> {
 	const data = await apiRequest<HostStats>(STATS_API.host)

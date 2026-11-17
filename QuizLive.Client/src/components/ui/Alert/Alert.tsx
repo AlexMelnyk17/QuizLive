@@ -1,8 +1,8 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes'
+import cn from 'clsx'
 import type { ReactNode } from 'react'
 
 import { alert, alertBody, alertTitle } from '@components/ui/Alert/Alert.css'
-import cn from 'clsx'
 
 type AlertVariants = NonNullable<RecipeVariants<typeof alert>>
 
@@ -18,9 +18,9 @@ export const Alert = ({
 	variant,
 	title,
 	children,
-	icon,
+	icon
 }: AlertProps) => (
-	<div className={cn(alert({ variant }), className)} role="alert">
+	<div className={cn(alert({ variant }), className)} role='alert'>
 		{icon}
 		<div>
 			{title ? <p className={alertTitle}>{title}</p> : null}

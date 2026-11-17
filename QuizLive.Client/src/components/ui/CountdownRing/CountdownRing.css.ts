@@ -8,22 +8,22 @@ export const countdownRoot = recipe({
 		position: 'relative',
 		display: 'inline-flex',
 		alignItems: 'center',
-		justifyContent: 'center',
+		justifyContent: 'center'
 	},
 	variants: {
 		size: {
 			sm: { width: '56px', height: '56px' },
 			md: { width: '80px', height: '80px' },
-			lg: { width: '112px', height: '112px' },
-		},
+			lg: { width: '112px', height: '112px' }
+		}
 	},
 	defaultVariants: {
-		size: 'md',
-	},
+		size: 'md'
+	}
 })
 
 export const countdownSvg = style({
-	transform: 'rotate(-90deg)',
+	transform: 'rotate(-90deg)'
 })
 
 export const countdownLabel = recipe({
@@ -31,16 +31,16 @@ export const countdownLabel = recipe({
 		position: 'absolute',
 		fontFamily: vars.fonts.mono,
 		fontWeight: vars.fontWeights.semibold,
-		color: vars.colors.textHeading,
+		color: vars.colors.textHeading
 	},
 	variants: {
 		size: {
 			sm: { fontSize: vars.fontSizes.sm },
 			md: { fontSize: vars.fontSizes.lg },
-			lg: { fontSize: vars.fontSizes['2xl'] },
-		},
+			lg: { fontSize: vars.fontSizes['2xl'] }
+		}
 	},
 	defaultVariants: {
-		size: 'md',
-	},
+		size: 'md'
+	}
 })

@@ -23,29 +23,29 @@ function parseSession(raw: Session | null): Session | null {
 
 export const useAuthStore = create<AuthState>()(
 	persist(
-		(set) => ({
+		set => ({
 			session: null,
-			setSessionFromAuthResponse: (response) => {
+			setSessionFromAuthResponse: response => {
 				const parsed = authResponseSchema.parse(response)
 				const session: Session = {
 					token: parsed.token,
 					expiresAtUtc: parsed.expiresAtUtc,
-					user: parsed.user,
+					user: parsed.user
 				}
 				set({ session })
 				return session
 			},
-			clearSession: () => set({ session: null }),
+			clearSession: () => set({ session: null })
 		}),
 		{
 			name: SESSION_STORAGE_KEY,
 			storage: createJSONStorage(() => sessionStorage),
-			partialize: (state) => ({ session: state.session }),
-			onRehydrateStorage: () => (state) => {
+			partialize: state => ({ session: state.session }),
+			onRehydrateStorage: () => state => {
 				if (state?.session && isSessionExpired(state.session)) {
 					state.clearSession()
 				}
-			},
+			}
 		}
 	)
 )
@@ -72,7 +72,7 @@ export function signOut(): void {
 }
 
 export function useSession(): Session | null {
-	const session = useAuthStore((state) => state.session)
+	const session = useAuthStore(state => state.session)
 	if (!session) return null
 	if (isSessionExpired(session)) {
 		useAuthStore.getState().clearSession()

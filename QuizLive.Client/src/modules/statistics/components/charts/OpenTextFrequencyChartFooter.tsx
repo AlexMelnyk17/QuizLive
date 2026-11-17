@@ -7,14 +7,14 @@ export type OpenTextFrequencyChartFooterProps = {
 }
 
 export function OpenTextFrequencyChartFooter({
-	otherCount,
+	otherCount
 }: OpenTextFrequencyChartFooterProps) {
 	if (otherCount <= 0) {
 		return null
 	}
 
 	return (
-		<Text size="sm" tone="muted">
+		<Text size='sm' tone='muted'>
 			{STATISTICS_CHART_COPY.otherAnswers(otherCount)}
 		</Text>
 	)

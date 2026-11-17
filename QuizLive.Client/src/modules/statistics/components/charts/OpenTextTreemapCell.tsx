@@ -1,10 +1,10 @@
 import {
 	statsChartColors,
-	statsChartSeries,
+	statsChartSeries
 } from '@modules/statistics/chartColors'
 import {
 	treemapLabelBox,
-	treemapLabelText,
+	treemapLabelText
 } from '@modules/statistics/components/charts/OpenTextTreemapCell.css'
 import {
 	STATISTICS_CHART_STROKE_WIDTH,
@@ -12,7 +12,7 @@ import {
 	STATISTICS_TREEMAP_LABEL_TRUNCATE,
 	STATISTICS_TREEMAP_MIN_CELL_SIZE,
 	STATISTICS_TREEMAP_MIN_LABEL_HEIGHT,
-	STATISTICS_TREEMAP_MIN_LABEL_WIDTH,
+	STATISTICS_TREEMAP_MIN_LABEL_WIDTH
 } from '@modules/statistics/constants'
 import { truncateLabel } from '@modules/statistics/utils/truncateLabel'
 
@@ -31,9 +31,8 @@ export function OpenTextTreemapCell({
 	width = 0,
 	height = 0,
 	index = 0,
-	name = '',
+	name = ''
 }: OpenTextTreemapCellProps) {
-
 	if (
 		width < STATISTICS_TREEMAP_MIN_CELL_SIZE ||
 		height < STATISTICS_TREEMAP_MIN_CELL_SIZE
@@ -47,14 +46,8 @@ export function OpenTextTreemapCell({
 		height >= STATISTICS_TREEMAP_MIN_LABEL_HEIGHT &&
 		name.length > 0
 	const label = truncateLabel(name, STATISTICS_TREEMAP_LABEL_TRUNCATE)
-	const innerWidth = Math.max(
-		0,
-		width - STATISTICS_TREEMAP_CELL_PADDING * 2,
-	)
-	const innerHeight = Math.max(
-		0,
-		height - STATISTICS_TREEMAP_CELL_PADDING * 2,
-	)
+	const innerWidth = Math.max(0, width - STATISTICS_TREEMAP_CELL_PADDING * 2)
+	const innerHeight = Math.max(0, height - STATISTICS_TREEMAP_CELL_PADDING * 2)
 
 	const renderLabel = () => {
 		if (!showLabel) {
