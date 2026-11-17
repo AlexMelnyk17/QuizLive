@@ -1,5 +1,15 @@
+import type { GameState } from '@modules/game/types'
+
 // The path is relative to ENV.VITE_API_BASE_URL: with "/api" it is /api/hubs/game.
 export const GAME_HUB_PATH = '/hubs/game'
+
+// SignalR puts the text of a HubException after this marker in the message of a failed call:
+// "An unexpected error occurred invoking 'X' on the server. HubException: <readable text>".
+export const HUB_EXCEPTION_MARKER = 'HubException: '
+
+export const GAME_ERROR_COPY = {
+	generic: 'Something went wrong. Try again.'
+} as const
 
 // Names of the methods the client calls on the hub.
 export const GAME_HUB_METHODS = {
@@ -32,3 +42,21 @@ export const GameStatus = {
 	Results: 2,
 	Finished: 3
 } as const
+
+// What can happen to the state of a game on the client; see gameReducer.
+export const GAME_ACTION_TYPES = {
+	snapshot: 'snapshot',
+	playerJoined: 'playerJoined',
+	questionShown: 'questionShown',
+	questionClosed: 'questionClosed',
+	gameEnded: 'gameEnded'
+} as const
+
+// Nothing is known until the connect response arrives (status is null).
+export const INITIAL_GAME_STATE: GameState<never> = {
+	status: null,
+	players: [],
+	currentQuestion: null,
+	questionReceivedAtMs: null,
+	closedQuestionNumber: null
+}
