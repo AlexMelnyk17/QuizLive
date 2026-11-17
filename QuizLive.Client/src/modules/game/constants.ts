@@ -8,7 +8,8 @@ export const GAME_HUB_PATH = '/hubs/game'
 export const HUB_EXCEPTION_MARKER = 'HubException: '
 
 export const GAME_ERROR_COPY = {
-	generic: 'Something went wrong. Try again.'
+	generic: 'Something went wrong. Try again.',
+	notConnected: 'Not connected to the game yet.'
 } as const
 
 // Names of the methods the client calls on the hub.

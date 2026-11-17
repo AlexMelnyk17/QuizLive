@@ -90,6 +90,36 @@ export type GameHubConnectionResult = {
 	error: string | null
 }
 
+// What stays the same during a game. The status and the players change and live in the game state.
+export type HostGameInfo = Pick<
+	HostGameDto,
+	'id' | 'code' | 'quizId' | 'quizTitle' | 'quizKind'
+>
+
+// A host command gives back the readable error text, or null when the server accepted it. What the command
+// does arrives as an event, not as a result.
+export type HostGameCommands = {
+	startGame: () => Promise<string | null>
+	showResults: () => Promise<string | null>
+	nextQuestion: () => Promise<string | null>
+	endGame: () => Promise<string | null>
+}
+
+export type HostGameResult = {
+	// Null until the host has joined the game.
+	game: HostGameInfo | null
+	status: GameStatusValue | null
+	players: GamePlayerDto[]
+	currentQuestion: HostQuestionDto | null
+	// When the current question arrived, on the device clock; getRemainingMs needs it.
+	questionReceivedAtMs: number | null
+	// The number of the question whose results are shown.
+	closedQuestionNumber: number | null
+	connectionState: GameConnectionStateValue
+	error: string | null
+	commands: HostGameCommands
+}
+
 // Every handler is optional: the host listens to some events, a player to others.
 export type GameEventHandlers = {
 	onPlayerJoined?: (player: GamePlayerDto) => void
