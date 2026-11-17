@@ -12,7 +12,7 @@ import {
 } from '@modules/statistics/constants'
 import type { QuizPlayStats } from '@modules/statistics/types'
 
-import { renderWithTheme } from '@src/test/testUtils'
+import { LAZY_UI_TIMEOUT_MS, renderWithTheme } from '@src/test/testUtils'
 
 type QuizStatsQuery = Pick<
 	UseQueryResult<QuizPlayStats>,
@@ -95,7 +95,7 @@ describe('QuizPlayStatsPage', () => {
 		cleanup()
 	})
 
-	it('shows empty finished-runs message and question charts', () => {
+	it('shows empty finished-runs message and question charts', async () => {
 		useQuizStatsMock.mockReturnValue({
 			isPending: false,
 			isError: false,
@@ -111,7 +111,11 @@ describe('QuizPlayStatsPage', () => {
 			screen.getByText(QUIZ_STATS_PAGE_COPY.noFinishedRuns)
 		).toBeInTheDocument()
 		expect(
-			screen.getByText(STATISTICS_CHART_COPY.questionCorrectPercent)
+			await screen.findByText(
+				STATISTICS_CHART_COPY.questionCorrectPercent,
+				undefined,
+				{ timeout: LAZY_UI_TIMEOUT_MS }
+			)
 		).toBeInTheDocument()
 	})
 
