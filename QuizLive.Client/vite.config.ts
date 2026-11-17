@@ -40,7 +40,10 @@ export default defineConfig({
 			'/api': {
 				target: 'https://localhost:7118',
 				changeOrigin: true,
-				secure: false
+				secure: false,
+				// SignalR connects to /api/hubs/game over WebSocket; without this the dev server
+				// cannot upgrade the connection and the client falls back to long polling.
+				ws: true
 			}
 		}
 	}
