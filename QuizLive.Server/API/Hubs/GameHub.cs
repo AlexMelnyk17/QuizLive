@@ -9,9 +9,10 @@ namespace QuizLive.Server.API.Hubs
     /// <summary>
     /// Realtime channel of a game. Players connect with their player token, the host with a JWT.
     /// Both connect methods return the current state, so nothing sent before connecting is lost.
-    /// The hub only manages connections and groups; the rules live in <see cref="IGameService"/>.
+    /// The hub only manages connections and groups and passes the host's commands on; the rules live in
+    /// <see cref="IGameService"/> and <see cref="IGameFlowService"/>.
     /// </summary>
-    public class GameHub(IGameService gameService) : Hub<IGameClient>
+    public class GameHub(IGameService gameService, IGameFlowService gameFlow) : Hub<IGameClient>
     {
         public const string PlayerIdKey = "PlayerId";
         public const string GameIdKey = "GameId";
@@ -80,6 +81,50 @@ namespace QuizLive.Server.API.Hubs
             Context.Items[RoleKey] = ConnectionRole.Host;
 
             return game;
+        }
+
+        // The host's commands. A command has no game id: it always acts on the game this connection joined, so
+        // the client cannot aim it at another game. The result reaches everyone as an event (QuestionShown,
+        // QuestionClosed, GameEnded), including the host's other tabs, so the commands return nothing.
+        [Authorize]
+        public Task StartGame()
+        {
+            var (gameId, userId) = HostCommandContext();
+            return gameFlow.StartAsync(gameId, userId);
+        }
+
+        [Authorize]
+        public Task ShowResults()
+        {
+            var (gameId, userId) = HostCommandContext();
+            return gameFlow.ShowResultsAsync(gameId, userId);
+        }
+
+        [Authorize]
+        public Task NextQuestion()
+        {
+            var (gameId, userId) = HostCommandContext();
+            return gameFlow.NextQuestionAsync(gameId, userId);
+        }
+
+        [Authorize]
+        public Task EndGame()
+        {
+            var (gameId, userId) = HostCommandContext();
+            return gameFlow.EndAsync(gameId, userId);
+        }
+
+        // Only a connection that joined as the host passes: the role is set by ConnectAsHost after its access check.
+        private (int GameId, string UserId) HostCommandContext()
+        {
+            if (!Context.Items.TryGetValue(RoleKey, out var role) || role is not ConnectionRole.Host)
+            {
+                throw new UnauthorizedException(GameMessages.HostOnly);
+            }
+
+            var userId = Context.UserIdentifier ?? throw new UnauthorizedException(GameMessages.HostOnly);
+
+            return ((int)Context.Items[GameIdKey]!, userId);
         }
 
         // One connection joins one game, once. A repeated call would leave it in the groups of the first
