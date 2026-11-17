@@ -5,11 +5,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
 	GameStatus,
 	PLAYER_LOBBY_COPY,
-	PLAYER_PAGE_COPY
+	PLAYER_PAGE_COPY,
+	PLAYER_QUESTION_COPY
 } from '@modules/game/constants'
 import { usePlayerGame } from '@modules/game/hooks/usePlayerGame'
 import { usePlayerTokenStore } from '@modules/game/store/playerTokenStore'
-import type { PlayerGameResult } from '@modules/game/types'
+import type { PlayerGameResult, PlayerQuestionDto } from '@modules/game/types'
 
 import { PATHS } from '@config/routes'
 
@@ -23,6 +24,32 @@ vi.mock('@modules/game/hooks/usePlayerGame', () => ({
 }))
 
 const playerGameMock = vi.mocked(usePlayerGame)
+
+const joinedPlayer = {
+	gameId: 7,
+	code: '283646',
+	quizTitle: 'STEM basics',
+	playerId: 1,
+	nickname: 'Ann'
+}
+
+// A question without a time limit, so no countdown timer runs in these tests.
+const question: PlayerQuestionDto = {
+	number: 2,
+	total: 5,
+	text: 'What is 2 + 2?',
+	imageUrl: null,
+	timeLimitSeconds: null,
+	options: [
+		{ id: 21, order: 1, text: '4' },
+		{ id: 22, order: 2, text: '5' }
+	],
+	timing: {
+		startedAtUtc: '2026-11-17T10:00:00Z',
+		endsAtUtc: null,
+		serverNowUtc: '2026-11-17T10:00:05Z'
+	}
+}
 
 function playerGame(
 	overrides: Partial<PlayerGameResult> = {}
@@ -72,40 +99,24 @@ describe('the player page', () => {
 		).toBeInTheDocument()
 	})
 
-	it('confirms the join with the nickname, the quiz and the game code', async () => {
-		playerGameMock.mockReturnValue(
-			playerGame({
-				player: {
-					gameId: 7,
-					code: '283646',
-					quizTitle: 'STEM basics',
-					playerId: 1,
-					nickname: 'Ann'
-				}
-			})
-		)
-
-		await renderApp(PATHS.play)
-
-		expect(
-			await screen.findByRole('heading', {
-				name: PLAYER_PAGE_COPY.joined('Ann')
-			})
-		).toBeInTheDocument()
-		expect(screen.getByText('STEM basics')).toBeInTheDocument()
-		expect(
-			screen.getByText(PLAYER_PAGE_COPY.gameCode('283646'))
-		).toBeInTheDocument()
-	})
-
 	describe('while the game has not started', () => {
-		const joinedPlayer = {
-			gameId: 7,
-			code: '283646',
-			quizTitle: 'STEM basics',
-			playerId: 1,
-			nickname: 'Ann'
-		}
+		it('shows the lobby with who the player is, the quiz and the game code', async () => {
+			playerGameMock.mockReturnValue(
+				playerGame({ player: joinedPlayer, status: GameStatus.Lobby })
+			)
+
+			await renderApp(PATHS.play)
+
+			expect(
+				await screen.findByRole('heading', {
+					name: PLAYER_PAGE_COPY.joined('Ann')
+				})
+			).toBeInTheDocument()
+			expect(screen.getByText('STEM basics')).toBeInTheDocument()
+			expect(
+				screen.getByText(PLAYER_PAGE_COPY.gameCode('283646'))
+			).toBeInTheDocument()
+		})
 
 		it('tells the player to wait for the host', async () => {
 			playerGameMock.mockReturnValue(
@@ -145,37 +156,110 @@ describe('the player page', () => {
 
 			expect(leave).toHaveBeenCalledOnce()
 		})
+	})
 
-		it.each([
-			['a question is open', GameStatus.Question],
-			['the results are shown', GameStatus.Results],
-			['the game is over', GameStatus.Finished]
-		])('does not tell the player to wait when %s', async (_name, status) => {
+	describe('while a question is open', () => {
+		it('shows the question with its options, and no waiting message', async () => {
 			playerGameMock.mockReturnValue(
-				playerGame({ player: joinedPlayer, status })
+				playerGame({
+					player: joinedPlayer,
+					status: GameStatus.Question,
+					currentQuestion: question,
+					questionReceivedAtMs: 1000
+				})
 			)
 
 			await renderApp(PATHS.play)
 
-			await screen.findByRole('heading', {
-				name: PLAYER_PAGE_COPY.joined('Ann')
-			})
+			expect(
+				await screen.findByRole('heading', {
+					name: PLAYER_QUESTION_COPY.heading(2, 5)
+				})
+			).toBeInTheDocument()
+			expect(screen.getByText('What is 2 + 2?')).toBeInTheDocument()
+			expect(screen.getAllByRole('listitem')).toHaveLength(2)
 			expect(
 				screen.queryByText(PLAYER_LOBBY_COPY.waitingForHost)
 			).not.toBeInTheDocument()
 		})
 	})
 
-	it('shows the text of the server when the player cannot be connected', async () => {
-		playerGameMock.mockReturnValue(
-			playerGame({ error: 'Player was not found.' })
-		)
+	describe('while the results are shown', () => {
+		it('tells the player to wait for the next question', async () => {
+			playerGameMock.mockReturnValue(
+				playerGame({
+					player: joinedPlayer,
+					status: GameStatus.Results,
+					currentQuestion: question,
+					closedQuestionNumber: 2
+				})
+			)
 
-		await renderApp(PATHS.play)
+			await renderApp(PATHS.play)
 
-		expect(await screen.findByRole('alert')).toHaveTextContent(
-			'Player was not found.'
-		)
+			expect(
+				await screen.findByText(PLAYER_QUESTION_COPY.closed)
+			).toBeInTheDocument()
+			expect(
+				screen.queryByText(PLAYER_LOBBY_COPY.waitingForHost)
+			).not.toBeInTheDocument()
+		})
+	})
+
+	describe('when the game is over', () => {
+		it('says so and lets the player go back to the start', async () => {
+			const leave = vi.fn()
+			playerGameMock.mockReturnValue(
+				playerGame({ player: joinedPlayer, status: GameStatus.Finished, leave })
+			)
+
+			await renderApp(PATHS.play)
+
+			expect(
+				await screen.findByRole('heading', { name: PLAYER_PAGE_COPY.finished })
+			).toBeInTheDocument()
+
+			await userEvent
+				.setup()
+				.click(
+					screen.getByRole('button', { name: PLAYER_PAGE_COPY.backToStart })
+				)
+
+			expect(leave).toHaveBeenCalledOnce()
+		})
+	})
+
+	describe('when the player cannot be connected', () => {
+		it('shows the text of the server', async () => {
+			playerGameMock.mockReturnValue(
+				playerGame({ error: 'Player was not found.' })
+			)
+
+			await renderApp(PATHS.play)
+
+			expect(await screen.findByRole('alert')).toHaveTextContent(
+				'Player was not found.'
+			)
+			expect(
+				screen.queryByText(PLAYER_PAGE_COPY.connecting)
+			).not.toBeInTheDocument()
+		})
+
+		it('lets the player go back to the start', async () => {
+			const leave = vi.fn()
+			playerGameMock.mockReturnValue(
+				playerGame({ error: 'Player was not found.', leave })
+			)
+
+			await renderApp(PATHS.play)
+			await userEvent.setup().click(
+				await screen.findByRole('button', {
+					name: PLAYER_PAGE_COPY.backToStart
+				})
+			)
+
+			expect(leave).toHaveBeenCalledOnce()
+		})
 	})
 
 	it('goes home when the player token is gone, e.g. the player left', async () => {

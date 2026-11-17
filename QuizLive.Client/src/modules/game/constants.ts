@@ -47,8 +47,23 @@ export const GameStatus = {
 export const PLAYER_PAGE_COPY = {
 	connecting: 'Connecting to the game…',
 	joined: (nickname: string) => `You joined as ${nickname}`,
-	gameCode: (code: string) => `Game code: ${code}`
+	gameCode: (code: string) => `Game code: ${code}`,
+	finished: 'Game finished',
+	finishedBody: 'Thanks for playing!',
+	backToStart: 'Back to start'
 } as const
+
+export const PLAYER_QUESTION_COPY = {
+	heading: (number: number, total: number) => `Question ${number} of ${total}`,
+	imageAlt: 'Illustration of the question',
+	timeUp: 'Time is up',
+	closed: 'The question is closed. Waiting for the next question…'
+} as const
+
+export const MS_PER_SECOND = 1000
+
+// How often the countdown of a question is refreshed.
+export const COUNTDOWN_TICK_MS = 1000
 
 export const PLAYER_LOBBY_COPY = {
 	waitingForHost: 'Wait for the host to start the game.',
